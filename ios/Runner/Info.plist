@@ -18,12 +18,16 @@
     <string>La aplicación necesita acceso a Bluetooth para conectar dispositivos.</string>
     <key>NSMicrophoneUsageDescription</key>
     <string>La aplicación necesita acceso al micrófono para realizar grabaciones.</string>
+    <key>NSFileSystemUsageDescription</key>
+    <string>Esta aplicación necesita acceso a los archivos del sistema para guardar y recuperar documentos.</string>
+    
     <key>UIBackgroundModes</key>
     <array>
         <string>location</string>
         <string>fetch</string>
         <string>remote-notification</string>
     </array>
+    
     <key>CFBundleDevelopmentRegion</key>
     <string>$(DEVELOPMENT_LANGUAGE)</string>
     <key>CFBundleDisplayName</key>
@@ -50,16 +54,14 @@
     <string>LaunchScreen</string>
     <key>UIMainStoryboardFile</key>
     <string>Main</string>
+    
     <key>UISupportedInterfaceOrientations</key>
-	<key>NSFileSystemUsageDescription</key>
-	<string>Esta aplicación necesita acceso a los archivos del sistema para guardar y recuperar documentos.</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>La aplicación necesita acceso a la galería para seleccionar imágenes.</string>
     <array>
         <string>UIInterfaceOrientationPortrait</string>
         <string>UIInterfaceOrientationLandscapeLeft</string>
         <string>UIInterfaceOrientationLandscapeRight</string>
     </array>
+    
     <key>UISupportedInterfaceOrientations~ipad</key>
     <array>
         <string>UIInterfaceOrientationPortrait</string>
@@ -67,6 +69,7 @@
         <string>UIInterfaceOrientationLandscapeLeft</string>
         <string>UIInterfaceOrientationLandscapeRight</string>
     </array>
+    
     <key>CADisableMinimumFrameDurationOnPhone</key>
     <true/>
     <key>UIApplicationSupportsIndirectInputEvents</key>
