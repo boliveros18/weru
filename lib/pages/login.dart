@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:weru/components/button_ui.dart';
 import 'package:weru/components/permission_request.dart';
 import 'package:weru/components/text_field_ui.dart';
+import 'package:weru/components/dialog_ui.dart';
+import 'package:weru/services/ftp_service.dart';
+import 'package:weru/config/config.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -11,16 +14,41 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  bool _permissionsGranted = false;
+  bool permissionsGranted = false;
+  String nit = "";
+  bool masters = false;
+  final FTPService ftpService = FTPService();
 
   void _updatePermissionStatus(bool granted) {
     setState(() {
-      _permissionsGranted = granted;
+      permissionsGranted = granted;
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    if (nit.isEmpty) {
+      Future.delayed(Duration.zero, () {
+        DialogUi.show(
+          context: context,
+          title: "Ingrese el nit de la organización",
+          hintText: "NIT",
+          onConfirm: (value) async {
+            setState(() {
+              nit = value;
+            });
+            Navigator.of(context).pop();
+            //"\(NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0])/master.zip"   <-- iOs
+            ///var/mobile/Containers/Data/Application/<App_ID>/Documents/master.zip    <--end point iOs
+            final localFilePath =
+                '/data/data/com.example.weru/files/master.zip';
+            await ftpService.downloadFile(
+                '${pathFTPS}' + value + '.zip', localFilePath);
+          },
+        );
+      });
+    }
+
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
@@ -48,7 +76,7 @@ class _LoginPageState extends State<LoginPage> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  if (!_permissionsGranted)
+                  if (!permissionsGranted)
                     PermissionRequest(
                       onPermissionStatusChanged: _updatePermissionStatus,
                     ),

@@ -4,12 +4,14 @@ class TextFieldUi extends StatelessWidget {
   final String hint;
   final bool prefixIcon;
   final String? prefixIconPath;
+  final TextEditingController? controller;
 
   const TextFieldUi({
     super.key,
     required this.hint,
     this.prefixIcon = false,
     this.prefixIconPath,
+    this.controller,
   });
 
   @override
@@ -23,6 +25,7 @@ class TextFieldUi extends StatelessWidget {
         ),
       ]),
       child: TextField(
+        controller: controller,
         decoration: InputDecoration(
           filled: true,
           fillColor: Colors.white,
