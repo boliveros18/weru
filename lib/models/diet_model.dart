@@ -23,7 +23,7 @@ class DietModel {
 
     diets.add(DietModel(
         name: 'Bowl Food Noodle',
-        iconPath: 'assets/icons/salad.svg',
+        iconPath: 'assets/icons/ellipsis-vertical-solid.svg',
         level: 'Easy',
         duration: '30mins',
         calorie: '180kCal',
@@ -32,7 +32,7 @@ class DietModel {
 
     diets.add(DietModel(
         name: 'Bibimbub Food',
-        iconPath: 'assets/icons/pancakes.svg',
+        iconPath: 'assets/icons/ellipsis-vertical-solid.svg',
         level: 'Medium',
         duration: '20mins',
         calorie: '230kCal',
@@ -41,7 +41,7 @@ class DietModel {
 
     diets.add(DietModel(
         name: 'Chow Food',
-        iconPath: 'assets/icons/orange.svg',
+        iconPath: 'assets/icons/ellipsis-vertical-solid.svg',
         level: 'Easy',
         duration: '20mins',
         calorie: '200kCal',

@@ -10,7 +10,7 @@ const String appMaintenancePassword = '509569';
 const String appRibHostName = 'nansoft.co';
 
 const String servidorFTPS = 'nansoft.co';
-const String puertoFTPS = '21';
+const int puertoFTPS = 21;
 const String userNameFTPS = 'Soporte';
 const String passwordFTPS = 'S0porte*123.';
 const String pathFTPS = '/WerU_Prueba/MasterData';

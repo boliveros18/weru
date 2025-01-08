@@ -5,6 +5,7 @@ class TextFieldUi extends StatelessWidget {
   final bool prefixIcon;
   final String? prefixIconPath;
   final TextEditingController? controller;
+  final Function(String)? onChanged;
 
   const TextFieldUi({
     super.key,
@@ -12,6 +13,7 @@ class TextFieldUi extends StatelessWidget {
     this.prefixIcon = false,
     this.prefixIconPath,
     this.controller,
+    this.onChanged,
   });
 
   @override
@@ -19,13 +21,14 @@ class TextFieldUi extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(boxShadow: [
         BoxShadow(
-          color: const Color(0xff1D1617).withOpacity(0.11),
+          color: const Color(0xff1D1617).withValues(alpha: 0.11),
           blurRadius: 20,
           spreadRadius: 0.0,
         ),
       ]),
       child: TextField(
         controller: controller,
+        onChanged: onChanged,
         decoration: InputDecoration(
           filled: true,
           fillColor: Colors.white,

@@ -4,31 +4,39 @@ import 'package:flutter_svg/flutter_svg.dart';
 class AppBarUi extends StatelessWidget implements PreferredSizeWidget {
   final String header;
   final bool prefixIcon;
+  final double prefixIconHeight;
+  final double prefixIconWidth;
   final String prefixIconPath;
   final bool menuIcon;
+  final bool leading;
+  final bool centerTitle;
 
-  const AppBarUi({
-    super.key,
-    this.header = "",
-    this.prefixIcon = false,
-    this.prefixIconPath = "",
-    this.menuIcon = false,
-  });
+  const AppBarUi(
+      {super.key,
+      this.header = "",
+      this.prefixIcon = false,
+      this.prefixIconHeight = 15,
+      this.prefixIconWidth = 15,
+      this.prefixIconPath = "",
+      this.menuIcon = false,
+      this.leading = true,
+      this.centerTitle = true});
 
   @override
   Widget build(BuildContext context) {
     return AppBar(
+      automaticallyImplyLeading: leading,
       title: Text(
         header,
         style: const TextStyle(
           color: Colors.black,
           fontSize: 18,
-          fontWeight: FontWeight.bold,
+          fontWeight: FontWeight.normal,
         ),
       ),
       backgroundColor: Colors.white,
       elevation: 0.0,
-      centerTitle: true,
+      centerTitle: centerTitle,
       leading: prefixIcon
           ? GestureDetector(
               onTap: () {
@@ -43,8 +51,8 @@ class AppBarUi extends StatelessWidget implements PreferredSizeWidget {
                 ),
                 child: SvgPicture.asset(
                   prefixIconPath,
-                  height: 15,
-                  width: 15,
+                  height: prefixIconHeight,
+                  width: prefixIconWidth,
                 ),
               ),
             )
@@ -64,7 +72,7 @@ class AppBarUi extends StatelessWidget implements PreferredSizeWidget {
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: SvgPicture.asset(
-                    'assets/icons/ellipsis-solid.svg',
+                    'assets/icons/ellipsis-vertical-solid.svg',
                     height: 20,
                     width: 20,
                   ),

@@ -34,9 +34,12 @@ dependencies:
   permission_handler: ^11.3.1
   sqflite: ^2.4.1
   ftpconnect: ^2.0.7
-  pure_ftp: ^0.7.5
+  archive: ^4.0.2
+  device_info_plus: ^11.2.0
+  shared_preferences: ^2.3.5
+  provider: ^6.1.2
+  path_provider: ^2.1.5
   
-
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
@@ -51,7 +54,7 @@ dev_dependencies:
 flutter_icons:
   ios: true
   android: true
-  image_path: "assets/icon/icon.png"
+  image_path: "assets/icon/launcher_icon.png"
   remove_alpha_ios: true
 
   # The "flutter_lints" package below contains a set of recommended lints to
@@ -76,6 +79,9 @@ flutter:
   assets:
       - assets/icons/
       - assets/images/
+      - assets/utils/init.json
+      - assets/utils/tables.sql
+      - assets/icon/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

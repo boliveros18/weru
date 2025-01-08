@@ -1,5 +1,4 @@
 import 'package:weru/components/app_bar_ui.dart';
-import 'package:weru/components/text_field_ui.dart';
 import 'package:weru/models/category_model.dart';
 import 'package:weru/models/diet_model.dart';
 import 'package:flutter/material.dart';
@@ -25,14 +24,18 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     getInitials();
     return Scaffold(
-      appBar: const AppBarUi(),
+      appBar: const AppBarUi(
+          header: "Servicios",
+          prefixIcon: true,
+          prefixIconHeight: 32,
+          prefixIconWidth: 32,
+          prefixIconPath: "assets/icon/icon.svg",
+          leading: false,
+          centerTitle: false,
+          menuIcon: true),
       backgroundColor: Colors.white,
       body: Column(
         children: [
-          const TextFieldUi(
-              hint: "",
-              prefixIcon: true,
-              prefixIconPath: "assets/icons/magnifying-glass-solid.svg"),
           Expanded(
             child: SingleChildScrollView(
               child: Padding(
@@ -86,7 +89,8 @@ class _HomePageState extends State<HomePage> {
                   return Container(
                     width: 100,
                     decoration: BoxDecoration(
-                        color: categories[index].boxColor.withOpacity(0.3),
+                        color:
+                            categories[index].boxColor.withValues(alpha: 0.3),
                         borderRadius: BorderRadius.circular(16)),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -138,7 +142,7 @@ class _HomePageState extends State<HomePage> {
               return Container(
                 width: 210,
                 decoration: BoxDecoration(
-                    color: diets[index].boxColor.withOpacity(0.3),
+                    color: diets[index].boxColor.withValues(alpha: 0.3),
                     borderRadius: BorderRadius.circular(20)),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,

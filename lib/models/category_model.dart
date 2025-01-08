@@ -16,22 +16,22 @@ class CategoryModel {
 
     categories.add(CategoryModel(
         name: 'Salad',
-        iconPath: 'assets/icons/salad.svg',
+        iconPath: 'assets/icons/ellipsis-vertical-solid.svg',
         boxColor: const Color(0xff9DCEFF)));
 
     categories.add(CategoryModel(
         name: 'Cake',
-        iconPath: 'assets/icons/pancakes.svg',
+        iconPath: 'assets/icons/ellipsis-vertical-solid.svg',
         boxColor: const Color(0xffEEA4CE)));
 
     categories.add(CategoryModel(
         name: 'Pie',
-        iconPath: 'assets/icons/pie.svg',
+        iconPath: 'assets/icons/ellipsis-vertical-solid.svg',
         boxColor: const Color(0xff9DCEFF)));
 
     categories.add(CategoryModel(
         name: 'Smoothies',
-        iconPath: 'assets/icons/orange.svg',
+        iconPath: 'assets/icons/ellipsis-vertical-solid.svg',
         boxColor: const Color(0xffEEA4CE)));
 
     return categories;

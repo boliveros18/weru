@@ -4,28 +4,33 @@ import 'package:weru/components/text_field_ui.dart';
 class DialogUi extends StatelessWidget {
   final String title;
   final String hintText;
+  final bool textField;
   final Function(String) onConfirm;
 
   const DialogUi({
     super.key,
     required this.title,
-    required this.hintText,
+    this.hintText = "",
+    this.textField = true,
     required this.onConfirm,
   });
 
   static Future<void> show({
     required BuildContext context,
     required String title,
-    required String hintText,
+    String hintText = "",
+    bool textField = true,
     required Function(String) onConfirm,
   }) async {
     await showDialog(
       context: context,
       barrierDismissible: false,
+      barrierColor: Colors.black12,
       builder: (BuildContext context) {
         return DialogUi(
           title: title,
           hintText: hintText,
+          textField: textField,
           onConfirm: (value) {
             onConfirm(value);
             Navigator.of(context).pop();
@@ -40,26 +45,36 @@ class DialogUi extends StatelessWidget {
     final TextEditingController textController = TextEditingController();
 
     return AlertDialog(
-      title: Padding(
-        padding: const EdgeInsets.only(bottom: 8.0),
-        child: Text(
-          title,
-          style: TextStyle(fontSize: 16),
-        ),
+      backgroundColor: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8.0),
       ),
-      content: TextFieldUi(
-        hint: hintText,
-        controller: textController,
+      title: Text(
+        title,
+        style: const TextStyle(fontSize: 16),
       ),
+      content: textField
+          ? SizedBox(
+              width: 200,
+              child: TextFieldUi(
+                hint: hintText,
+                controller: textController,
+              ),
+            )
+          : null,
       actions: [
         ElevatedButton(
           onPressed: () {
-            if (textController.text.isNotEmpty) {
-              onConfirm(textController.text);
+            if (textField) {
+              if (textController.text.isNotEmpty) {
+                onConfirm(textController.text);
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("Por favor, ingrese un valor")),
+                );
+              }
             } else {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("Por favor, ingrese un valor")),
-              );
+              onConfirm("id");
             }
           },
           child: const Text("Aceptar"),

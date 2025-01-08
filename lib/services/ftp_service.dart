@@ -8,37 +8,40 @@ class FTPService {
     servidorFTPS,
     user: userNameFTPS,
     pass: passwordFTPS,
-    port: int.parse(puertoFTPS),
+    port: puertoFTPS,
     showLog: true,
     securityType: SecurityType.FTPES,
     timeout: 10,
   );
 
-  Future<void> downloadFile(String remoteFileName, String localFileName) async {
+  Future<bool> downloadFile(String remoteFileName, String localFileName) async {
     try {
       await ftpConnect.connect();
       await ftpConnect.downloadFileWithRetry(
           remoteFileName, File(localFileName));
       print('Archivo descargado: $localFileName');
       await ftpConnect.disconnect();
+      return true;
     } catch (e) {
       print('Error al descargar el archivo: $e');
+      return false;
     }
   }
 
-  Future<void> getMessages() async {
-    final response = await http.get(
-        Uri.http('nansoft.co:87', '/PruebaWeruC/RibWeb.svc/REST/QueHayNuevo'));
+  static Future<String> getMessages() async {
+    final response = await http.get(Uri.http(appRibGetMessagesUrlMethod));
     if (response.statusCode == 200) {
       print('Mensajes recibidos: ${response.body}');
+      return response.body;
     } else {
       print('Error al obtener mensajes: ${response.statusCode}');
+      return "";
     }
   }
 
-  Future<void> setMessageReceived() async {
-    final response = await http.post(Uri.http('nansoft.co:87',
-        '/PruebaWeruC/RibWeb.svc/REST/ReportarMensajeRecibido'));
+  static Future<void> setMessageReceived() async {
+    final response =
+        await http.post(Uri.http(appRibSetMessageReceivedUrlMethod));
     if (response.statusCode == 200) {
       print('Mensaje recibido reportado');
     } else {
@@ -46,10 +49,9 @@ class FTPService {
     }
   }
 
-  Future<void> sendMessageEntrada(String message) async {
+  static Future<void> sendMessageEntrada(String message) async {
     final response = await http.post(
-      Uri.http(
-          'nansoft.co:87', '/PruebaWeruC/RibWeb.svc/REST/RecibirMensajeStream'),
+      Uri.http(appRibSendMessageEntrada),
       body: message,
     );
     if (response.statusCode == 200) {
@@ -59,10 +61,9 @@ class FTPService {
     }
   }
 
-  Future<void> sendMessageSalida(String message) async {
+  static Future<void> sendMessageSalida(String message) async {
     final response = await http.post(
-      Uri.http('nansoft.co:87',
-          '/PruebaWeruC/RibWeb.svc/REST/RecibirMensajeStreamSalida'),
+      Uri.http(appRibSendMessageSalida),
       body: message,
     );
     if (response.statusCode == 200) {
@@ -72,9 +73,8 @@ class FTPService {
     }
   }
 
-  Future<void> deleteMessagesNewInstall() async {
-    final response = await http.post(Uri.http(
-        'nansoft.co:87', '/PruebaWeruC/RibWeb.svc/REST/BorrarMensajesTableta'));
+  static Future<void> deleteMessagesNewInstall() async {
+    final response = await http.post(Uri.http(appRibDeleteMessagesNewInstall));
     if (response.statusCode == 200) {
       print('Mensajes borrados');
     } else {
@@ -82,9 +82,9 @@ class FTPService {
     }
   }
 
-  Future<void> sendImages(String imagePath) async {
+  static Future<void> sendImages(String imagePath) async {
     final response = await http.post(
-      Uri.http('nansoft.co:87', '/PruebaWeruC/RibWeb.svc/REST/RecibirImagen'),
+      Uri.http(appRibSendImagesUrlMethod),
       body: imagePath,
     );
     if (response.statusCode == 200) {
