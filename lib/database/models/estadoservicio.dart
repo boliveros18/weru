@@ -17,6 +17,14 @@ class EstadoServicio {
     };
   }
 
+  factory EstadoServicio.fromMap(Map<String, dynamic> map) {
+    return EstadoServicio(
+      id: map['id'] as int,
+      nombre: map['nombre'] as String,
+      descripcion: map['descripcion'] as String,
+    );
+  }
+
   @override
   String toString() {
     return 'EstadoServicio{id: $id, nombre: $nombre, descripcion: $descripcion}';

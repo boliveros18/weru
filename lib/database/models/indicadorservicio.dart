@@ -1,7 +1,7 @@
 class IndicadorServicio {
   final int id;
   final int idIndicador;
-  final String idServicio;
+  final int idServicio;
   final int idTecnico;
   final String valor;
 

@@ -1,7 +1,7 @@
 class IndirectoServicio {
   final int id;
   final int idIndirecto;
-  final String idServicio;
+  final int idServicio;
   final int cantidad;
   final int costo;
   final int valor;

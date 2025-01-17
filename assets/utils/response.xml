@@ -1,0 +1,447 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ArrayOfStageMessage xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <StageMessage>
+        <Id>138721</Id>
+        <Mensaje>{ "id":"233929", "idCliente":"161019", "idEstadoEquipo":"1", "idModelo":"169", "idProveedor":"7495", "nombre":"PANEL SOLAR 600WT 110V", "serial":"010PANEL" }</Mensaje>
+        <FamiliaMensaje>Equipo</FamiliaMensaje>
+        <Direccion>SALIDA</Direccion>
+        <TipoMensaje>INSERT</TipoMensaje>
+        <Reintentos>0</Reintentos>
+        <EnProcesado>false</EnProcesado>
+        <Error/>
+        <EnError>false</EnError>
+        <IdNegocio>20240919103107</IdNegocio>
+        <Dispositivo>WebService</Dispositivo>
+    </StageMessage>
+    <StageMessage>
+        <Id>139027</Id>
+        <Mensaje>{ "id":"233940", "idCliente":"161019", "idEstadoEquipo":"1", "idModelo":"169", "idProveedor":"7495", "nombre":"Piso techo 5TR Prado 55 #1", "serial":"MCC104060CCU216B 1591" }</Mensaje>
+        <FamiliaMensaje>Equipo</FamiliaMensaje>
+        <Direccion>SALIDA</Direccion>
+        <TipoMensaje>INSERT</TipoMensaje>
+        <Reintentos>0</Reintentos>
+        <EnProcesado>false</EnProcesado>
+        <Error/>
+        <EnError>false</EnError>
+        <IdNegocio>20240919140917</IdNegocio>
+        <Dispositivo>WebService</Dispositivo>
+    </StageMessage>
+    <StageMessage>
+        <Id>139141</Id>
+        <Mensaje>{ "id":"233941", "idCliente":"161019", "idEstadoEquipo":"1", "idModelo":"169", "idProveedor":"7495", "nombre":"GENERADOR FOTOESTATICO", "serial":"CARGAMASIVA1" }</Mensaje>
+        <FamiliaMensaje>Equipo</FamiliaMensaje>
+        <Direccion>SALIDA</Direccion>
+        <TipoMensaje>INSERT</TipoMensaje>
+        <Reintentos>0</Reintentos>
+        <EnProcesado>false</EnProcesado>
+        <Error/>
+        <EnError>false</EnError>
+        <IdNegocio>20240919150617</IdNegocio>
+        <Dispositivo>WebService</Dispositivo>
+    </StageMessage>
+    <StageMessage>
+        <Id>139142</Id>
+        <Mensaje>{ "id":"233942", "idCliente":"161019", "idEstadoEquipo":"1", "idModelo":"169", "idProveedor":"7495", "nombre":"GENERADOR FOTOESTATICO 2", "serial":"CARGAMASIVA2" }</Mensaje>
+        <FamiliaMensaje>Equipo</FamiliaMensaje>
+        <Direccion>SALIDA</Direccion>
+        <TipoMensaje>INSERT</TipoMensaje>
+        <Reintentos>0</Reintentos>
+        <EnProcesado>false</EnProcesado>
+        <Error/>
+        <EnError>false</EnError>
+        <IdNegocio>20240919150617</IdNegocio>
+        <Dispositivo>WebService</Dispositivo>
+    </StageMessage>
+    <StageMessage>
+        <Id>139143</Id>
+        <Mensaje>{ "id":"233943", "idCliente":"161019", "idEstadoEquipo":"1", "idModelo":"169", "idProveedor":"7495", "nombre":"GENERADOR FOTOESTATICO 3", "serial":"CARGAMASIVA3" }</Mensaje>
+        <FamiliaMensaje>Equipo</FamiliaMensaje>
+        <Direccion>SALIDA</Direccion>
+        <TipoMensaje>INSERT</TipoMensaje>
+        <Reintentos>0</Reintentos>
+        <EnProcesado>false</EnProcesado>
+        <Error/>
+        <EnError>false</EnError>
+        <IdNegocio>20240919150617</IdNegocio>
+        <Dispositivo>WebService</Dispositivo>
+    </StageMessage>
+    <StageMessage>
+        <Id>159406</Id>
+        <Mensaje>{ "correo":"hernangodoyp@yahoo.com", "direccion":"", "id":"161029", "idCiudad":"2", "idEstado":"1", "idTipoCliente":"30", "idTipoDocumento":"1", "nombre":"aa", "numDocumento":"11111111", "telefono":"33" }</Mensaje>
+        <FamiliaMensaje>Cliente</FamiliaMensaje>
+        <Direccion>SALIDA</Direccion>
+        <TipoMensaje>INSERT</TipoMensaje>
+        <Reintentos>0</Reintentos>
+        <EnProcesado>false</EnProcesado>
+        <Error/>
+        <EnError>false</EnError>
+        <IdNegocio>20240930162403</IdNegocio>
+        <Dispositivo>WebService</Dispositivo>
+    </StageMessage>
+    <StageMessage>
+        <Id>159407</Id>
+        <Mensaje>{ "id":"233944", "idCliente":"161029", "idEstadoEquipo":"1", "idModelo":"3193", "idProveedor":"3851", "nombre":"AUDI", "serial":"PPP999" }</Mensaje>
+        <FamiliaMensaje>Equipo</FamiliaMensaje>
+        <Direccion>SALIDA</Direccion>
+        <TipoMensaje>INSERT</TipoMensaje>
+        <Reintentos>0</Reintentos>
+        <EnProcesado>false</EnProcesado>
+        <Error/>
+        <EnError>false</EnError>
+        <IdNegocio>20240930162403</IdNegocio>
+        <Dispositivo>WebService</Dispositivo>
+    </StageMessage>
+    <StageMessage>
+        <Id>159432</Id>
+        <Mensaje>{ "id":"233945", "idCliente":"155894", "idEstadoEquipo":"1", "idModelo":"3193", "idProveedor":"3851", "nombre":"AUDI", "serial":"MMM222" }</Mensaje>
+        <FamiliaMensaje>Equipo</FamiliaMensaje>
+        <Direccion>SALIDA</Direccion>
+        <TipoMensaje>INSERT</TipoMensaje>
+        <Reintentos>0</Reintentos>
+        <EnProcesado>false</EnProcesado>
+        <Error/>
+        <EnError>false</EnError>
+        <IdNegocio>20240930170202</IdNegocio>
+        <Dispositivo>WebService</Dispositivo>
+    </StageMessage>
+    <StageMessage>
+        <Id>159649</Id>
+        <Mensaje>{ "id":"233946", "idCliente":"155894", "idEstadoEquipo":"1", "idModelo":"3193", "idProveedor":"3851", "nombre":"AUDI", "serial":"MNN444" }</Mensaje>
+        <FamiliaMensaje>Equipo</FamiliaMensaje>
+        <Direccion>SALIDA</Direccion>
+        <TipoMensaje>INSERT</TipoMensaje>
+        <Reintentos>0</Reintentos>
+        <EnProcesado>false</EnProcesado>
+        <Error/>
+        <EnError>false</EnError>
+        <IdNegocio>20240930185800</IdNegocio>
+        <Dispositivo>WebService</Dispositivo>
+    </StageMessage>
+    <StageMessage>
+        <Id>161444</Id>
+        <Mensaje>{ "id":"233947", "idCliente":"155894", "idEstadoEquipo":"1", "idModelo":"3193", "idProveedor":"3851", "nombre":"AUDI", "serial":"AAA555" }</Mensaje>
+        <FamiliaMensaje>Equipo</FamiliaMensaje>
+        <Direccion>SALIDA</Direccion>
+        <TipoMensaje>INSERT</TipoMensaje>
+        <Reintentos>0</Reintentos>
+        <EnProcesado>false</EnProcesado>
+        <Error/>
+        <EnError>false</EnError>
+        <IdNegocio>20241001150300</IdNegocio>
+        <Dispositivo>WebService</Dispositivo>
+    </StageMessage>
+    <StageMessage>
+        <Id>161445</Id>
+        <Mensaje>{ "id":"233948", "idCliente":"155894", "idEstadoEquipo":"1", "idModelo":"3193", "idProveedor":"3851", "nombre":"AUDI", "serial":"DDD555" }</Mensaje>
+        <FamiliaMensaje>Equipo</FamiliaMensaje>
+        <Direccion>SALIDA</Direccion>
+        <TipoMensaje>INSERT</TipoMensaje>
+        <Reintentos>0</Reintentos>
+        <EnProcesado>false</EnProcesado>
+        <Error/>
+        <EnError>false</EnError>
+        <IdNegocio>20241001150302</IdNegocio>
+        <Dispositivo>WebService</Dispositivo>
+    </StageMessage>
+    <StageMessage>
+        <Id>161447</Id>
+        <Mensaje>{ "id":"233949", "idCliente":"155894", "idEstadoEquipo":"1", "idModelo":"3193", "idProveedor":"3851", "nombre":"AUDI", "serial":"MMM666" }</Mensaje>
+        <FamiliaMensaje>Equipo</FamiliaMensaje>
+        <Direccion>SALIDA</Direccion>
+        <TipoMensaje>INSERT</TipoMensaje>
+        <Reintentos>0</Reintentos>
+        <EnProcesado>false</EnProcesado>
+        <Error/>
+        <EnError>false</EnError>
+        <IdNegocio>20241001151400</IdNegocio>
+        <Dispositivo>WebService</Dispositivo>
+    </StageMessage>
+    <StageMessage>
+        <Id>161513</Id>
+        <Mensaje>{ "id":"233950", "idCliente":"155894", "idEstadoEquipo":"1", "idModelo":"3193", "idProveedor":"3851", "nombre":"AUDI", "serial":"AAA777" }</Mensaje>
+        <FamiliaMensaje>Equipo</FamiliaMensaje>
+        <Direccion>SALIDA</Direccion>
+        <TipoMensaje>INSERT</TipoMensaje>
+        <Reintentos>0</Reintentos>
+        <EnProcesado>false</EnProcesado>
+        <Error/>
+        <EnError>false</EnError>
+        <IdNegocio>20241001153900</IdNegocio>
+        <Dispositivo>WebService</Dispositivo>
+    </StageMessage>
+    <StageMessage>
+        <Id>161515</Id>
+        <Mensaje>{ "id":"233951", "idCliente":"155894", "idEstadoEquipo":"1", "idModelo":"3193", "idProveedor":"3851", "nombre":"AUDI", "serial":"AAA888" }</Mensaje>
+        <FamiliaMensaje>Equipo</FamiliaMensaje>
+        <Direccion>SALIDA</Direccion>
+        <TipoMensaje>INSERT</TipoMensaje>
+        <Reintentos>0</Reintentos>
+        <EnProcesado>false</EnProcesado>
+        <Error/>
+        <EnError>false</EnError>
+        <IdNegocio>20241001154500</IdNegocio>
+        <Dispositivo>WebService</Dispositivo>
+    </StageMessage>
+    <StageMessage>
+        <Id>161611</Id>
+        <Mensaje>{ "id":"233952", "idCliente":"155894", "idEstadoEquipo":"1", "idModelo":"3193", "idProveedor":"3851", "nombre":"AUDI", "serial":"DDD555" }</Mensaje>
+        <FamiliaMensaje>Equipo</FamiliaMensaje>
+        <Direccion>SALIDA</Direccion>
+        <TipoMensaje>INSERT</TipoMensaje>
+        <Reintentos>0</Reintentos>
+        <EnProcesado>false</EnProcesado>
+        <Error/>
+        <EnError>false</EnError>
+        <IdNegocio>20241001164900</IdNegocio>
+        <Dispositivo>WebService</Dispositivo>
+    </StageMessage>
+    <StageMessage>
+        <Id>161612</Id>
+        <Mensaje>{ "id":"233953", "idCliente":"155894", "idEstadoEquipo":"1", "idModelo":"3193", "idProveedor":"3851", "nombre":"AUDI", "serial":"MMM666" }</Mensaje>
+        <FamiliaMensaje>Equipo</FamiliaMensaje>
+        <Direccion>SALIDA</Direccion>
+        <TipoMensaje>INSERT</TipoMensaje>
+        <Reintentos>0</Reintentos>
+        <EnProcesado>false</EnProcesado>
+        <Error/>
+        <EnError>false</EnError>
+        <IdNegocio>20241001164901</IdNegocio>
+        <Dispositivo>WebService</Dispositivo>
+    </StageMessage>
+    <StageMessage>
+        <Id>164052</Id>
+        <Mensaje>{ "correo":"", "direccion":"carrera5382-242", "id":"103708", "idCiudad":"5686", "idEstado":"1", "idTipoCliente":"30", "idTipoDocumento":"1", "nombre":"DONADOANDRESDIAZ", "numDocumento":"8718515", "telefono":"3106455750" }</Mensaje>
+        <FamiliaMensaje>Cliente</FamiliaMensaje>
+        <Direccion>SALIDA</Direccion>
+        <TipoMensaje>INSERT</TipoMensaje>
+        <Reintentos>0</Reintentos>
+        <EnProcesado>false</EnProcesado>
+        <Error/>
+        <EnError>false</EnError>
+        <IdNegocio>20241002130357</IdNegocio>
+        <Dispositivo>WebService</Dispositivo>
+    </StageMessage>
+    <StageMessage>
+        <Id>169057</Id>
+        <Mensaje>{ "correo":"ing.jugshdj@hitmaul.com", "direccion":"carrera 45 calle 76 - 89", "id":"161030", "idCiudad":"6", "idEstado":"1", "idTipoCliente":"30", "idTipoDocumento":"1", "nombre":"Juan Camilo", "numDocumento":"1140887654", "telefono":"369852147" }</Mensaje>
+        <FamiliaMensaje>Cliente</FamiliaMensaje>
+        <Direccion>SALIDA</Direccion>
+        <TipoMensaje>INSERT</TipoMensaje>
+        <Reintentos>0</Reintentos>
+        <EnProcesado>false</EnProcesado>
+        <Error/>
+        <EnError>false</EnError>
+        <IdNegocio>20241003120905</IdNegocio>
+        <Dispositivo>WebService</Dispositivo>
+    </StageMessage>
+    <StageMessage>
+        <Id>169058</Id>
+        <Mensaje>{ "id":"233976", "idCliente":"161030", "idEstadoEquipo":"1", "idModelo":"172", "idProveedor":"3851", "nombre":"APLANADORA SENCILLA", "serial":"JJJ 789" }</Mensaje>
+        <FamiliaMensaje>Equipo</FamiliaMensaje>
+        <Direccion>SALIDA</Direccion>
+        <TipoMensaje>INSERT</TipoMensaje>
+        <Reintentos>0</Reintentos>
+        <EnProcesado>false</EnProcesado>
+        <Error/>
+        <EnError>false</EnError>
+        <IdNegocio>20241003120905</IdNegocio>
+        <Dispositivo>WebService</Dispositivo>
+    </StageMessage>
+    <StageMessage>
+        <Id>189640</Id>
+        <Mensaje>{ "correo":"jeyssonz@gmail.com", "direccion":"carrera 74 # 67 - 76", "id":"161037", "idCiudad":"2", "idEstado":"1", "idTipoCliente":"30", "idTipoDocumento":"1", "nombre":"jeysson", "numDocumento":"11408880521", "telefono":"300654231" }</Mensaje>
+        <FamiliaMensaje>Cliente</FamiliaMensaje>
+        <Direccion>SALIDA</Direccion>
+        <TipoMensaje>INSERT</TipoMensaje>
+        <Reintentos>0</Reintentos>
+        <EnProcesado>false</EnProcesado>
+        <Error/>
+        <EnError>false</EnError>
+        <IdNegocio>20241011134703</IdNegocio>
+        <Dispositivo>WebService</Dispositivo>
+    </StageMessage>
+    <StageMessage>
+        <Id>189641</Id>
+        <Mensaje>{ "id":"233985", "idCliente":"161037", "idEstadoEquipo":"1", "idModelo":"172", "idProveedor":"3851", "nombre":"APLANADORA SENCILLA", "serial":"JKL 546" }</Mensaje>
+        <FamiliaMensaje>Equipo</FamiliaMensaje>
+        <Direccion>SALIDA</Direccion>
+        <TipoMensaje>INSERT</TipoMensaje>
+        <Reintentos>0</Reintentos>
+        <EnProcesado>false</EnProcesado>
+        <Error/>
+        <EnError>false</EnError>
+        <IdNegocio>20241011134703</IdNegocio>
+        <Dispositivo>WebService</Dispositivo>
+    </StageMessage>
+    <StageMessage>
+        <Id>382428</Id>
+        <Mensaje>{ "correo":"juan@juan.com", "direccion":"hay djdue", "id":"161038", "idCiudad":"2", "idEstado":"1", "idTipoCliente":"30", "idTipoDocumento":"1", "nombre":"prueba clienteabs", "numDocumento":"114088790", "telefono":"304310088" }</Mensaje>
+        <FamiliaMensaje>Cliente</FamiliaMensaje>
+        <Direccion>SALIDA</Direccion>
+        <TipoMensaje>INSERT</TipoMensaje>
+        <Reintentos>0</Reintentos>
+        <EnProcesado>false</EnProcesado>
+        <Error/>
+        <EnError>false</EnError>
+        <IdNegocio>20241015181810</IdNegocio>
+        <Dispositivo>WebService</Dispositivo>
+    </StageMessage>
+    <StageMessage>
+        <Id>382429</Id>
+        <Mensaje>{ "id":"233986", "idCliente":"161038", "idEstadoEquipo":"1", "idModelo":"172", "idProveedor":"3851", "nombre":"APLANADORA SENCILLA", "serial":"JKM 654" }</Mensaje>
+        <FamiliaMensaje>Equipo</FamiliaMensaje>
+        <Direccion>SALIDA</Direccion>
+        <TipoMensaje>INSERT</TipoMensaje>
+        <Reintentos>0</Reintentos>
+        <EnProcesado>false</EnProcesado>
+        <Error/>
+        <EnError>false</EnError>
+        <IdNegocio>20241015181810</IdNegocio>
+        <Dispositivo>WebService</Dispositivo>
+    </StageMessage>
+    <StageMessage>
+        <Id>505346</Id>
+        <Mensaje>{ "id":"79", "cedula":"1234554321", "nombre":"TECNICO PRUEBA FLUTER", "idProveedor":"1", "idEstadoTecnico":"1", "clave":"1234", "telefono":"3001234567", "celular":"3001234567", "latitud":"0.000000000000000", "longitud":"0.000000000000000", "usuario":"Tec21", "androidID":"OPR1.170623.032", "fechaPulso":"Jan 15 2025  9:01AM", "versionApp":" " }</Mensaje>
+        <FamiliaMensaje>Tecnico</FamiliaMensaje>
+        <Direccion>SALIDA</Direccion>
+        <TipoMensaje>INSERT</TipoMensaje>
+        <Reintentos>0</Reintentos>
+        <EnProcesado>false</EnProcesado>
+        <Error/>
+        <EnError>false</EnError>
+        <IdNegocio>20250115090107</IdNegocio>
+        <Dispositivo>OPR1.170623.032</Dispositivo>
+    </StageMessage>
+    <StageMessage>
+        <Id>505349</Id>
+        <Mensaje>{ "id":"79", "cedula":"5432154321", "nombre":"TECNICO PRUEBA FLUTER", "idProveedor":"1", "idEstadoTecnico":"1", "clave":"1234", "telefono":"3007654321", "celular":"3001234567", "latitud":"0.000000000000000", "longitud":"0.000000000000000", "usuario":"Tec21", "androidID":"OPR1.170623.032", "fechaPulso":"Jan 15 2025  9:01AM", "versionApp":" " }</Mensaje>
+        <FamiliaMensaje>Tecnico</FamiliaMensaje>
+        <Direccion>SALIDA</Direccion>
+        <TipoMensaje>INSERT</TipoMensaje>
+        <Reintentos>0</Reintentos>
+        <EnProcesado>false</EnProcesado>
+        <Error/>
+        <EnError>false</EnError>
+        <IdNegocio>20250115090733</IdNegocio>
+        <Dispositivo>OPR1.170623.032</Dispositivo>
+    </StageMessage>
+    <StageMessage>
+        <Id>505387</Id>
+        <Mensaje>{ "id":"79", "cedula":"1234567890", "nombre":"TECNICO PRUEBA FLUTER", "idProveedor":"1", "idEstadoTecnico":"1", "clave":"1234", "telefono":"3007654321", "celular":"3001234567", "latitud":"0.000000000000000", "longitud":"0.000000000000000", "usuario":"Tec21", "androidID":"OPR1.170623.032", "fechaPulso":"Jan 15 2025  9:01AM", "versionApp":" " }</Mensaje>
+        <FamiliaMensaje>Tecnico</FamiliaMensaje>
+        <Direccion>SALIDA</Direccion>
+        <TipoMensaje>INSERT</TipoMensaje>
+        <Reintentos>0</Reintentos>
+        <EnProcesado>false</EnProcesado>
+        <Error/>
+        <EnError>false</EnError>
+        <IdNegocio>20250115162619</IdNegocio>
+        <Dispositivo>OPR1.170623.032</Dispositivo>
+    </StageMessage>
+    <StageMessage>
+        <Id>505388</Id>
+        <Mensaje>{ "id":"79", "cedula":"1234567890", "nombre":"TECNICO PRUEBA FLUTER", "idProveedor":"1", "idEstadoTecnico":"1", "clave":"1234", "telefono":"3007654322", "celular":"3001234567", "latitud":"0.000000000000000", "longitud":"0.000000000000000", "usuario":"Tec21", "androidID":"OPR1.170623.032", "fechaPulso":"Jan 15 2025  9:01AM", "versionApp":" " }</Mensaje>
+        <FamiliaMensaje>Tecnico</FamiliaMensaje>
+        <Direccion>SALIDA</Direccion>
+        <TipoMensaje>INSERT</TipoMensaje>
+        <Reintentos>0</Reintentos>
+        <EnProcesado>false</EnProcesado>
+        <Error/>
+        <EnError>false</EnError>
+        <IdNegocio>20250115162627</IdNegocio>
+        <Dispositivo>OPR1.170623.032</Dispositivo>
+    </StageMessage>
+    <StageMessage>
+        <Id>505389</Id>
+        <Mensaje>{ "id":"79", "cedula":"1234567890", "nombre":"TECNICO PRUEBA FLUTER", "idProveedor":"1", "idEstadoTecnico":"1", "clave":"1234", "telefono":"3007654322", "celular":"30012345", "latitud":"0.000000000000000", "longitud":"0.000000000000000", "usuario":"Tec21", "androidID":"OPR1.170623.032", "fechaPulso":"Jan 15 2025  9:01AM", "versionApp":" " }</Mensaje>
+        <FamiliaMensaje>Tecnico</FamiliaMensaje>
+        <Direccion>SALIDA</Direccion>
+        <TipoMensaje>INSERT</TipoMensaje>
+        <Reintentos>0</Reintentos>
+        <EnProcesado>false</EnProcesado>
+        <Error/>
+        <EnError>false</EnError>
+        <IdNegocio>20250115162636</IdNegocio>
+        <Dispositivo>OPR1.170623.032</Dispositivo>
+    </StageMessage>
+    <StageMessage>
+        <Id>505390</Id>
+        <Mensaje>{ "id":"79", "cedula":"1234567865", "nombre":"TECNICO PRUEBA FLUTER", "idProveedor":"1", "idEstadoTecnico":"1", "clave":"1234", "telefono":"3007654322", "celular":"30012345", "latitud":"0.000000000000000", "longitud":"0.000000000000000", "usuario":"Tec21", "androidID":"OPR1.170623.032", "fechaPulso":"Jan 15 2025  9:01AM", "versionApp":" " }</Mensaje>
+        <FamiliaMensaje>Tecnico</FamiliaMensaje>
+        <Direccion>SALIDA</Direccion>
+        <TipoMensaje>INSERT</TipoMensaje>
+        <Reintentos>0</Reintentos>
+        <EnProcesado>false</EnProcesado>
+        <Error/>
+        <EnError>false</EnError>
+        <IdNegocio>20250115162724</IdNegocio>
+        <Dispositivo>OPR1.170623.032</Dispositivo>
+    </StageMessage>
+    <StageMessage>
+        <Id>505398</Id>
+        <Mensaje>{"cliente":{"id":86,"nombre":"NANAPPS SAS","direccion":"Cra 59 # 74 - 48","idCiudad":92,"telefono":"6053606067","celular":"3006302743","idTipoCliente":2,"idTipoDocumento":3,"numDocumento":"830514739","establecimiento":"NANAPPS SAS","contacto":"Nestor Alvarado","idEstado":1,"correo":"nalvarado@prueba.com","idBarrio":108,"idEmpresa":1},"equipo":{"id":144451,"serial":"001","nombre":"PC DE ENLACE","fechaCompra":"1/01/1900 12:00:00 a. m.","fechaGarantia":"1/01/1900 12:00:00 a. m.","idModelo":169,"idEstado":1,"idProveedor":1,"idCliente":86,"idEmpresa":1},"novedades":[],"diagnosticos":[],"actividades":[{"herramientas":[{"id":3270,"idItem":510,"idTipo":2,"idActividadServicio":931279,"cantidadReq":1},{"id":3271,"idItem":511,"idTipo":2,"idActividadServicio":931279,"cantidadReq":1}],"id":931279,"idActividad":122,"idServicio":758656,"cantidad":1,"costo":300000,"valor":450000,"ejecutada":0}],"repuestos":[{"id":5985,"idItem":505,"idServicio":758656,"cantidad":1,"costo":15000,"valor":20000,"cantidadReq":1,"fechaUltimaVez":"1900-01-01 00:00:00","vidaUtil":"250"},{"id":5986,"idItem":506,"idServicio":758656,"cantidad":1,"costo":200000,"valor":350000,"cantidadReq":1,"fechaUltimaVez":"1900-01-01 00:00:00","vidaUtil":"250"},{"id":5987,"idItem":507,"idServicio":758656,"cantidad":1,"costo":80000,"valor":120000,"cantidadReq":1,"fechaUltimaVez":"1900-01-01 00:00:00","vidaUtil":"250"}],"indirectos":[],"fotos":[],"indicadores":[{"id":7252720,"idIndicador":1,"idServicio":758656,"idTecnico":79,"valor":"0"}],"registroCamposAdicionales":[],"id":758656,"idTecnico":79,"idCliente":86,"idEstadoServicio":2,"nombre":"NANAPPS SAS","descripcion":"Prueba FLuter Android","direccion":"Cra 59 # 74 - 48 BARRANQUILLA - ATLANTICO","idCiudad":0,"latitud":11.0036278,"longitud":-74.79863619999999,"fechayhorainicio":"1900-01-01 00:00:00","horainicio":"06:30:00","fechaInicio":"2025-01-16 00:00:00","fechaModificacion":"2025-01-15 17:29:26","fechaFin":"1900-01-01 00:00:00","idEquipo":144451,"idFalla":67,"observacionReporte":"","radicado":"PF 0001","idTipoServicio":1,"idEmpresa":1,"cedulaFirma":null,"nombreFirma":null,"archivoFirma":null,"orden":0,"fechaLlegada":"1900-01-01 00:00:00","comentarios":null,"consecutivo":46}</Mensaje>
+        <FamiliaMensaje>Servicio</FamiliaMensaje>
+        <Direccion>SALIDA</Direccion>
+        <TipoMensaje>INSERT</TipoMensaje>
+        <Reintentos>0</Reintentos>
+        <EnProcesado>false</EnProcesado>
+        <Error/>
+        <EnError>false</EnError>
+        <IdNegocio>20250115173000</IdNegocio>
+        <Dispositivo>OPR1.170623.032</Dispositivo>
+    </StageMessage>
+    <StageMessage>
+        <Id>505490</Id>
+        <Mensaje>{ "id":"79", "cedula":"1234567865", "nombre":"TECNICO PRUEBA FLUTER", "idProveedor":"1", "idEstadoTecnico":"1", "clave":"1234", "telefono":"3007654322", "celular":"30012345", "latitud":"0.000000000000000", "longitud":"0.000000000000000", "usuario":"Tec21", "androidID":"OPR1.170623.032", "fechaPulso":"Jan 15 2025  9:01AM", "versionApp":" " }</Mensaje>
+        <FamiliaMensaje>Tecnico</FamiliaMensaje>
+        <Direccion>SALIDA</Direccion>
+        <TipoMensaje>INSERT</TipoMensaje>
+        <Reintentos>0</Reintentos>
+        <EnProcesado>false</EnProcesado>
+        <Error/>
+        <EnError>false</EnError>
+        <IdNegocio>20250116010002</IdNegocio>
+        <Dispositivo>OPR1.170623.032</Dispositivo>
+    </StageMessage>
+    <StageMessage>
+        <Id>505490</Id>
+        <Mensaje>{ "id":"79", "cedula":"1234567865", "nombre":"TECNICO PRUEBA FLUTER", "idProveedor":"1", "idEstadoTecnico":"1", "clave":"1234", "telefono":"3007654322", "celular":"30012345", "latitud":"0.000000000000000", "longitud":"0.000000000000000", "usuario":"Tec21", "androidID":"OPR1.170623.032", "fechaPulso":"Jan 15 2025  9:01AM", "versionApp":" " }</Mensaje>
+        <FamiliaMensaje>Tecnico</FamiliaMensaje>
+        <Direccion>SALIDA</Direccion>
+        <TipoMensaje>INSERT</TipoMensaje>
+        <Reintentos>0</Reintentos>
+        <EnProcesado>false</EnProcesado>
+        <Error/>
+        <EnError>false</EnError>
+        <IdNegocio>20250116010002</IdNegocio>
+        <Dispositivo>OPR1.170623.032</Dispositivo>
+    </StageMessage>
+        <StageMessage>
+        <Id>505398</Id>
+        <Mensaje>{"cliente":{"id":86,"nombre":"NANAPPS SAS","direccion":"Cra 59 # 74 - 48","idCiudad":92,"telefono":"6053606067","celular":"3006302743","idTipoCliente":2,"idTipoDocumento":3,"numDocumento":"830514739","establecimiento":"NANAPPS SAS","contacto":"Nestor Alvarado","idEstado":1,"correo":"nalvarado@prueba.com","idBarrio":108,"idEmpresa":1},"equipo":{"id":144451,"serial":"001","nombre":"PC DE ENLACE","fechaCompra":"1/01/1900 12:00:00 a. m.","fechaGarantia":"1/01/1900 12:00:00 a. m.","idModelo":169,"idEstado":1,"idProveedor":1,"idCliente":86,"idEmpresa":1},"novedades":[],"diagnosticos":[],"actividades":[{"herramientas":[{"id":3270,"idItem":510,"idTipo":2,"idActividadServicio":931279,"cantidadReq":1},{"id":3271,"idItem":511,"idTipo":2,"idActividadServicio":931279,"cantidadReq":1}],"id":931279,"idActividad":122,"idServicio":758656,"cantidad":1,"costo":300000,"valor":450000,"ejecutada":0}],"repuestos":[{"id":5985,"idItem":505,"idServicio":758656,"cantidad":1,"costo":15000,"valor":20000,"cantidadReq":1,"fechaUltimaVez":"1900-01-01 00:00:00","vidaUtil":"250"},{"id":5986,"idItem":506,"idServicio":758656,"cantidad":1,"costo":200000,"valor":350000,"cantidadReq":1,"fechaUltimaVez":"1900-01-01 00:00:00","vidaUtil":"250"},{"id":5987,"idItem":507,"idServicio":758656,"cantidad":1,"costo":80000,"valor":120000,"cantidadReq":1,"fechaUltimaVez":"1900-01-01 00:00:00","vidaUtil":"250"}],"indirectos":[],"fotos":[],"indicadores":[{"id":7252720,"idIndicador":1,"idServicio":758656,"idTecnico":79,"valor":"0"}],"registroCamposAdicionales":[],"id":758656,"idTecnico":79,"idCliente":86,"idEstadoServicio":2,"nombre":"NANAPPS SAS","descripcion":"Prueba FLuter Android","direccion":"Cra 59 # 74 - 48 BARRANQUILLA - ATLANTICO","idCiudad":0,"latitud":11.0036278,"longitud":-74.79863619999999,"fechayhorainicio":"1900-01-01 00:00:00","horainicio":"06:30:00","fechaInicio":"2025-01-16 00:00:00","fechaModificacion":"2025-01-15 17:29:26","fechaFin":"1900-01-01 00:00:00","idEquipo":144451,"idFalla":67,"observacionReporte":"","radicado":"PF 0001","idTipoServicio":1,"idEmpresa":1,"cedulaFirma":null,"nombreFirma":null,"archivoFirma":null,"orden":0,"fechaLlegada":"1900-01-01 00:00:00","comentarios":null,"consecutivo":46}</Mensaje>
+        <FamiliaMensaje>Servicio</FamiliaMensaje>
+        <Direccion>SALIDA</Direccion>
+        <TipoMensaje>INSERT</TipoMensaje>
+        <Reintentos>0</Reintentos>
+        <EnProcesado>false</EnProcesado>
+        <Error/>
+        <EnError>false</EnError>
+        <IdNegocio>20250115173000</IdNegocio>
+        <Dispositivo>OPR1.170623.032</Dispositivo>
+    </StageMessage>
+</ArrayOfStageMessage>
+
+{
+"cliente": {"id":86,"nombre":"NANAPPS SAS","direccion":"Cra 59 # 74 - 48","idCiudad":92,"telefono":"6053606067","celular":"3006302743","idTipoCliente":2,"idTipoDocumento":3,"numDocumento":"830514739","establecimiento":"NANAPPS SAS","contacto":"Nestor Alvarado","idEstado":1,"correo":"nalvarado@prueba.com","idBarrio":108,"idEmpresa":1},
+"equipo": {"id":144451,"serial":"001","nombre":"PC DE ENLACE","fechaCompra":"1/01/1900 12:00:00 a. m.","fechaGarantia":"1/01/1900 12:00:00 a. m.","idModelo":169,"idEstado":1,"idProveedor":1,"idCliente":86,"idEmpresa":1},
+"novedades":[],
+"diagnosticos":[],
+"actividades":[{"id":931279,"idActividad":122,"idServicio":758656,"cantidad":1,"costo":300000,"valor":450000,"ejecutada":0}],
+"herramientas":[{"id":3270,"idItem":510,"idTipo":2,"idActividadServicio":931279,"cantidadReq":1},{"id":3271,"idItem":511,"idTipo":2,"idActividadServicio":931279,"cantidadReq":1}],
+"repuestos":[{"id":5985,"idItem":505,"idServicio":758656,"cantidad":1,"costo":15000,"valor":20000,"cantidadReq":1,"fechaUltimaVez":"1900-01-01 00:00:00","vidaUtil":"250"},{"id":5986,"idItem":506,"idServicio":758656,"cantidad":1,"costo":200000,"valor":350000,"cantidadReq":1,"fechaUltimaVez":"1900-01-01 00:00:00","vidaUtil":"250"},{"id":5987,"idItem":507,"idServicio":758656,"cantidad":1,"costo":80000,"valor":120000,"cantidadReq":1,"fechaUltimaVez":"1900-01-01 00:00:00","vidaUtil":"250"}],
+"indirectos":[],
+"fotos":[],
+"indicadores":[{"id":7252720,"idIndicador":1,"idServicio":758656,"idTecnico":79,"valor":"0"}],
+"registroCamposAdicionales":[],
+"Servicio": {"id":758656,"idTecnico":79,"idCliente":86,"idEstadoServicio":2,"nombre":"NANAPPS SAS","descripcion":"Prueba FLuter Android","direccion":"Cra 59 # 74 - 48 BARRANQUILLA - ATLANTICO","idCiudad":0,"latitud":11.0036278,"longitud":-74.79863619999999,"fechayhorainicio":"1900-01-01 00:00:00","horainicio":"06:30:00","fechaInicio":"2025-01-16 00:00:00","fechaModificacion":"2025-01-15 17:29:26","fechaFin":"1900-01-01 00:00:00","idEquipo":144451,"idFalla":67,"observacionReporte":"","radicado":"PF 0001","idTipoServicio":1,"idEmpresa":1,"cedulaFirma":null,"nombreFirma":null,"archivoFirma":null,"orden":0,"fechaLlegada":"1900-01-01 00:00:00","comentarios":null,"consecutivo":46}
+}

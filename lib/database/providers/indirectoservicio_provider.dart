@@ -4,7 +4,6 @@ import 'package:archive/archive.dart';
 import 'dart:convert';
 
 class IndirectoServicioProvider {
-
   final Database db;
   IndirectoServicioProvider({required this.db});
 
@@ -22,7 +21,7 @@ class IndirectoServicioProvider {
       return IndirectoServicio(
         id: map['id'] as int,
         idIndirecto: map['idIndirecto'] as int,
-        idServicio: map['idServicio'] as String,
+        idServicio: map['idServicio'] as int,
         cantidad: map['cantidad'] as int,
         costo: map['costo'] as int,
         valor: map['valor'] as int,
@@ -47,21 +46,21 @@ class IndirectoServicioProvider {
     );
   }
 
-Future<void> insertInitFile(ArchiveFile file) async {
-  List<int> bytes = file.content;
-  String fileContent = utf8.decode(bytes);
-  List<String> lines = fileContent.split('\n');
+  Future<void> insertInitFile(ArchiveFile file) async {
+    List<int> bytes = file.content;
+    String fileContent = utf8.decode(bytes);
+    List<String> lines = fileContent.split('\n');
     for (var line in lines) {
       if (line.trim().isEmpty) continue;
       List<String> parts = line.split('|');
       IndirectoServicio indirectoservicio = IndirectoServicio(
-          id: int.parse(parts[0].trim()),
-idIndirecto: int.parse(parts[1].trim()),
-idServicio: parts[2].trim(),
-cantidad: int.parse(parts[3].trim()),
-costo: int.parse(parts[4].trim()),
-valor: int.parse(parts[5].trim()),
-        );
+        id: int.parse(parts[0].trim()),
+        idIndirecto: int.parse(parts[1].trim()),
+        idServicio: int.parse(parts[2].trim()),
+        cantidad: int.parse(parts[3].trim()),
+        costo: int.parse(parts[4].trim()),
+        valor: int.parse(parts[5].trim()),
+      );
       await db.transaction((database) async {
         await database.insert(
           'IndirectoServicio',

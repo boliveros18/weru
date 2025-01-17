@@ -17,6 +17,14 @@ class Ciudad {
     };
   }
 
+  factory Ciudad.fromMap(Map<String, dynamic> map) {
+    return Ciudad(
+      id: map['id'] as int,
+      nombre: map['nombre'] as String,
+      estado: map['estado'] as int,
+    );
+  }
+
   @override
   String toString() {
     return 'Ciudad{id: $id, nombre: $nombre, estado: $estado}';

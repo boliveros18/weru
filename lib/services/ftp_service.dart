@@ -28,10 +28,13 @@ class FTPService {
     }
   }
 
-  static Future<String> getMessages() async {
-    final response = await http.get(Uri.http(appRibGetMessagesUrlMethod));
+  static Future<String> getMessages(String id) async {
+    final uri = Uri.http(
+      appRibGetMessagesUrlHost,
+      appRibGetMessagesUrlPath + id,
+    );
+    final response = await http.get(uri);
     if (response.statusCode == 200) {
-      print('Mensajes recibidos: ${response.body}');
       return response.body;
     } else {
       print('Error al obtener mensajes: ${response.statusCode}');

@@ -47,6 +47,24 @@ class Cliente {
     };
   }
 
+  factory Cliente.fromMap(Map<String, dynamic> map) {
+    return Cliente(
+      id: map['id'] as int,
+      nombre: map['nombre'] as String,
+      direccion: map['direccion'] as String,
+      idCiudad: map['idCiudad'] as int,
+      telefono: map['telefono'] as String,
+      celular: map['celular'] as String,
+      idTipoCliente: map['idTipoCliente'] as int,
+      idTipoDocumento: map['idTipoDocumento'] as String,
+      numDocumento: map['numDocumento'] as String,
+      establecimiento: map['establecimiento'] as String,
+      contacto: map['contacto'] as String,
+      idEstado: map['idEstado'] as int,
+      correo: map['correo'] as String,
+    );
+  }
+
   @override
   String toString() {
     return 'Cliente{id: $id, nombre: $nombre, direccion: $direccion, idCiudad: $idCiudad, telefono: $telefono, celular: $celular, idTipoCliente: $idTipoCliente, idTipoDocumento: $idTipoDocumento, numDocumento: $numDocumento, establecimiento: $establecimiento, contacto: $contacto, idEstado: $idEstado, correo: $correo}';

@@ -1,18 +1,69 @@
+import 'package:weru/database/models/ciudad.dart';
+import 'package:weru/database/models/cliente.dart';
+import 'package:weru/database/models/equipo.dart';
+import 'package:weru/database/models/estadoservicio.dart';
+import 'package:weru/database/models/modelo.dart';
+import 'package:weru/database/models/servicio.dart';
+import 'package:weru/database/providers/ciudad_provider.dart';
+import 'package:weru/database/providers/cliente_provider.dart';
+import 'package:weru/database/providers/equipo_provider.dart';
+import 'package:weru/database/providers/estadoservicio_provider.dart';
+import 'package:weru/database/providers/modelo_provider.dart';
+import 'package:weru/database/providers/servicio_provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
 class DatabaseMain {
   final String path;
+  List<Servicio> services = [];
+  List<Cliente> clients = [];
+  List<Equipo> equipments = [];
+  List<Ciudad> cities = [];
+  List<Modelo> models = [];
+  List<EstadoServicio> servicesStatus = [];
 
-  DatabaseMain({
-    required this.path,
-  });
+  DatabaseMain({required this.path}) {}
+  Future<void> getServices() async {
+    final database = await db;
+    try {
+      final _services = await ServicioProvider(db: database).getAll();
+      equipments = await Future.wait(_services.map((service) async {
+        return await EquipoProvider(db: database).getItemById(service.idEquipo);
+      }).toList());
+
+      clients = await Future.wait(_services.map((service) async {
+        return await ClienteProvider(db: database)
+            .getItemById(service.idCliente);
+      }).toList());
+
+      cities = await Future.wait(_services.map((service) async {
+        return await CiudadProvider(db: database).getItemById(service.idCiudad);
+      }).toList());
+
+      models = await Future.wait(equipments.map((equipo) async {
+        return await ModeloProvider(db: database).getItemById(equipo.idModelo);
+      }).toList());
+
+      servicesStatus = await Future.wait(_services.map((service) async {
+        return await EstadoServicioProvider(db: database)
+            .getItemById(service.idEstadoServicio);
+      }).toList());
+
+      services = _services;
+    } catch (e) {
+      print("Error: $e");
+    }
+  }
+
+  Future<Database> onCreate() async {
+    return await db;
+  }
 
   Future<Database> get db async {
     return openDatabase(
       join(path, 'weru.db'),
       onCreate: (db, version) async {
-        return await onCreateTables(db);
+        await onCreateTables(db);
       },
       version: 1,
     );
@@ -126,9 +177,5 @@ class DatabaseMain {
     await db.execute(
       'CREATE TABLE ValoresIndicador (id INTEGER PRIMARY KEY, idIndicador INTEGER, descripcion TEXT)',
     );
-  }
-
-  Future<Database> onCreate() async {
-    return await db;
   }
 }

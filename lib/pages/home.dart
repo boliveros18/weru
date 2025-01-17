@@ -1,8 +1,9 @@
 import 'package:weru/components/app_bar_ui.dart';
-import 'package:weru/models/category_model.dart';
-import 'package:weru/models/diet_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:weru/components/text_ui.dart';
+import 'package:weru/config/config.dart';
+import 'package:weru/database/main.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -12,27 +13,29 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  List<CategoryModel> categories = [];
-  List<DietModel> diets = [];
+  final DatabaseMain database = DatabaseMain(path: localDatabasePath);
 
-  void getInitials() {
-    categories = CategoryModel.getCategories();
-    diets = DietModel.getDiets();
+  @override
+  void initState() {
+    super.initState();
+    database.getServices().then((_) {
+      setState(() {});
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    getInitials();
     return Scaffold(
       appBar: const AppBarUi(
-          header: "Servicios",
-          prefixIcon: true,
-          prefixIconHeight: 32,
-          prefixIconWidth: 32,
-          prefixIconPath: "assets/icon/icon.svg",
-          leading: false,
-          centerTitle: false,
-          menuIcon: true),
+        header: "Servicios",
+        prefixIcon: true,
+        prefixIconHeight: 32,
+        prefixIconWidth: 32,
+        prefixIconPath: "assets/icon/icon.svg",
+        leading: false,
+        centerTitle: false,
+        menuIcon: true,
+      ),
       backgroundColor: Colors.white,
       body: Column(
         children: [
@@ -43,14 +46,7 @@ class _HomePageState extends State<HomePage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(
-                      height: 40,
-                    ),
-                    categoriesSection(),
-                    const SizedBox(
-                      height: 40,
-                    ),
-                    recommendationForDietSection(),
+                    servicesSection(),
                   ],
                 ),
               ),
@@ -61,153 +57,140 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Column categoriesSection() {
+  Column servicesSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
-          padding: EdgeInsets.only(left: 20),
-          child: Text(
-            'Category',
-            style: TextStyle(
-                color: Colors.black, fontSize: 18, fontWeight: FontWeight.w600),
-          ),
-        ),
-        const SizedBox(
-          height: 40,
-        ),
         SizedBox(
-            height: 120,
-            child: ListView.separated(
-                itemCount: categories.length,
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.only(left: 20, right: 20),
-                separatorBuilder: (context, index) => const SizedBox(
-                      width: 25,
-                    ),
-                itemBuilder: (context, index) {
-                  return Container(
-                    width: 100,
-                    decoration: BoxDecoration(
-                        color:
-                            categories[index].boxColor.withValues(alpha: 0.3),
-                        borderRadius: BorderRadius.circular(16)),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        Container(
-                          width: 60,
-                          height: 60,
-                          decoration: const BoxDecoration(
-                              color: Colors.white, shape: BoxShape.circle),
-                          child: Padding(
-                            padding: const EdgeInsets.all(12),
-                            child: SvgPicture.asset(categories[index].iconPath),
-                          ),
-                        ),
-                        Text(
-                          categories[index].name,
-                          style: const TextStyle(
-                              fontWeight: FontWeight.w400,
-                              color: Colors.black,
-                              fontSize: 14),
-                        ),
-                      ],
-                    ),
-                  );
-                }))
-      ],
-    );
-  }
-
-  Column recommendationForDietSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Padding(
-          padding: EdgeInsets.only(left: 20),
-          child: Text(
-            'Recommendation\nfor Diet',
-            style: TextStyle(
-                color: Colors.black, fontSize: 18, fontWeight: FontWeight.w600),
-          ),
-        ),
-        const SizedBox(
-          height: 15,
-        ),
-        SizedBox(
-          height: 240,
+          height: MediaQuery.of(context).size.height - 85,
           child: ListView.separated(
             itemBuilder: (context, index) {
               return Container(
-                width: 210,
+                height: 161,
+                width: MediaQuery.of(context).size.width,
                 decoration: BoxDecoration(
-                    color: diets[index].boxColor.withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(20)),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(0),
+                  border: Border(
+                    left: BorderSide(
+                      color: _getStatusColor(
+                          database.servicesStatus[index].nombre),
+                      width: 10,
+                    ),
+                    bottom: BorderSide(
+                      color: _getStatusColor(
+                          database.servicesStatus[index].nombre),
+                      width: 2,
+                    ),
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
                   children: [
+                    const SizedBox(width: 20),
                     SvgPicture.asset(
-                      diets[index].iconPath,
-                      width: 80,
-                      height: 80,
+                      "assets/icons/google-maps.svg",
+                      width: 40,
+                      height: 40,
                     ),
+                    const SizedBox(width: 20),
                     Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          diets[index].name,
-                          style: const TextStyle(
-                              fontWeight: FontWeight.w500,
-                              color: Colors.black,
-                              fontSize: 16),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            TextUi(
+                                text:
+                                    'N° Servicio: ${database.services[index].orden}     '),
+                            TextUi(
+                                text:
+                                    'Radicado: ${database.services[index].radicado}'),
+                          ],
                         ),
-                        Text(
-                          '${diets[index].level} | ${diets[index].duration} | ${diets[index].calorie}',
-                          style: const TextStyle(
-                              color: Color(0xff7B6F72),
-                              fontSize: 13,
-                              fontWeight: FontWeight.w400),
+                        TextUi(
+                            text:
+                                'Cliente:  ${database.clients[index].nombre}'),
+                        TextUi(
+                            text:
+                                'Direccion:  ${database.services[index].direccion}'),
+                        TextUi(
+                            text:
+                                'Ubicacion:  ${database.cities[index].nombre}'),
+                        TextUi(
+                            text:
+                                'Equipo:  ${database.equipments[index].nombre}'),
+                        TextUi(
+                            text:
+                                'Modelo:  ${database.models[index].descripcion}'),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            TextUi(
+                                text:
+                                    'Fecha:  ${database.services[index].fechayhorainicio.split(' ')[0]}     '),
+                            TextUi(
+                                text:
+                                    'Hora:  ${database.services[index].fechayhorainicio.split(' ')[1]}'),
+                          ],
                         ),
+                        const SizedBox(
+                          height: 5,
+                        ),
+                        Container(
+                          color: _getStatusColor(
+                              database.servicesStatus[index].nombre),
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(20, 2, 20, 0),
+                            child: TextUi(
+                              text: '${database.servicesStatus[index].nombre}',
+                              color: Colors.white,
+                            ),
+                          ),
+                        )
                       ],
-                    ),
-                    Container(
-                      height: 45,
-                      width: 130,
-                      decoration: BoxDecoration(
-                          gradient: LinearGradient(colors: [
-                            diets[index].viewIsSelected
-                                ? const Color(0xff9DCEFF)
-                                : Colors.transparent,
-                            diets[index].viewIsSelected
-                                ? const Color(0xff92A3FD)
-                                : Colors.transparent
-                          ]),
-                          borderRadius: BorderRadius.circular(50)),
-                      child: Center(
-                        child: Text(
-                          'View',
-                          style: TextStyle(
-                              color: diets[index].viewIsSelected
-                                  ? Colors.white
-                                  : const Color(0xffC58BF2),
-                              fontWeight: FontWeight.w600,
-                              fontSize: 14),
-                        ),
-                      ),
                     )
                   ],
                 ),
               );
             },
             separatorBuilder: (context, index) => const SizedBox(
-              width: 25,
+              height: 2,
             ),
-            itemCount: diets.length,
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.only(left: 20, right: 20),
+            itemCount: database.services.length,
+            scrollDirection: Axis.vertical,
           ),
         )
       ],
     );
+  }
+}
+
+Color _getStatusColor(String status) {
+  switch (status) {
+    case "Por asignar":
+      return const Color.fromARGB(255, 0, 45, 168);
+    case "Por ejecutar":
+      return const Color(0xFF4CAF50);
+    case "En ejecucion":
+      return const Color(0xFFFFC107);
+    case "Con novedad":
+      return const Color(0xFF2196F3);
+    case "Finalizado":
+      return const Color(0xFF8BC34A);
+    case "Anulado":
+      return const Color(0xFFF44336);
+    case "Cancelado":
+      return const Color(0xFF9E9E9E);
+    case "Vencido":
+      return const Color(0xFFB71C1C);
+    case "Fallido":
+      return const Color(0xFF757575);
+    case "En sitio":
+      return const Color(0xFF00BCD4);
+    case "Por Transmitir":
+      return const Color(0xFFFF5722);
+    default:
+      return const Color.fromARGB(255, 0, 45, 168);
   }
 }

@@ -70,7 +70,7 @@ class DialogUi extends StatelessWidget {
                 onConfirm(textController.text);
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Por favor, ingrese un valor")),
+                  const SnackBar(content: Text("Por favor, ingrese un valor!")),
                 );
               }
             } else {

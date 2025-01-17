@@ -15,19 +15,32 @@ const String userNameFTPS = 'Soporte';
 const String passwordFTPS = 'S0porte*123.';
 const String pathFTPS = '/WerU_Prueba/MasterData';
 
-const String appRibGetMessagesUrlMethod =
-    'http://nansoft.co:87/PruebaWeruC/RibWeb.svc/REST/QueHayNuevo';
+const String appRibGetMessagesUrlHost = 'nansoft.co:87';
+const String appRibGetMessagesUrlPath =
+    '/PruebaWeruC/RibWeb.svc/REST/QueHayNuevo/';
 const String appRibSetMessageReceivedUrlMethod =
-    'http://nansoft.co:87/PruebaWeruC/RibWeb.svc/REST/ReportarMensajeRecibido';
+    'http://nansoft.co:87/PruebaWeruC/RibWeb.svc/REST/ReportarMensajeRecibido/';
 const String appRibSendMessageEntrada =
-    'http://nansoft.co:87/PruebaWeruC/RibWeb.svc/REST/RecibirMensajeStream';
+    'http://nansoft.co:87/PruebaWeruC/RibWeb.svc/REST/RecibirMensajeStream/';
 const String appRibSendMessageSalida =
-    'http://nansoft.co:87/PruebaWeruC/RibWeb.svc/REST/RecibirMensajeStreamSalida';
+    'http://nansoft.co:87/PruebaWeruC/RibWeb.svc/REST/RecibirMensajeStreamSalida/';
 const String appRibDeleteMessagesNewInstall =
-    'http://nansoft.co:87/PruebaWeruC/RibWeb.svc/REST/BorrarMensajesTableta';
+    'http://nansoft.co:87/PruebaWeruC/RibWeb.svc/REST/BorrarMensajesTableta/';
 const String appRibSendImagesUrlMethod =
-    'http://nansoft.co:87/PruebaWeruC/RibWeb.svc/REST/RecibirImagen';
+    'http://nansoft.co:87/PruebaWeruC/RibWeb.svc/REST/RecibirImagen/';
 
 const String appRibSleepTime = '2000';
 const String appRibSleepTimeGPS = '1000';
 const String appItemTypeInternalId = 'maq';
+
+const String localDatabasePath = "/data/data/com.example.weru/files";
+//var/mobile/Containers/Data/Application/<App_ID>/Documents/database <--end point iOs
+
+Future<String> localFilePath(String value) async {
+  return "/data/data/com.example.weru/files/MasterData" + value + ".zip";
+  // "\(NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0])/master.zip"   <-- iOs
+// var/mobile/Containers/Data/Application/<App_ID>/Documents/master.zip    <--end point iOs
+}
+
+const String localDirectoryPath =
+    "/data/data/com.example.weru/files/MasterData";

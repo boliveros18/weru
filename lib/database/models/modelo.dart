@@ -14,6 +14,13 @@ class Modelo {
     };
   }
 
+  factory Modelo.fromMap(Map<String, dynamic> map) {
+    return Modelo(
+      id: map['id'] as int,
+      descripcion: map['descripcion'] as String,
+    );
+  }
+
   @override
   String toString() {
     return 'Modelo{id: $id, descripcion: $descripcion}';

@@ -15,6 +15,18 @@ class ClienteProvider {
     );
   }
 
+  Future<Cliente> getItemById(int id) async {
+    final List<Map<String, dynamic>> items = await db.query(
+      'Cliente',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+    if (items.isEmpty) {
+      throw Exception('Item no encontrado!');
+    }
+    return Cliente.fromMap(items.first);
+  }
+
   Future<List<Cliente>> getAll() async {
     final List<Map<String, Object?>> maps = await db.query('Cliente');
     return maps.map((map) {

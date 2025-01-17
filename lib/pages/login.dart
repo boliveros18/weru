@@ -3,10 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:archive/archive.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'dart:io';
-import 'package:flutter/services.dart';
 import 'package:sqflite/sqflite.dart';
-import 'dart:convert';
 import 'package:weru/components/button_ui.dart';
+import 'package:weru/config/config.dart';
 import 'package:weru/database/main.dart';
 import 'package:weru/functions/functions.dart';
 import 'package:weru/provider/session.dart';
@@ -27,11 +26,20 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   bool permissionsGranted = false;
   bool isLoading = false;
+  late bool master;
+  bool isTimerInitialized = false;
+  late Session session;
   final FTPService ftpService = FTPService();
   DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
   late Timer timer;
-  late TextEditingController userController;
-  late TextEditingController passController;
+  TextEditingController userController = TextEditingController();
+  TextEditingController passController = TextEditingController();
+  late Database database;
+  late AndroidDeviceInfo androidInfo;
+  /*
+      IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
+      id = iosInfo.identifierForVendor;
+   */
 
   void updatePermissionStatus(bool granted) {
     setState(() {
@@ -40,25 +48,15 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> downloadAndUnzipMaster(String value) async {
-    final localDatabasePath = "/data/data/com.example.weru/files";
-    //var/mobile/Containers/Data/Application/<App_ID>/Documents/database <--end point iOs
-    Database database = await DatabaseMain(path: localDatabasePath).onCreate();
-    final session = Provider.of<Session>(context, listen: false);
-    // "\(NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0])/master.zip"   <-- iOs
-    // var/mobile/Containers/Data/Application/<App_ID>/Documents/master.zip    <--end point iOs
-    final localFilePath =
-        "/data/data/com.example.weru/files/MasterData" + value + ".zip";
-    final localDirectoryPath = "/data/data/com.example.weru/files/MasterData";
     isLoading = true;
-    session.masters = true; // await ftpService.downloadFile(
-    //'${pathFTPS}' + value + '.zip', localFilePath);
+    master =
+        true; // await ftpService.downloadFile('${pathFTPS}' + value + '.zip', localFilePath);
     isLoading = false;
-    if (session.masters) {
-      //Navigator.of(context).pop();
+    if (master) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Archivo master descargado!")),
       );
-      final input = InputFileStream(localFilePath);
+      final input = InputFileStream(await localFilePath(value));
       final archive = ZipDecoder().decodeStream(input);
       for (final file in archive) {
         if (file.isFile) {
@@ -90,58 +88,70 @@ class _LoginPageState extends State<LoginPage> {
   @override
   void initState() {
     super.initState();
-    final session = Provider.of<Session>(context, listen: false);
-    userController = TextEditingController(text: session.user);
-    passController = TextEditingController(text: session.pass);
+    session = Provider.of<Session>(context, listen: false);
+    _initializeApp();
+  }
+
+  Future<void> _initializeApp() async {
+    androidInfo = await deviceInfo.androidInfo;
+    database = await DatabaseMain(path: localDatabasePath).onCreate();
     timer = Timer.periodic(Duration(seconds: 15), (timer) async {
-      //response = await FTPService.getMessages();
-      String response = await rootBundle.loadString('assets/utils/init.json');
-      if (session.user.isEmpty && response.isNotEmpty) {
-        final data = jsonDecode(response);
-        session.user = data['Tecnico'][0]['usuario'];
-        session.pass = data['Tecnico'][0]['clave'];
-        userController.text = session.user;
-        passController.text = session.pass;
-        Future.delayed(Duration.zero, () {
-          DialogUi.show(
-            context: context,
-            title: "Se descargaron tus servicios y credenciales",
-            textField: false,
-            onConfirm: (value) async {},
-          );
-        });
+      try {
+        String response = await FTPService.getMessages(androidInfo.id);
+        if (response.isEmpty) {
+          return;
+        }
+        final data = responseXMLtoJSON(response);
+        if (session.user.isEmpty &&
+            data['Tecnico'] != null &&
+            data['Tecnico']?[0]['usuario']?.toString().isNotEmpty == true) {
+          bool insert = await insertInitMessageDataToSqflite(data, database);
+          if (insert) {
+            session.user = data['Tecnico']?[0]['usuario'];
+            session.pass = data['Tecnico']?[0]['clave'];
+            userController.text = session.user;
+            passController.text = session.pass;
+            Future.delayed(Duration.zero, () {
+              DialogUi.show(
+                context: context,
+                title:
+                    "Se descargaron tus servicios y credenciales. Accede a tu cuenta!",
+                textField: false,
+                onConfirm: (value) async {},
+              );
+            });
+          }
+        }
+      } catch (e, stackTrace) {
+        print('Error in _initializeApp: $e');
+        print(stackTrace);
       }
     });
+    isTimerInitialized = true;
   }
 
   @override
   void dispose() {
-    timer.cancel();
+    if (isTimerInitialized) {
+      timer.cancel();
+    }
+    userController.dispose();
+    passController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final session = Provider.of<Session>(context, listen: false);
-    // if (session.nit.isEmpty) {
-    Future.delayed(Duration.zero, () {
-      downloadAndUnzipMaster("1");
-      /*
-      DialogUi.show(
-        context: context,
-        title: "Ingrese el nit de la organización",
-        hintText: "nit",
-        onConfirm: (value) async {
-          setState(() {
-            session.nit = value;
-          });
-          downloadAndUnzipMaster("1");
-          AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
-          /*
-            IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
-            id = iosInfo.identifierForVendor;
-            */
-          if (!session.deviceId) {
+    if (!Directory(localDirectoryPath).existsSync()) {
+      Future.delayed(Duration.zero, () {
+        DialogUi.show(
+          context: context,
+          title: "Ingrese el nit de la organización",
+          hintText: "nit",
+          onConfirm: (value) async {
+            setState(() {});
+            await downloadAndUnzipMaster(value);
+            Navigator.of(context).pop();
             (Future.delayed(Duration.zero, () {
               DialogUi.show(
                 context: context,
@@ -150,13 +160,10 @@ class _LoginPageState extends State<LoginPage> {
                 onConfirm: (value) async {},
               );
             }));
-            session.deviceId = true;
-          }
-        },
-      );
-      */
-    });
-    //}
+          },
+        );
+      });
+    }
 
     return Scaffold(
       body: Container(
@@ -208,8 +215,20 @@ class _LoginPageState extends State<LoginPage> {
                   ButtonUi(
                       value: "Ingresar",
                       onClicked: () async {
-                        //validacion con la bd
-                        Navigator.pushNamed(context, '/home');
+                        bool validation = await Authentication(
+                            userController.text, passController.text);
+                        if (validation) {
+                          session.login();
+                        } else {
+                          (Future.delayed(Duration.zero, () {
+                            DialogUi.show(
+                              context: context,
+                              title: "Contraseña o usuario invalido!",
+                              textField: false,
+                              onConfirm: (value) async {},
+                            );
+                          }));
+                        }
                       }),
                   const SizedBox(height: 10),
                   if (isLoading) const ProgressIndicatorUi()

@@ -15,6 +15,18 @@ class CiudadProvider {
     );
   }
 
+  Future<Ciudad> getItemById(int id) async {
+    final List<Map<String, dynamic>> items = await db.query(
+      'Ciudad',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+    if (items.isEmpty) {
+      throw Exception('Item no encontrado!');
+    }
+    return Ciudad.fromMap(items.first);
+  }
+
   Future<List<Ciudad>> getAll() async {
     final List<Map<String, Object?>> maps = await db.query('Ciudad');
     return maps.map((map) {

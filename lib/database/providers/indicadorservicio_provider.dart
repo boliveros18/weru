@@ -21,7 +21,7 @@ class IndicadorServicioProvider {
       return IndicadorServicio(
         id: map['id'] as int,
         idIndicador: map['idIndicador'] as int,
-        idServicio: map['idServicio'] as String,
+        idServicio: map['idServicio'] as int,
         idTecnico: map['idTecnico'] as int,
         valor: map['valor'] as String,
       );
@@ -55,7 +55,7 @@ class IndicadorServicioProvider {
       IndicadorServicio indicadorservicio = IndicadorServicio(
         id: int.parse(parts[0].trim()),
         idIndicador: int.parse(parts[1].trim()),
-        idServicio: parts[2].trim(),
+        idServicio: int.parse(parts[2].trim()),
         idTecnico: int.parse(parts[3].trim()),
         valor: parts[4].trim(),
       );
