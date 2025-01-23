@@ -15,6 +15,18 @@ class StageMessageProvider {
     );
   }
 
+  Future<StageMessage> getItemById(int id) async {
+    final List<Map<String, dynamic>> items = await db.query(
+      'StageMessage',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+    if (items.isEmpty) {
+      throw Exception('Item de StageMessage no encontrado!');
+    }
+    return StageMessage.fromMap(items.first);
+  }
+
   Future<List<StageMessage>> getAll() async {
     final List<Map<String, Object?>> maps = await db.query('StageMessage');
     return maps.map((map) {

@@ -15,6 +15,18 @@ class FallaProvider {
     );
   }
 
+  Future<Falla> getItemById(int id) async {
+    final List<Map<String, dynamic>> items = await db.query(
+      'Falla',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+    if (items.isEmpty) {
+      throw Exception('Item de Falla no encontrado!');
+    }
+    return Falla.fromMap(items.first);
+  }
+
   Future<List<Falla>> getAll() async {
     final List<Map<String, Object?>> maps = await db.query('Falla');
     return maps.map((map) {

@@ -15,6 +15,18 @@ class IndicadorServicioProvider {
     );
   }
 
+  Future<IndicadorServicio> getItemById(int id) async {
+    final List<Map<String, dynamic>> items = await db.query(
+      'IndicadorServicio',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+    if (items.isEmpty) {
+      throw Exception('Item de IndicadorServicio no encontrado!');
+    }
+    return IndicadorServicio.fromMap(items.first);
+  }
+
   Future<List<IndicadorServicio>> getAll() async {
     final List<Map<String, Object?>> maps = await db.query('IndicadorServicio');
     return maps.map((map) {

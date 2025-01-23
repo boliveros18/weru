@@ -15,6 +15,18 @@ class FotoServicioProvider {
     );
   }
 
+  Future<FotoServicio> getItemById(int id) async {
+    final List<Map<String, dynamic>> items = await db.query(
+      'FotoServicio',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+    if (items.isEmpty) {
+      throw Exception('Item de FotoServicio no encontrado!');
+    }
+    return FotoServicio.fromMap(items.first);
+  }
+
   Future<List<FotoServicio>> getAll() async {
     final List<Map<String, Object?>> maps = await db.query('FotoServicio');
     return maps.map((map) {

@@ -29,6 +29,18 @@ class Indicador {
     };
   }
 
+   factory   Indicador.fromMap(Map<String, dynamic> map) {
+    return   Indicador(
+           id: int.tryParse(map['id']?.toString() ?? '') ?? 0,
+      idEstadoIndicador: int.tryParse(map['idEstadoIndicador']?.toString() ?? '') ?? 0,
+      descripcion: map['descripcion']?.toString() ?? '',
+      valorMin: double.tryParse(map['valorMin']?.toString() ?? '') ?? 0.0,
+      valorMax: double.tryParse(map['valorMax']?.toString() ?? '') ?? 0.0,
+      tipo: map['tipo']?.toString() ?? '',
+      icono: map['icono']?.toString() ?? '',
+    );
+  }
+
   @override
   String toString() {
     return 'Indicador{id: $id, idEstadoIndicador: $idEstadoIndicador, descripcion: $descripcion, valorMin: $valorMin, valorMax: $valorMax, tipo: $tipo, icono: $icono}';

@@ -14,10 +14,10 @@ class Modelo {
     };
   }
 
-  factory Modelo.fromMap(Map<String, dynamic> map) {
-    return Modelo(
-      id: map['id'] as int,
-      descripcion: map['descripcion'] as String,
+   factory   Modelo.fromMap(Map<String, dynamic> map) {
+    return   Modelo(
+           id: int.tryParse(map['id']?.toString() ?? '') ?? 0,
+      descripcion: map['descripcion']?.toString() ?? '',
     );
   }
 

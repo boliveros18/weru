@@ -20,6 +20,15 @@ class FotoServicio {
     };
   }
 
+   factory   FotoServicio.fromMap(Map<String, dynamic> map) {
+    return   FotoServicio(
+           id: int.tryParse(map['id']?.toString() ?? '') ?? 0,
+      idServicio: int.tryParse(map['idServicio']?.toString() ?? '') ?? 0,
+      archivo: map['archivo']?.toString() ?? '',
+      comentario: map['comentario']?.toString() ?? '',
+    );
+  }
+
   @override
   String toString() {
     return 'FotoServicio{id: $id, idServicio: $idServicio, archivo: $archivo, comentario: $comentario}';

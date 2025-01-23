@@ -17,11 +17,11 @@ class EstadoServicio {
     };
   }
 
-  factory EstadoServicio.fromMap(Map<String, dynamic> map) {
-    return EstadoServicio(
-      id: map['id'] as int,
-      nombre: map['nombre'] as String,
-      descripcion: map['descripcion'] as String,
+   factory   EstadoServicio.fromMap(Map<String, dynamic> map) {
+    return   EstadoServicio(
+           id: int.tryParse(map['id']?.toString() ?? '') ?? 0,
+      nombre: map['nombre']?.toString() ?? '',
+      descripcion: map['descripcion']?.toString() ?? '',
     );
   }
 

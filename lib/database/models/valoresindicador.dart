@@ -17,6 +17,14 @@ class ValoresIndicador {
     };
   }
 
+   factory   ValoresIndicador.fromMap(Map<String, dynamic> map) {
+    return   ValoresIndicador(
+           id: int.tryParse(map['id']?.toString() ?? '') ?? 0,
+      idIndicador: int.tryParse(map['idIndicador']?.toString() ?? '') ?? 0,
+      descripcion: map['descripcion']?.toString() ?? '',
+    );
+  }
+
   @override
   String toString() {
     return 'ValoresIndicador{id: $id, idIndicador: $idIndicador, descripcion: $descripcion}';

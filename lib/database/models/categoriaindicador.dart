@@ -17,6 +17,14 @@ class CategoriaIndicador {
     };
   }
 
+   factory   CategoriaIndicador.fromMap(Map<String, dynamic> map) {
+    return   CategoriaIndicador(
+           id: int.tryParse(map['id']?.toString() ?? '') ?? 0,
+      nombre: map['nombre']?.toString() ?? '',
+      descripcion: map['descripcion']?.toString() ?? '',
+    );
+  }
+
   @override
   String toString() {
     return 'CategoriaIndicador{id: $id, nombre: $nombre, descripcion: $descripcion}';

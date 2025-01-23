@@ -15,6 +15,18 @@ class IndirectoProvider {
     );
   }
 
+  Future<Indirecto> getItemById(int id) async {
+    final List<Map<String, dynamic>> items = await db.query(
+      'Indirecto',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+    if (items.isEmpty) {
+      throw Exception('Item de Indirecto no encontrado!');
+    }
+    return Indirecto.fromMap(items.first);
+  }
+
   Future<List<Indirecto>> getAll() async {
     final List<Map<String, Object?>> maps = await db.query('Indirecto');
     return maps.map((map) {

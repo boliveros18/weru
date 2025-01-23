@@ -22,7 +22,7 @@ class EquipoProvider {
       whereArgs: [id],
     );
     if (items.isEmpty) {
-      throw Exception('Item no encontrado!');
+      throw Exception('Item de Equipo no encontrado!');
     }
     return Equipo.fromMap(items.first);
   }

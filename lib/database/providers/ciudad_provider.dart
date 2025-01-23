@@ -22,7 +22,7 @@ class CiudadProvider {
       whereArgs: [id],
     );
     if (items.isEmpty) {
-      throw Exception('Item no encontrado!');
+      throw Exception('Item de Ciudad no encontrado!');
     }
     return Ciudad.fromMap(items.first);
   }

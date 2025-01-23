@@ -23,6 +23,16 @@ class IndicadorServicio {
     };
   }
 
+   factory   IndicadorServicio.fromMap(Map<String, dynamic> map) {
+    return   IndicadorServicio(
+           id: int.tryParse(map['id']?.toString() ?? '') ?? 0,
+      idIndicador: int.tryParse(map['idIndicador']?.toString() ?? '') ?? 0,
+      idServicio: int.tryParse(map['idServicio']?.toString() ?? '') ?? 0,
+      idTecnico: int.tryParse(map['idTecnico']?.toString() ?? '') ?? 0,
+      valor: map['valor']?.toString() ?? '',
+    );
+  }
+
   @override
   String toString() {
     return 'IndicadorServicio{id: $id, idIndicador: $idIndicador, idServicio: $idServicio, idTecnico: $idTecnico, valor: $valor}';

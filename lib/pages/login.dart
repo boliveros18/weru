@@ -7,7 +7,10 @@ import 'package:sqflite/sqflite.dart';
 import 'package:weru/components/button_ui.dart';
 import 'package:weru/config/config.dart';
 import 'package:weru/database/main.dart';
-import 'package:weru/functions/functions.dart';
+import 'package:weru/functions/response_stage_message_xml_to_json.dart';
+import 'package:weru/functions/insert_master_file_in_sqflite.dart';
+import 'package:weru/functions/insert_stage_message_list_data_to_sqflite.dart';
+import 'package:weru/functions/authentication.dart';
 import 'package:weru/provider/session.dart';
 import 'package:weru/permission_request.dart';
 import 'package:weru/components/text_field_ui.dart';
@@ -15,6 +18,10 @@ import 'package:weru/components/dialog_ui.dart';
 import 'package:weru/components/progress_indicator_ui.dart';
 import 'package:weru/services/ftp_service.dart';
 import 'package:provider/provider.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:permission_handler/permission_handler.dart';
+
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -30,16 +37,10 @@ class _LoginPageState extends State<LoginPage> {
   bool isTimerInitialized = false;
   late Session session;
   final FTPService ftpService = FTPService();
-  DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
   late Timer timer;
   TextEditingController userController = TextEditingController();
   TextEditingController passController = TextEditingController();
   late Database database;
-  late AndroidDeviceInfo androidInfo;
-  /*
-      IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
-      id = iosInfo.identifierForVendor;
-   */
 
   void updatePermissionStatus(bool granted) {
     setState(() {
@@ -66,15 +67,15 @@ class _LoginPageState extends State<LoginPage> {
             output.writeStream(file.getContent()!);
             insertMasterFileInSqflite(file, database);
             await file.close();
-          } catch (e) {
-            print('Error in file:${e}');
+          } catch (e, stackTrace) {
+            print('Error in file:${e}, $stackTrace');
           }
         } else {
           try {
             await Directory('${localDirectoryPath}/${file.name}')
                 .create(recursive: true);
-          } catch (e) {
-            print('Error in directory:${e}');
+          } catch (e, stackTrace) {
+            print('Error in directory:${e}, $stackTrace');
           }
         }
       }
@@ -93,19 +94,20 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> _initializeApp() async {
-    androidInfo = await deviceInfo.androidInfo;
+    await currentPosition();
     database = await DatabaseMain(path: localDatabasePath).onCreate();
-    timer = Timer.periodic(Duration(seconds: 15), (timer) async {
+    timer = Timer.periodic(Duration(seconds: 5), (timer) async {
       try {
-        String response = await FTPService.getMessages(androidInfo.id);
+        String response = await FTPService.getMessages();
         if (response.isEmpty) {
           return;
         }
-        final data = responseXMLtoJSON(response);
+        final data = await responseStageMessageXMLtoJSON(response);
         if (session.user.isEmpty &&
             data['Tecnico'] != null &&
             data['Tecnico']?[0]['usuario']?.toString().isNotEmpty == true) {
-          bool insert = await insertInitMessageDataToSqflite(data, database);
+          bool insert =
+              await insertStageMessageListDataToSqflite(data, database);
           if (insert) {
             session.user = data['Tecnico']?[0]['usuario'];
             session.pass = data['Tecnico']?[0]['clave'];
@@ -123,8 +125,7 @@ class _LoginPageState extends State<LoginPage> {
           }
         }
       } catch (e, stackTrace) {
-        print('Error in _initializeApp: $e');
-        print(stackTrace);
+        print('Error in _initializeApp: $e, $stackTrace');
       }
     });
     isTimerInitialized = true;
@@ -150,12 +151,16 @@ class _LoginPageState extends State<LoginPage> {
           hintText: "nit",
           onConfirm: (value) async {
             setState(() {});
+            DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+            AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+            //IosDeviceInfo iOsInfo =  await deviceInfo.iosInfo;
             await downloadAndUnzipMaster(value);
             Navigator.of(context).pop();
             (Future.delayed(Duration.zero, () {
               DialogUi.show(
                 context: context,
-                title: "Este es el id del dispositivo: ${androidInfo.id}",
+                title:
+                    "Este es el id del dispositivo: ${androidInfo.id}", //iosInfo.identifierForVendor;
                 textField: false,
                 onConfirm: (value) async {},
               );
@@ -240,4 +245,59 @@ class _LoginPageState extends State<LoginPage> {
       ),
     );
   }
+}
+
+Future<Position> currentPosition() async {
+  bool serviceEnabled;
+  LocationPermission permission;
+
+  serviceEnabled = await Geolocator.isLocationServiceEnabled();
+  if (!serviceEnabled) {
+    await _showLocationServiceDialog();
+    return Future.error('Location services are disabled.');
+  }
+
+  permission = await Geolocator.checkPermission();
+  if (permission == LocationPermission.denied) {
+    permission = await Geolocator.requestPermission();
+    if (permission == LocationPermission.denied) {
+      return Future.error('Location permissions are denied');
+    }
+  }
+
+  if (permission == LocationPermission.deniedForever) {
+    return Future.error(
+        'Location permissions are permanently denied, we cannot request permissions.');
+  }
+
+  return await Geolocator.getCurrentPosition();
+}
+
+Future<void> _showLocationServiceDialog() async {
+  return showDialog<void>(
+    context: navigatorKey.currentContext!,
+    barrierDismissible: false,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text('Location Services Disabled'),
+        content: const Text(
+            'Please enable location services in your device settings.'),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () async {
+              await openAppSettings();
+              Navigator.of(context).pop();
+            },
+            child: const Text('Open Settings'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text('Cancel'),
+          ),
+        ],
+      );
+    },
+  );
 }

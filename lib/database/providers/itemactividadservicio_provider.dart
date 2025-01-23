@@ -4,7 +4,6 @@ import 'package:archive/archive.dart';
 import 'dart:convert';
 
 class ItemActividadServicioProvider {
-
   final Database db;
   ItemActividadServicioProvider({required this.db});
 
@@ -16,8 +15,21 @@ class ItemActividadServicioProvider {
     );
   }
 
+  Future<ItemActividadServicio> getItemById(int id) async {
+    final List<Map<String, dynamic>> items = await db.query(
+      'ItemActividadServicio',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+    if (items.isEmpty) {
+      throw Exception('Item de ItemActividadServicio no encontrado!');
+    }
+    return ItemActividadServicio.fromMap(items.first);
+  }
+
   Future<List<ItemActividadServicio>> getAll() async {
-    final List<Map<String, Object?>> maps = await db.query('ItemActividadServicio');
+    final List<Map<String, Object?>> maps =
+        await db.query('ItemActividadServicio');
     return maps.map((map) {
       return ItemActividadServicio(
         id: map['id'] as int,
@@ -45,19 +57,19 @@ class ItemActividadServicioProvider {
     );
   }
 
-Future<void> insertInitFile(ArchiveFile file) async {
-  List<int> bytes = file.content;
-  String fileContent = utf8.decode(bytes);
-  List<String> lines = fileContent.split('\n');
+  Future<void> insertInitFile(ArchiveFile file) async {
+    List<int> bytes = file.content;
+    String fileContent = utf8.decode(bytes);
+    List<String> lines = fileContent.split('\n');
     for (var line in lines) {
       if (line.trim().isEmpty) continue;
       List<String> parts = line.split('|');
       ItemActividadServicio itemactividadservicio = ItemActividadServicio(
-          id: int.parse(parts[0].trim()),
-idItem: int.parse(parts[1].trim()),
-idActividadServicio: int.parse(parts[2].trim()),
-cantidadReq: double.parse(parts[3].trim()),
-        );
+        id: int.parse(parts[0].trim()),
+        idItem: int.parse(parts[1].trim()),
+        idActividadServicio: int.parse(parts[2].trim()),
+        cantidadReq: double.parse(parts[3].trim()),
+      );
       await db.transaction((database) async {
         await database.insert(
           'ItemActividadServicio',

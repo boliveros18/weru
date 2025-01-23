@@ -22,7 +22,7 @@ class ModeloProvider {
       whereArgs: [id],
     );
     if (items.isEmpty) {
-      throw Exception('Item no encontrado!');
+      throw Exception('Item de Modelo no encontrado!');
     }
     return Modelo.fromMap(items.first);
   }

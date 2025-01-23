@@ -27,6 +27,7 @@ class DatabaseMain {
     final database = await db;
     try {
       final _services = await ServicioProvider(db: database).getAll();
+
       equipments = await Future.wait(_services.map((service) async {
         return await EquipoProvider(db: database).getItemById(service.idEquipo);
       }).toList());
@@ -50,8 +51,8 @@ class DatabaseMain {
       }).toList());
 
       services = _services;
-    } catch (e) {
-      print("Error: $e");
+    } catch (e, stackTrace) {
+      print("Error getServices() in main database: $e, $stackTrace");
     }
   }
 
@@ -176,6 +177,9 @@ class DatabaseMain {
     );
     await db.execute(
       'CREATE TABLE ValoresIndicador (id INTEGER PRIMARY KEY, idIndicador INTEGER, descripcion TEXT)',
+    );
+    await db.execute(
+      'CREATE TABLE Pulso ( id INTEGER PRIMARY KEY AUTOINCREMENT, idTecnico INTEGER NOT NULL, latitud REAL NULL, longitud REAL NULL, fechaPulso TEXT NULL)',
     );
   }
 }

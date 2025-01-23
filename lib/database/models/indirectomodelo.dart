@@ -17,6 +17,14 @@ class IndirectoModelo {
     };
   }
 
+   factory   IndirectoModelo.fromMap(Map<String, dynamic> map) {
+    return   IndirectoModelo(
+           id: int.tryParse(map['id']?.toString() ?? '') ?? 0,
+      idIndirecto: int.tryParse(map['idIndirecto']?.toString() ?? '') ?? 0,
+      idModelo: int.tryParse(map['idModelo']?.toString() ?? '') ?? 0,
+    );
+  }
+
   @override
   String toString() {
     return 'IndirectoModelo{id: $id, idIndirecto: $idIndirecto, idModelo: $idModelo}';

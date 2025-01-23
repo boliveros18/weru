@@ -16,6 +16,18 @@ class RegistroCamposAdicionalesProvider {
     );
   }
 
+  Future<RegistroCamposAdicionales> getItemById(int id) async {
+    final List<Map<String, dynamic>> items = await db.query(
+      'RegistroCamposAdicionales',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+    if (items.isEmpty) {
+      throw Exception('Item de RegistroCamposAdicionales no encontrado!');
+    }
+    return RegistroCamposAdicionales.fromMap(items.first);
+  }
+
   Future<List<RegistroCamposAdicionales>> getAll() async {
     final List<Map<String, Object?>> maps =
         await db.query('RegistroCamposAdicionales');

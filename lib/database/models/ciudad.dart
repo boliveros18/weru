@@ -17,11 +17,11 @@ class Ciudad {
     };
   }
 
-  factory Ciudad.fromMap(Map<String, dynamic> map) {
-    return Ciudad(
-      id: map['id'] as int,
-      nombre: map['nombre'] as String,
-      estado: map['estado'] as int,
+   factory   Ciudad.fromMap(Map<String, dynamic> map) {
+    return   Ciudad(
+           id: int.tryParse(map['id']?.toString() ?? '') ?? 0,
+      nombre: map['nombre']?.toString() ?? '',
+      estado: int.tryParse(map['estado']?.toString() ?? '') ?? 0,
     );
   }
 

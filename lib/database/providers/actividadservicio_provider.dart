@@ -15,13 +15,25 @@ class ActividadServicioProvider {
     );
   }
 
+  Future<ActividadServicio> getItemById(int id) async {
+    final List<Map<String, dynamic>> items = await db.query(
+      'ActividadServicio',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+    if (items.isEmpty) {
+      throw Exception('Item de ActividadServicio no encontrado!');
+    }
+    return ActividadServicio.fromMap(items.first);
+  }
+
   Future<List<ActividadServicio>> getAll() async {
     final List<Map<String, Object?>> maps = await db.query('ActividadServicio');
     return maps.map((map) {
       return ActividadServicio(
         id: map['id'] as int,
         idActividad: map['idActividad'] as int,
-        idServicio: map['idServicio'] as String,
+        idServicio: map['idServicio'] as int,
         cantidad: map['cantidad'] as int,
         costo: map['costo'] as int,
         valor: map['valor'] as int,
@@ -57,7 +69,7 @@ class ActividadServicioProvider {
       ActividadServicio actividadservicio = ActividadServicio(
         id: int.parse(parts[0].trim()),
         idActividad: int.parse(parts[1].trim()),
-        idServicio: parts[2].trim(),
+        idServicio: int.parse(parts[2].trim()),
         cantidad: int.parse(parts[3].trim()),
         costo: int.parse(parts[4].trim()),
         valor: int.parse(parts[5].trim()),

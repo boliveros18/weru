@@ -15,6 +15,18 @@ class ActividadProvider {
     );
   }
 
+  Future<Actividad> getItemById(int id) async {
+    final List<Map<String, dynamic>> items = await db.query(
+      'Actividad',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+    if (items.isEmpty) {
+      throw Exception('Item de Actividad no encontrado!');
+    }
+    return Actividad.fromMap(items.first);
+  }
+
   Future<List<Actividad>> getAll() async {
     final List<Map<String, Object?>> maps = await db.query('Actividad');
     return maps.map((map) {

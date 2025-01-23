@@ -6,7 +6,7 @@ class Cliente {
   final String telefono;
   final String celular;
   final int idTipoCliente;
-  final String idTipoDocumento;
+  final int idTipoDocumento;
   final String numDocumento;
   final String establecimiento;
   final String contacto;
@@ -47,21 +47,21 @@ class Cliente {
     };
   }
 
-  factory Cliente.fromMap(Map<String, dynamic> map) {
-    return Cliente(
-      id: map['id'] as int,
-      nombre: map['nombre'] as String,
-      direccion: map['direccion'] as String,
-      idCiudad: map['idCiudad'] as int,
-      telefono: map['telefono'] as String,
-      celular: map['celular'] as String,
-      idTipoCliente: map['idTipoCliente'] as int,
-      idTipoDocumento: map['idTipoDocumento'] as String,
-      numDocumento: map['numDocumento'] as String,
-      establecimiento: map['establecimiento'] as String,
-      contacto: map['contacto'] as String,
-      idEstado: map['idEstado'] as int,
-      correo: map['correo'] as String,
+   factory   Cliente.fromMap(Map<String, dynamic> map) {
+    return   Cliente(
+           id: int.tryParse(map['id']?.toString() ?? '') ?? 0,
+      nombre: map['nombre']?.toString() ?? '',
+      direccion: map['direccion']?.toString() ?? '',
+      idCiudad: int.tryParse(map['idCiudad']?.toString() ?? '') ?? 0,
+      telefono: map['telefono']?.toString() ?? '',
+      celular: map['celular']?.toString() ?? '',
+      idTipoCliente: int.tryParse(map['idTipoCliente']?.toString() ?? '') ?? 0,
+      idTipoDocumento: int.tryParse(map['idTipoDocumento']?.toString() ?? '') ?? 0,
+      numDocumento: map['numDocumento']?.toString() ?? '',
+      establecimiento: map['establecimiento']?.toString() ?? '',
+      contacto: map['contacto']?.toString() ?? '',
+      idEstado: int.tryParse(map['idEstado']?.toString() ?? '') ?? 0,
+      correo: map['correo']?.toString() ?? '',
     );
   }
 

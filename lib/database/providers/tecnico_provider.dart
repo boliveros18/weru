@@ -15,6 +15,18 @@ class TecnicoProvider {
     );
   }
 
+  Future<Tecnico> getItemById(int id) async {
+    final List<Map<String, dynamic>> items = await db.query(
+      'Tecnico',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+    if (items.isEmpty) {
+      throw Exception('Item de Tecnico no encontrado!');
+    }
+    return Tecnico.fromMap(items.first);
+  }
+
   Future<List<Tecnico>> getAll() async {
     final List<Map<String, Object?>> maps = await db.query('Tecnico');
     return maps.map((map) {
@@ -28,8 +40,8 @@ class TecnicoProvider {
         clave: map['clave'] as String,
         telefono: map['telefono'] as String,
         celular: map['celular'] as String,
-        latitud: map['latitud'] as double,
-        longitud: map['longitud'] as double,
+        latitud: (map['latitud'] as num).toDouble(),
+        longitud: (map['longitud'] as num).toDouble(),
         androidID: map['androidID'] as String,
         fechaPulso: map['fechaPulso'] as String,
         versionApp: map['versionApp'] as String,

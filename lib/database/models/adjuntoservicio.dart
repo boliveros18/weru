@@ -1,6 +1,6 @@
 class AdjuntoServicio {
   final int id;
-  final String idServicio;
+  final int idServicio;
   final int idTecnico;
   final String titulo;
   final String descripcion;
@@ -24,6 +24,17 @@ class AdjuntoServicio {
       'descripcion': descripcion,
       'tipo': tipo,
     };
+  }
+
+   factory   AdjuntoServicio.fromMap(Map<String, dynamic> map) {
+    return   AdjuntoServicio(
+           id: int.tryParse(map['id']?.toString() ?? '') ?? 0,
+      idServicio: int.tryParse(map['idServicio']?.toString() ?? '') ?? 0,
+      idTecnico: int.tryParse(map['idTecnico']?.toString() ?? '') ?? 0,
+      titulo: map['titulo']?.toString() ?? '',
+      descripcion: map['descripcion']?.toString() ?? '',
+      tipo: map['tipo']?.toString() ?? '',
+    );
   }
 
   @override

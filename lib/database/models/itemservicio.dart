@@ -35,6 +35,20 @@ class ItemServicio {
     };
   }
 
+   factory   ItemServicio.fromMap(Map<String, dynamic> map) {
+    return   ItemServicio(
+           id: int.tryParse(map['id']?.toString() ?? '') ?? 0,
+      idItem: int.tryParse(map['idItem']?.toString() ?? '') ?? 0,
+      idServicio: int.tryParse(map['idServicio']?.toString() ?? '') ?? 0,
+      cantidad: double.tryParse(map['cantidad']?.toString() ?? '') ?? 0.0,
+      costo: int.tryParse(map['costo']?.toString() ?? '') ?? 0,
+      valor: int.tryParse(map['valor']?.toString() ?? '') ?? 0,
+      cantidadReq: double.tryParse(map['cantidadReq']?.toString() ?? '') ?? 0.0,
+      fechaUltimaVez: map['fechaUltimaVez']?.toString() ?? '',
+      vidaUtil: map['vidaUtil']?.toString() ?? '',
+    );
+  }
+
   @override
   String toString() {
     return 'ItemServicio{id: $id, idItem: $idItem, idServicio: $idServicio, cantidad: $cantidad, costo: $costo, valor: $valor, cantidadReq: $cantidadReq, fechaUltimaVez: $fechaUltimaVez, vidaUtil: $vidaUtil}';

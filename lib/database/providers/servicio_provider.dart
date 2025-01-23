@@ -15,6 +15,18 @@ class ServicioProvider {
     );
   }
 
+  Future<Servicio> getItemById(int id) async {
+    final List<Map<String, dynamic>> items = await db.query(
+      'Servicio',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+    if (items.isEmpty) {
+      throw Exception('Item de Servicio no encontrado!');
+    }
+    return Servicio.fromMap(items.first);
+  }
+
   Future<List<Servicio>> getAll() async {
     final List<Map<String, Object?>> maps = await db.query('Servicio');
     return maps.map((map) {
@@ -27,12 +39,8 @@ class ServicioProvider {
         descripcion: map['descripcion'] as String,
         direccion: map['direccion'] as String,
         idCiudad: map['idCiudad'] as int,
-        latitud: (map['latitud'] is int)
-            ? (map['latitud'] as int).toDouble()
-            : map['latitud'] as double,
-        longitud: (map['longitud'] is int)
-            ? (map['longitud'] as int).toDouble()
-            : map['longitud'] as double,
+        latitud: (map['latitud'] as num).toDouble(),
+        longitud: (map['longitud'] as num).toDouble(),
         fechaInicio: map['fechaInicio'] as String,
         fechayhorainicio: map['fechayhorainicio'] as String,
         fechaModificacion: map['fechaModificacion'] as String,

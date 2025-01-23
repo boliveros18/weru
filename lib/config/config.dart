@@ -19,15 +19,15 @@ const String appRibGetMessagesUrlHost = 'nansoft.co:87';
 const String appRibGetMessagesUrlPath =
     '/PruebaWeruC/RibWeb.svc/REST/QueHayNuevo/';
 const String appRibSetMessageReceivedUrlMethod =
-    'http://nansoft.co:87/PruebaWeruC/RibWeb.svc/REST/ReportarMensajeRecibido/';
+    '/PruebaWeruC/RibWeb.svc/REST/ReportarMensajeRecibido/';
 const String appRibSendMessageEntrada =
-    'http://nansoft.co:87/PruebaWeruC/RibWeb.svc/REST/RecibirMensajeStream/';
+    '/PruebaWeruC/RibWeb.svc/REST/RecibirMensajeStream/';
 const String appRibSendMessageSalida =
-    'http://nansoft.co:87/PruebaWeruC/RibWeb.svc/REST/RecibirMensajeStreamSalida/';
+    '/PruebaWeruC/RibWeb.svc/REST/RecibirMensajeStreamSalida/';
 const String appRibDeleteMessagesNewInstall =
-    'http://nansoft.co:87/PruebaWeruC/RibWeb.svc/REST/BorrarMensajesTableta/';
+    '/PruebaWeruC/RibWeb.svc/REST/BorrarMensajesTableta/';
 const String appRibSendImagesUrlMethod =
-    'http://nansoft.co:87/PruebaWeruC/RibWeb.svc/REST/RecibirImagen/';
+    '/PruebaWeruC/RibWeb.svc/REST/RecibirImagen/';
 
 const String appRibSleepTime = '2000';
 const String appRibSleepTimeGPS = '1000';

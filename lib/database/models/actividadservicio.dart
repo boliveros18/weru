@@ -1,7 +1,7 @@
 class ActividadServicio {
   final int id;
   final int idActividad;
-  final String idServicio;
+  final int idServicio;
   final int cantidad;
   final int costo;
   final int valor;
@@ -27,6 +27,18 @@ class ActividadServicio {
       'valor': valor,
       'ejecutada': ejecutada,
     };
+  }
+
+   factory   ActividadServicio.fromMap(Map<String, dynamic> map) {
+    return   ActividadServicio(
+           id: int.tryParse(map['id']?.toString() ?? '') ?? 0,
+      idActividad: int.tryParse(map['idActividad']?.toString() ?? '') ?? 0,
+      idServicio: int.tryParse(map['idServicio']?.toString() ?? '') ?? 0,
+      cantidad: int.tryParse(map['cantidad']?.toString() ?? '') ?? 0,
+      costo: int.tryParse(map['costo']?.toString() ?? '') ?? 0,
+      valor: int.tryParse(map['valor']?.toString() ?? '') ?? 0,
+      ejecutada: int.tryParse(map['ejecutada']?.toString() ?? '') ?? 0,
+    );
   }
 
   @override

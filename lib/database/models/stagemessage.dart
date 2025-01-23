@@ -44,6 +44,23 @@ class StageMessage {
     };
   }
 
+   factory   StageMessage.fromMap(Map<String, dynamic> map) {
+    return   StageMessage(
+           id: int.tryParse(map['id']?.toString() ?? '') ?? 0,
+      Message: map['Message']?.toString() ?? '',
+      MessageFamily: map['MessageFamily']?.toString() ?? '',
+      Address: map['Address']?.toString() ?? '',
+      Action: map['Action']?.toString() ?? '',
+      RetryCount: int.tryParse(map['RetryCount']?.toString() ?? '') ?? 0,
+      Created: DateTime.tryParse(map['Created']?.toString() ?? '') ?? DateTime(0),
+      Updated: DateTime.tryParse(map['Updated']?.toString() ?? '') ?? DateTime(0),
+      Proccesed: int.tryParse(map['Proccesed']?.toString() ?? '') ?? 0,
+      ErrorDescription: map['ErrorDescription']?.toString() ?? '',
+      Error: int.tryParse(map['Error']?.toString() ?? '') ?? 0,
+      BusinessId: map['BusinessId']?.toString() ?? '',
+    );
+  }
+
   @override
   String toString() {
     return 'StageMessage{id: $id, Message: $Message, MessageFamily: $MessageFamily, Address: $Address, Action: $Action, RetryCount: $RetryCount, Created: $Created, Updated: $Updated, Proccesed: $Proccesed, ErrorDescription: $ErrorDescription, Error: $Error, BusinessId: $BusinessId}';

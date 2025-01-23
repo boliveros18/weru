@@ -35,17 +35,17 @@ class Equipo {
     };
   }
 
-  factory Equipo.fromMap(Map<String, dynamic> map) {
-    return Equipo(
-      id: map['id'] as int,
-      serial: map['serial'] as String,
-      nombre: map['nombre'] as String,
-      fechaCompra: map['fechaCompra'] as String,
-      fechaGarantia: map['fechaGarantia'] as String,
-      idModelo: map['idModelo'] as int,
-      idEstadoEquipo: map['idEstadoEquipo'] as int,
-      idProveedor: map['idProveedor'] as int,
-      idCliente: map['idCliente'] as int,
+   factory   Equipo.fromMap(Map<String, dynamic> map) {
+    return   Equipo(
+           id: int.tryParse(map['id']?.toString() ?? '') ?? 0,
+      serial: map['serial']?.toString() ?? '',
+      nombre: map['nombre']?.toString() ?? '',
+      fechaCompra: map['fechaCompra']?.toString() ?? '',
+      fechaGarantia: map['fechaGarantia']?.toString() ?? '',
+      idModelo: int.tryParse(map['idModelo']?.toString() ?? '') ?? 0,
+      idEstadoEquipo: int.tryParse(map['idEstadoEquipo']?.toString() ?? '') ?? 0,
+      idProveedor: int.tryParse(map['idProveedor']?.toString() ?? '') ?? 0,
+      idCliente: int.tryParse(map['idCliente']?.toString() ?? '') ?? 0,
     );
   }
 

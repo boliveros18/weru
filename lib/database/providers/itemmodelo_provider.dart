@@ -4,7 +4,6 @@ import 'package:archive/archive.dart';
 import 'dart:convert';
 
 class ItemModeloProvider {
-
   final Database db;
   ItemModeloProvider({required this.db});
 
@@ -14,6 +13,18 @@ class ItemModeloProvider {
       itemmodelo.toMap(),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
+  }
+
+  Future<ItemModelo> getItemById(int id) async {
+    final List<Map<String, dynamic>> items = await db.query(
+      'ItemModelo',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+    if (items.isEmpty) {
+      throw Exception('Item de ItemModelo no encontrado!');
+    }
+    return ItemModelo.fromMap(items.first);
   }
 
   Future<List<ItemModelo>> getAll() async {
@@ -44,18 +55,18 @@ class ItemModeloProvider {
     );
   }
 
-Future<void> insertInitFile(ArchiveFile file) async {
-  List<int> bytes = file.content;
-  String fileContent = utf8.decode(bytes);
-  List<String> lines = fileContent.split('\n');
+  Future<void> insertInitFile(ArchiveFile file) async {
+    List<int> bytes = file.content;
+    String fileContent = utf8.decode(bytes);
+    List<String> lines = fileContent.split('\n');
     for (var line in lines) {
       if (line.trim().isEmpty) continue;
       List<String> parts = line.split('|');
       ItemModelo itemmodelo = ItemModelo(
-          id: int.parse(parts[0].trim()),
-idItem: int.parse(parts[1].trim()),
-idModelo: int.parse(parts[2].trim()),
-        );
+        id: int.parse(parts[0].trim()),
+        idItem: int.parse(parts[1].trim()),
+        idModelo: int.parse(parts[2].trim()),
+      );
       await db.transaction((database) async {
         await database.insert(
           'ItemModelo',

@@ -1,6 +1,8 @@
 import 'package:http/http.dart' as http;
 import '../config/config.dart';
 import 'package:ftpconnect/ftpconnect.dart';
+import 'package:device_info_plus/device_info_plus.dart';
+import 'package:intl/intl.dart';
 import 'dart:io';
 
 class FTPService {
@@ -14,6 +16,13 @@ class FTPService {
     timeout: 10,
   );
 
+  static Future<String> getDeviceId() async {
+    DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+    AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+    //IosDeviceInfo iOsInfo =  await deviceInfo.iosInfo;
+    return androidInfo.id; //iosInfo.identifierForVendor;
+  }
+
   Future<bool> downloadFile(String remoteFileName, String localFileName) async {
     try {
       await ftpConnect.connect();
@@ -22,16 +31,17 @@ class FTPService {
       print('Archivo descargado: $localFileName');
       await ftpConnect.disconnect();
       return true;
-    } catch (e) {
-      print('Error al descargar el archivo: $e');
+    } catch (e, stackTrace) {
+      print('Error al descargar el archivo: $e, $stackTrace');
       return false;
     }
   }
 
-  static Future<String> getMessages(String id) async {
+  static Future<String> getMessages() async {
+    final idDevice = await getDeviceId();
     final uri = Uri.http(
       appRibGetMessagesUrlHost,
-      appRibGetMessagesUrlPath + id,
+      appRibGetMessagesUrlPath + idDevice,
     );
     final response = await http.get(uri);
     if (response.statusCode == 200) {
@@ -42,31 +52,48 @@ class FTPService {
     }
   }
 
-  static Future<void> setMessageReceived() async {
-    final response =
-        await http.post(Uri.http(appRibSetMessageReceivedUrlMethod));
+  static Future<void> setMessageReceived(String idStageMessage) async {
+    final idDevice = await getDeviceId();
+    final response = await http.get(
+      Uri.http(appRibGetMessagesUrlHost,
+          appRibSetMessageReceivedUrlMethod + idDevice + "/" + idStageMessage),
+    );
     if (response.statusCode == 200) {
-      print('Mensaje recibido reportado');
+      //print('Mensaje recibido reportado: ${idStageMessage}');
     } else {
-      print('Error al reportar mensaje recibido: ${response.statusCode}');
+      print(
+          'Error al reportar mensaje recibido: ${response.statusCode}, ${idStageMessage}');
     }
   }
 
-  static Future<void> sendMessageEntrada(String message) async {
+  static Future<bool> sendMessageEntrada(
+    Map<String, Object?> body,
+    String table,
+  ) async {
+    final idNegocio = DateFormat("yyyyMMddHHmmss").format(DateTime.now());
+    final idDevice = await getDeviceId();
     final response = await http.post(
-      Uri.http(appRibSendMessageEntrada),
-      body: message,
+      Uri.http(appRibGetMessagesUrlHost, appRibSendMessageEntrada),
+      body: {
+        "familiaMensaje": table,
+        "tipoMensaje": "INSERT",
+        "mensaje": body,
+        "keyDispositivo": idDevice,
+        "idNegocio": idNegocio
+      },
     );
     if (response.statusCode == 200) {
       print('Mensaje de entrada enviado');
+      return true;
     } else {
       print('Error al enviar mensaje de entrada: ${response.statusCode}');
+      return false;
     }
   }
 
   static Future<void> sendMessageSalida(String message) async {
     final response = await http.post(
-      Uri.http(appRibSendMessageSalida),
+      Uri.http(appRibGetMessagesUrlHost, appRibSendMessageSalida),
       body: message,
     );
     if (response.statusCode == 200) {
@@ -77,7 +104,8 @@ class FTPService {
   }
 
   static Future<void> deleteMessagesNewInstall() async {
-    final response = await http.post(Uri.http(appRibDeleteMessagesNewInstall));
+    final response = await http.post(
+        Uri.http(appRibGetMessagesUrlHost, appRibDeleteMessagesNewInstall));
     if (response.statusCode == 200) {
       print('Mensajes borrados');
     } else {
@@ -87,7 +115,7 @@ class FTPService {
 
   static Future<void> sendImages(String imagePath) async {
     final response = await http.post(
-      Uri.http(appRibSendImagesUrlMethod),
+      Uri.http(appRibGetMessagesUrlHost, appRibSendImagesUrlMethod),
       body: imagePath,
     );
     if (response.statusCode == 200) {

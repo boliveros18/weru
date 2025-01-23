@@ -15,6 +15,18 @@ class CategoriaIndicadorProvider {
     );
   }
 
+  Future<CategoriaIndicador> getItemById(int id) async {
+    final List<Map<String, dynamic>> items = await db.query(
+      'CategoriaIndicador',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+    if (items.isEmpty) {
+      throw Exception('Item de CategoriaIndicador no encontrado!');
+    }
+    return CategoriaIndicador.fromMap(items.first);
+  }
+
   Future<List<CategoriaIndicador>> getAll() async {
     final List<Map<String, Object?>> maps =
         await db.query('CategoriaIndicador');

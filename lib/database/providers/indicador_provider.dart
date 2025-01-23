@@ -15,6 +15,18 @@ class IndicadorProvider {
     );
   }
 
+  Future<Indicador> getItemById(int id) async {
+    final List<Map<String, dynamic>> items = await db.query(
+      'Indicador',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+    if (items.isEmpty) {
+      throw Exception('Item de Indicador no encontrado!');
+    }
+    return Indicador.fromMap(items.first);
+  }
+
   Future<List<Indicador>> getAll() async {
     final List<Map<String, Object?>> maps = await db.query('Indicador');
     return maps.map((map) {
@@ -22,12 +34,8 @@ class IndicadorProvider {
         id: map['id'] as int,
         idEstadoIndicador: map['idEstadoIndicador'] as int,
         descripcion: map['descripcion'] as String,
-        valorMin: (map['valorMin'] is int)
-            ? (map['valorMin'] as int).toDouble()
-            : map['valorMin'] as double,
-        valorMax: (map['valorMax'] is int)
-            ? (map['valorMax'] as int).toDouble()
-            : map['valorMax'] as double,
+        valorMin: map['valorMin'] as double,
+        valorMax: map['valorMax'] as double,
         tipo: map['tipo'] as String,
         icono: map['icono'] as String,
       );

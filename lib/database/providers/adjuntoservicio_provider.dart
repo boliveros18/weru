@@ -15,12 +15,24 @@ class AdjuntoServicioProvider {
     );
   }
 
+  Future<AdjuntoServicio> getItemById(int id) async {
+    final List<Map<String, dynamic>> items = await db.query(
+      'AdjuntoServicio',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+    if (items.isEmpty) {
+      throw Exception('Item de AdjuntoServicio no encontrado!');
+    }
+    return AdjuntoServicio.fromMap(items.first);
+  }
+
   Future<List<AdjuntoServicio>> getAll() async {
     final List<Map<String, Object?>> maps = await db.query('AdjuntoServicio');
     return maps.map((map) {
       return AdjuntoServicio(
         id: map['id'] as int,
-        idServicio: map['idServicio'] as String,
+        idServicio: map['idServicio'] as int,
         idTecnico: map['idTecnico'] as int,
         titulo: map['titulo'] as String,
         descripcion: map['descripcion'] as String,
@@ -55,7 +67,7 @@ class AdjuntoServicioProvider {
       List<String> parts = line.split('|');
       AdjuntoServicio adjuntoservicio = AdjuntoServicio(
         id: int.parse(parts[0].trim()),
-        idServicio: parts[1].trim(),
+        idServicio: int.parse(parts[1].trim()),
         idTecnico: int.parse(parts[2].trim()),
         titulo: parts[3].trim(),
         descripcion: parts[4].trim(),

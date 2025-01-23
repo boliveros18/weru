@@ -22,7 +22,7 @@ class ClienteProvider {
       whereArgs: [id],
     );
     if (items.isEmpty) {
-      throw Exception('Item no encontrado!');
+      throw Exception('Item de Cliente no encontrado!');
     }
     return Cliente.fromMap(items.first);
   }
@@ -38,7 +38,7 @@ class ClienteProvider {
         telefono: map['telefono'] as String,
         celular: map['celular'] as String,
         idTipoCliente: map['idTipoCliente'] as int,
-        idTipoDocumento: map['idTipoDocumento'] as String,
+        idTipoDocumento: map['idTipoDocumento'] as int,
         numDocumento: map['numDocumento'] as String,
         establecimiento: map['establecimiento'] as String,
         contacto: map['contacto'] as String,
@@ -80,7 +80,7 @@ class ClienteProvider {
         telefono: parts[4].trim(),
         celular: parts[5].trim(),
         idTipoCliente: int.parse(parts[6].trim()),
-        idTipoDocumento: parts[7].trim(),
+        idTipoDocumento: int.parse(parts[7].trim()),
         numDocumento: parts[8].trim(),
         establecimiento: parts[9].trim(),
         contacto: parts[10].trim(),

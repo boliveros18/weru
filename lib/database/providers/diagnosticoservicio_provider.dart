@@ -15,6 +15,18 @@ class DiagnosticoServicioProvider {
     );
   }
 
+  Future<DiagnosticoServicio> getItemById(int id) async {
+    final List<Map<String, dynamic>> items = await db.query(
+      'DiagnosticoServicio',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+    if (items.isEmpty) {
+      throw Exception('Item de DiagnosticoServicio no encontrado!');
+    }
+    return DiagnosticoServicio.fromMap(items.first);
+  }
+
   Future<List<DiagnosticoServicio>> getAll() async {
     final List<Map<String, Object?>> maps =
         await db.query('DiagnosticoServicio');

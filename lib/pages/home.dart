@@ -13,12 +13,12 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final DatabaseMain database = DatabaseMain(path: localDatabasePath);
+  final DatabaseMain databaseMain = DatabaseMain(path: localDatabasePath);
 
   @override
   void initState() {
     super.initState();
-    database.getServices().then((_) {
+    databaseMain.getServices().then((_) {
       setState(() {});
     });
   }
@@ -74,12 +74,12 @@ class _HomePageState extends State<HomePage> {
                   border: Border(
                     left: BorderSide(
                       color: _getStatusColor(
-                          database.servicesStatus[index].nombre),
-                      width: 10,
+                          databaseMain.servicesStatus[index].nombre),
+                      width: 7,
                     ),
                     bottom: BorderSide(
                       color: _getStatusColor(
-                          database.servicesStatus[index].nombre),
+                          databaseMain.servicesStatus[index].nombre),
                       width: 2,
                     ),
                   ),
@@ -102,36 +102,36 @@ class _HomePageState extends State<HomePage> {
                           children: [
                             TextUi(
                                 text:
-                                    'N° Servicio: ${database.services[index].orden}     '),
+                                    'N° Servicio: ${databaseMain.services[index].orden}     '),
                             TextUi(
                                 text:
-                                    'Radicado: ${database.services[index].radicado}'),
+                                    'Radicado: ${databaseMain.services[index].radicado}'),
                           ],
                         ),
                         TextUi(
                             text:
-                                'Cliente:  ${database.clients[index].nombre}'),
+                                'Cliente:  ${databaseMain.clients[index].nombre}'),
                         TextUi(
                             text:
-                                'Direccion:  ${database.services[index].direccion}'),
+                                'Direccion:  ${databaseMain.services[index].direccion}'),
                         TextUi(
                             text:
-                                'Ubicacion:  ${database.cities[index].nombre}'),
+                                'Ubicacion:  ${databaseMain.cities[index].nombre}'),
                         TextUi(
                             text:
-                                'Equipo:  ${database.equipments[index].nombre}'),
+                                'Equipo:  ${databaseMain.equipments[index].nombre}'),
                         TextUi(
                             text:
-                                'Modelo:  ${database.models[index].descripcion}'),
+                                'Modelo:  ${databaseMain.models[index].descripcion}'),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
                             TextUi(
                                 text:
-                                    'Fecha:  ${database.services[index].fechayhorainicio.split(' ')[0]}     '),
+                                    'Fecha:  ${databaseMain.services[index].fechayhorainicio.split(' ')[0]}     '),
                             TextUi(
                                 text:
-                                    'Hora:  ${database.services[index].fechayhorainicio.split(' ')[1]}'),
+                                    'Hora:  ${databaseMain.services[index].fechayhorainicio.split(' ')[1]}'),
                           ],
                         ),
                         const SizedBox(
@@ -139,11 +139,12 @@ class _HomePageState extends State<HomePage> {
                         ),
                         Container(
                           color: _getStatusColor(
-                              database.servicesStatus[index].nombre),
+                              databaseMain.servicesStatus[index].nombre),
                           child: Padding(
                             padding: const EdgeInsets.fromLTRB(20, 2, 20, 0),
                             child: TextUi(
-                              text: '${database.servicesStatus[index].nombre}',
+                              text:
+                                  '${databaseMain.servicesStatus[index].nombre}',
                               color: Colors.white,
                             ),
                           ),
@@ -157,7 +158,7 @@ class _HomePageState extends State<HomePage> {
             separatorBuilder: (context, index) => const SizedBox(
               height: 2,
             ),
-            itemCount: database.services.length,
+            itemCount: databaseMain.services.length,
             scrollDirection: Axis.vertical,
           ),
         )

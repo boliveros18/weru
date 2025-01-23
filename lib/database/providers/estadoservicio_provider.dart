@@ -22,7 +22,7 @@ class EstadoServicioProvider {
       whereArgs: [id],
     );
     if (items.isEmpty) {
-      throw Exception('Item no encontrado!');
+      throw Exception('Item de EstadoServicio no encontrado!');
     }
     return EstadoServicio.fromMap(items.first);
   }

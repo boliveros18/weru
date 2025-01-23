@@ -14,6 +14,13 @@ class TipoServicio {
     };
   }
 
+   factory   TipoServicio.fromMap(Map<String, dynamic> map) {
+    return   TipoServicio(
+           id: int.tryParse(map['id']?.toString() ?? '') ?? 0,
+      descripcion: map['descripcion']?.toString() ?? '',
+    );
+  }
+
   @override
   String toString() {
     return 'TipoServicio{id: $id, descripcion: $descripcion}';

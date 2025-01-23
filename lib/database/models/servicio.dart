@@ -86,6 +86,37 @@ class Servicio {
     };
   }
 
+   factory   Servicio.fromMap(Map<String, dynamic> map) {
+    return   Servicio(
+           id: int.tryParse(map['id']?.toString() ?? '') ?? 0,
+      idTecnico: int.tryParse(map['idTecnico']?.toString() ?? '') ?? 0,
+      idCliente: int.tryParse(map['idCliente']?.toString() ?? '') ?? 0,
+      idEstadoServicio: int.tryParse(map['idEstadoServicio']?.toString() ?? '') ?? 0,
+      nombre: map['nombre']?.toString() ?? '',
+      descripcion: map['descripcion']?.toString() ?? '',
+      direccion: map['direccion']?.toString() ?? '',
+      idCiudad: int.tryParse(map['idCiudad']?.toString() ?? '') ?? 0,
+      latitud: double.tryParse(map['latitud']?.toString() ?? '') ?? 0.0,
+      longitud: double.tryParse(map['longitud']?.toString() ?? '') ?? 0.0,
+      fechaInicio: map['fechaInicio']?.toString() ?? '',
+      fechayhorainicio: map['fechayhorainicio']?.toString() ?? '',
+      fechaModificacion: map['fechaModificacion']?.toString() ?? '',
+      fechaFin: map['fechaFin']?.toString() ?? '',
+      idEquipo: int.tryParse(map['idEquipo']?.toString() ?? '') ?? 0,
+      idFalla: int.tryParse(map['idFalla']?.toString() ?? '') ?? 0,
+      observacionReporte: map['observacionReporte']?.toString() ?? '',
+      radicado: map['radicado']?.toString() ?? '',
+      idTipoServicio: int.tryParse(map['idTipoServicio']?.toString() ?? '') ?? 0,
+      cedulaFirma: map['cedulaFirma']?.toString() ?? '',
+      nombreFirma: map['nombreFirma']?.toString() ?? '',
+      archivoFirma: map['archivoFirma']?.toString() ?? '',
+      orden: int.tryParse(map['orden']?.toString() ?? '') ?? 0,
+      fechaLlegada: map['fechaLlegada']?.toString() ?? '',
+      comentarios: map['comentarios']?.toString() ?? '',
+      consecutivo: int.tryParse(map['consecutivo']?.toString() ?? '') ?? 0,
+    );
+  }
+
   @override
   String toString() {
     return 'Servicio{id: $id, idTecnico: $idTecnico, idCliente: $idCliente, idEstadoServicio: $idEstadoServicio, nombre: $nombre, descripcion: $descripcion, direccion: $direccion, idCiudad: $idCiudad, latitud: $latitud, longitud: $longitud, fechaInicio: $fechaInicio, fechayhorainicio: $fechayhorainicio, fechaModificacion: $fechaModificacion, fechaFin: $fechaFin, idEquipo: $idEquipo, idFalla: $idFalla, observacionReporte: $observacionReporte, radicado: $radicado, idTipoServicio: $idTipoServicio, cedulaFirma: $cedulaFirma, nombreFirma: $nombreFirma, archivoFirma: $archivoFirma, orden: $orden, fechaLlegada: $fechaLlegada, comentarios: $comentarios, consecutivo: $consecutivo}';
