@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'dart:convert';
 import 'package:provider/provider.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:weru/functions/authentication.dart';
@@ -20,11 +22,13 @@ import 'package:weru/database/models/pulso.dart';
 import 'package:weru/database/providers/tecnico_provider.dart';
 import 'package:weru/database/models/tecnico.dart';
 import 'package:intl/intl.dart';
+import 'package:weru/services/stage_service.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await checkAndRequestLocationPermissions();
   await initializeService();
   startBackgroundService();
   runApp(
@@ -40,25 +44,33 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final session = Provider.of<Session>(context);
+    Session session = Provider.of<Session>(context);
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(fontFamily: 'Poppins'),
-      home: const HomePage(),
-      /*
-      FutureBuilder<bool>(
-        future: Authentication(session.user, session.pass),
-        builder: (context, snapshot) {
-          if (snapshot.data == true) {
-            return const HomePage();
-          } else {
-            return const LoginPage();
-          }
-        },
-      ),
-      */
+      home: FutureBuilder<bool>(
+          future: Authentication(session.user, session.pass),
+          builder: (context, snapshot) {
+            if (snapshot.hasData && snapshot.data == true) {
+              return HomePage();
+            }
+            return LoginPage();
+          }),
     );
+  }
+}
+
+Future<void> checkAndRequestLocationPermissions() async {
+  LocationPermission permission = await Geolocator.checkPermission();
+  if (permission == LocationPermission.denied) {
+    permission = await Geolocator.requestPermission();
+  }
+
+  if (permission == LocationPermission.deniedForever) {
+    print('Permissions are permanently denied. Cannot request permissions.');
+  } else if (permission == LocationPermission.denied) {
+    print('Permissions are denied.');
   }
 }
 
@@ -103,11 +115,32 @@ void onStart(ServiceInstance service) async {
     service.stopSelf();
     print("Background process is now stopped");
   });
-  Database database = await DatabaseMain(path: localDatabasePath).onCreate();
-  LocationPermission permission;
-  bool internet = false;
 
-  Timer.periodic(Duration(seconds: 5), (timer) async {
+  bool internet = false;
+  Database database =
+      await DatabaseMain(path: await getLocalDatabasePath()).onCreate();
+
+  LocationSettings locationSettings;
+  if (Platform.isAndroid) {
+    locationSettings = AndroidSettings(
+      accuracy: LocationAccuracy.high,
+      distanceFilter: 10,
+      forceLocationManager: false,
+      intervalDuration: const Duration(seconds: 5),
+    );
+  } else if (Platform.isIOS) {
+    locationSettings = AppleSettings(
+      accuracy: LocationAccuracy.best,
+      activityType: ActivityType.other,
+      distanceFilter: 10,
+      pauseLocationUpdatesAutomatically: false,
+    );
+  } else {
+    print('Plataforma no soportada para obtener ubicaciones.');
+    return;
+  }
+
+  Timer.periodic(Duration(seconds: 30), (timer) async {
     final List<ConnectivityResult> connectivityResult =
         await (Connectivity().checkConnectivity());
     if (connectivityResult.contains(ConnectivityResult.mobile) ||
@@ -117,70 +150,63 @@ void onStart(ServiceInstance service) async {
       internet = false;
     }
 
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        print('Location permissions are denied');
-        return;
-      }
-    }
-    if (permission == LocationPermission.deniedForever) {
-      print(
-          'Location permissions are permanently denied, we cannot request permissions.');
-      return;
-    }
-    Position position = await Geolocator.getCurrentPosition();
+    Position position = await Geolocator.getCurrentPosition(
+      locationSettings: locationSettings,
+    );
     final double latitud = position.latitude;
     final double longitud = position.longitude;
     final String fechaPulso =
         DateFormat("MMM dd yyyy  h:mma").format(DateTime.now());
-    List<Tecnico> technicians = await TecnicoProvider(db: database).getAll();
-    Map<String, Object?> technician = technicians[0].toMap();
-    technician['latitud'] = latitud;
-    technician['longitud'] = longitud;
-    technician['fechaPulso'] = fechaPulso;
-    Tecnico updated = Tecnico.fromMap(technician);
-    TecnicoProvider(db: database).insert(updated);
 
-    if (internet) {
-      try {
-        String message = await FTPService.getMessages();
-        if (message.isNotEmpty) {
-          final data = await responseStageMessageXMLtoJSON(message);
-          await insertStageMessageListDataToSqflite(data, database);
+    if (!Directory(await getLocalDatabasePathFile()).existsSync()) {
+      List<Tecnico> technicians = await TecnicoProvider(db: database).getAll();
+      if (technicians.isNotEmpty) {
+        Map<String, Object?> technician = technicians[0].toMap();
+        technician['latitud'] = latitud;
+        technician['longitud'] = longitud;
+        technician['fechaPulso'] = fechaPulso;
+        Tecnico updated = Tecnico.fromMap(technician);
+        TecnicoProvider(db: database).insert(updated);
 
-          List<Pulso> pulses = await PulsoProvider(db: database).getAll();
-          if (pulses.isNotEmpty) {
-            for (final pulse in pulses) {
-              technician['latitud'] = pulse.latitud;
-              technician['longitud'] = pulse.longitud;
-              technician['fechaPulso'] = pulse.fechaPulso;
-              //Crear una tabla manual en weru.db llamada Pulso
-              /*
-              bool sended =
-                  await FTPService.sendMessageEntrada(technician, 'Tecnico');
-              if (sended) {
-                await PulsoProvider(db: database).delete(pulse.id);
+        if (internet) {
+          try {
+            String message = await FTPService.getMessages();
+            if (message.isNotEmpty) {
+              final data = await responseStageMessageXMLtoJSON(message);
+              await insertStageMessageListDataToSqflite(data, database);
+
+              List<Pulso> pulses = await PulsoProvider(db: database).getAll();
+              if (pulses.isNotEmpty) {
+                for (final pulse in pulses) {
+                  technician['latitud'] = pulse.latitud;
+                  technician['longitud'] = pulse.longitud;
+                  technician['fechaPulso'] = pulse.fechaPulso;
+                  bool sended = await FTPService.sendMessageEntrada(
+                      jsonEncode(technician), 'Tecnico');
+                  if (sended) {
+                    await PulsoProvider(db: database).delete(pulse.id!);
+                  }
+                }
               }
-              */
+              await FTPService.sendMessageEntrada(
+                  jsonEncode(technician), 'Tecnico');
+              await StageService.sendStageMessages2Server();
             }
+          } catch (e, stackTrace) {
+            print('Error in background process: $e, $stackTrace');
           }
-          // await FTPService.sendMessageEntrada(technician, 'Tecnico');
+        } else {
+          try {
+            await PulsoProvider(db: database).insert(Pulso(
+              idTecnico: updated.id,
+              latitud: latitud,
+              longitud: longitud,
+              fechaPulso: fechaPulso,
+            ));
+          } catch (e) {
+            print('Error al insertar pulso: $e');
+          }
         }
-      } catch (e, stackTrace) {
-        print('Error in background process: $e, $stackTrace');
-      }
-    } else {
-      try {
-        await PulsoProvider(db: database).insert(Pulso(
-          idTecnico: updated.id,
-          latitud: latitud,
-          longitud: longitud,
-          fechaPulso: fechaPulso,
-        ));
-      } catch (e) {
-        print('Error al insertar pulso: $e');
       }
     }
   });

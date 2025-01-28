@@ -2,16 +2,20 @@ import 'package:weru/database/models/ciudad.dart';
 import 'package:weru/database/models/cliente.dart';
 import 'package:weru/database/models/equipo.dart';
 import 'package:weru/database/models/estadoservicio.dart';
+import 'package:weru/database/models/falla.dart';
 import 'package:weru/database/models/modelo.dart';
 import 'package:weru/database/models/servicio.dart';
+import 'package:weru/database/models/tiposervicio.dart';
 import 'package:weru/database/providers/ciudad_provider.dart';
 import 'package:weru/database/providers/cliente_provider.dart';
 import 'package:weru/database/providers/equipo_provider.dart';
 import 'package:weru/database/providers/estadoservicio_provider.dart';
+import 'package:weru/database/providers/falla_provider.dart';
 import 'package:weru/database/providers/modelo_provider.dart';
 import 'package:weru/database/providers/servicio_provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+import 'package:weru/database/providers/tiposervicio_provider.dart';
 
 class DatabaseMain {
   final String path;
@@ -21,6 +25,8 @@ class DatabaseMain {
   List<Ciudad> cities = [];
   List<Modelo> models = [];
   List<EstadoServicio> servicesStatus = [];
+  List<TipoServicio> servicesTypes = [];
+  List<Falla> fails = [];
 
   DatabaseMain({required this.path}) {}
   Future<void> getServices() async {
@@ -48,6 +54,15 @@ class DatabaseMain {
       servicesStatus = await Future.wait(_services.map((service) async {
         return await EstadoServicioProvider(db: database)
             .getItemById(service.idEstadoServicio);
+      }).toList());
+
+      servicesTypes = await Future.wait(_services.map((service) async {
+        return await TipoServicioProvider(db: database)
+            .getItemById(service.idTipoServicio);
+      }).toList());
+
+      fails = await Future.wait(_services.map((service) async {
+        return await FallaProvider(db: database).getItemById(service.idFalla);
       }).toList());
 
       services = _services;

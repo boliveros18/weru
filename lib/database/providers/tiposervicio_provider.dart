@@ -22,7 +22,7 @@ class TipoServicioProvider {
       whereArgs: [id],
     );
     if (items.isEmpty) {
-      throw Exception('Item de TipoServicio no encontrado!');
+      return TipoServicio(id: id, descripcion: "No especificado");
     }
     return TipoServicio.fromMap(items.first);
   }

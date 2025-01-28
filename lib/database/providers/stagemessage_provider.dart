@@ -7,7 +7,11 @@ class StageMessageProvider {
   final Database db;
   StageMessageProvider({required this.db});
 
-  Future<void> insert(StageMessage stagemessage) async {
+  Future<void> insert(String message, String table) async {
+    StageMessage stagemessage = StageMessage(
+      Message: message,
+      MessageFamily: table,
+    );
     await db.insert(
       'StageMessage',
       stagemessage.toMap(),
@@ -34,15 +38,6 @@ class StageMessageProvider {
         id: map['id'] as int,
         Message: map['Message'] as String,
         MessageFamily: map['MessageFamily'] as String,
-        Address: map['Address'] as String,
-        Action: map['Action'] as String,
-        RetryCount: map['RetryCount'] as int,
-        Created: map['Created'] as DateTime,
-        Updated: map['Updated'] as DateTime,
-        Proccesed: map['Proccesed'] as int,
-        ErrorDescription: map['ErrorDescription'] as String,
-        Error: map['Error'] as int,
-        BusinessId: map['BusinessId'] as String,
       );
     }).toList();
   }
@@ -75,15 +70,6 @@ class StageMessageProvider {
         id: int.parse(parts[0].trim()),
         Message: parts[1].trim(),
         MessageFamily: parts[2].trim(),
-        Address: parts[3].trim(),
-        Action: parts[4].trim(),
-        RetryCount: int.parse(parts[5].trim()),
-        Created: DateTime.parse(parts[6].trim()),
-        Updated: DateTime.parse(parts[7].trim()),
-        Proccesed: int.parse(parts[8].trim()),
-        ErrorDescription: parts[9].trim(),
-        Error: int.parse(parts[10].trim()),
-        BusinessId: parts[11].trim(),
       );
       await db.transaction((database) async {
         await database.insert(

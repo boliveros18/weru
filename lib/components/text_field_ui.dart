@@ -4,6 +4,7 @@ class TextFieldUi extends StatelessWidget {
   final String hint;
   final bool prefixIcon;
   final String? prefixIconPath;
+  final int minLines;
   final TextEditingController? controller;
   final Function(String)? onChanged;
 
@@ -12,6 +13,7 @@ class TextFieldUi extends StatelessWidget {
     required this.hint,
     this.prefixIcon = false,
     this.prefixIconPath,
+    this.minLines = 1,
     this.controller,
     this.onChanged,
   });
@@ -29,6 +31,8 @@ class TextFieldUi extends StatelessWidget {
       child: TextField(
         controller: controller,
         onChanged: onChanged,
+        maxLines: null,
+        minLines: minLines,
         decoration: InputDecoration(
           filled: true,
           fillColor: Colors.white,

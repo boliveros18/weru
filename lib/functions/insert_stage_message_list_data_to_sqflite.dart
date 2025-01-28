@@ -28,7 +28,6 @@ import 'package:weru/database/providers/novedad_provider.dart';
 import 'package:weru/database/providers/novedadservicio_provider.dart';
 import 'package:weru/database/providers/registrocamposadicionales_provider.dart';
 import 'package:weru/database/providers/servicio_provider.dart';
-import 'package:weru/database/providers/stagemessage_provider.dart';
 import 'package:weru/database/providers/tecnico_provider.dart';
 import 'package:weru/database/providers/tipocliente_provider.dart';
 import 'package:weru/database/providers/tipoitem_provider.dart';
@@ -65,7 +64,6 @@ import 'package:weru/database/models/novedad.dart';
 import 'package:weru/database/models/novedadservicio.dart';
 import 'package:weru/database/models/registrocamposadicionales.dart';
 import 'package:weru/database/models/servicio.dart';
-import 'package:weru/database/models/stagemessage.dart';
 import 'package:weru/database/models/tecnico.dart';
 import 'package:weru/database/models/tipocliente.dart';
 import 'package:weru/database/models/tipoitem.dart';
@@ -135,8 +133,6 @@ Future<bool> insertStageMessageListDataToSqflite(
               .insert(RegistroCamposAdicionales.fromMap(map)),
       'Servicio': (map) =>
           ServicioProvider(db: database).insert(Servicio.fromMap(map)),
-      'StageMessage': (map) =>
-          StageMessageProvider(db: database).insert(StageMessage.fromMap(map)),
       'Tecnico': (map) =>
           TecnicoProvider(db: database).insert(Tecnico.fromMap(map)),
       'TipoCliente': (map) =>

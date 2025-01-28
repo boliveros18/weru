@@ -22,7 +22,7 @@ class FallaProvider {
       whereArgs: [id],
     );
     if (items.isEmpty) {
-      throw Exception('Item de Falla no encontrado!');
+      return Falla(id: id, descripcion: "No especificado", estado: 1);
     }
     return Falla.fromMap(items.first);
   }

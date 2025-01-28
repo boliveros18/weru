@@ -1,9 +1,15 @@
 import 'package:weru/components/app_bar_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:weru/components/progress_indicator_ui.dart';
 import 'package:weru/components/text_ui.dart';
 import 'package:weru/config/config.dart';
 import 'package:weru/database/main.dart';
+import 'package:weru/pages/menu.dart';
+import 'package:weru/pages/service.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:weru/provider/session.dart';
+import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -13,26 +19,41 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final DatabaseMain databaseMain = DatabaseMain(path: localDatabasePath);
+  late DatabaseMain databaseMain;
+  late Session session;
+  bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    databaseMain.getServices().then((_) {
-      setState(() {});
+    initializeDatabase();
+    session = Provider.of<Session>(context, listen: false);
+  }
+
+  Future<void> initializeDatabase() async {
+    databaseMain = DatabaseMain(path: await getLocalDatabasePath());
+    await databaseMain.getServices();
+    setState(() {
+      isLoading = false;
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    if (isLoading) {
+      return const Scaffold(
+        body: Center(
+          child: ProgressIndicatorUi(),
+        ),
+      );
+    }
     return Scaffold(
-      appBar: const AppBarUi(
+      appBar: AppBarUi(
         header: "Servicios",
         prefixIcon: true,
         prefixIconHeight: 32,
         prefixIconWidth: 32,
         prefixIconPath: "assets/icon/icon.svg",
-        leading: false,
         centerTitle: false,
         menuIcon: true,
       ),
@@ -65,103 +86,125 @@ class _HomePageState extends State<HomePage> {
           height: MediaQuery.of(context).size.height - 85,
           child: ListView.separated(
             itemBuilder: (context, index) {
+              final service = databaseMain.services[index];
+              final client = databaseMain.clients[index];
+              final city = databaseMain.cities[index];
+              final equipment = databaseMain.equipments[index];
+              final model = databaseMain.models[index];
+              final status = databaseMain.servicesStatus[index];
+              final dateAndTime = service.fechayhorainicio.split(' ');
+              final address = "${service.direccion}${city.nombre}";
+              final encodedAddress = Uri.encodeComponent(address);
+              final googleMapsUrl =
+                  "https://www.google.com/maps/search/?api=1&query=$encodedAddress";
+              final statusColor = _getStatusColor(status.nombre);
+
               return Container(
                 height: 161,
                 width: MediaQuery.of(context).size.width,
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(0),
+                  borderRadius: BorderRadius.zero,
                   border: Border(
-                    left: BorderSide(
-                      color: _getStatusColor(
-                          databaseMain.servicesStatus[index].nombre),
-                      width: 7,
-                    ),
-                    bottom: BorderSide(
-                      color: _getStatusColor(
-                          databaseMain.servicesStatus[index].nombre),
-                      width: 2,
-                    ),
+                    left: BorderSide(color: statusColor, width: 7),
+                    bottom: BorderSide(color: statusColor, width: 2),
                   ),
                 ),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    const SizedBox(width: 20),
-                    SvgPicture.asset(
-                      "assets/icons/google-maps.svg",
-                      width: 40,
-                      height: 40,
+                    InkWell(
+                      onTap: () async {
+                        if (await canLaunchUrl(Uri.parse(googleMapsUrl))) {
+                          await launchUrl(Uri.parse(googleMapsUrl),
+                              mode: LaunchMode.externalApplication);
+                        } else {
+                          print("No se pudo abrir Google Maps");
+                        }
+                      },
+                      child: Row(
+                        children: [
+                          const SizedBox(width: 20),
+                          SvgPicture.asset(
+                            "assets/icons/google-maps.svg",
+                            width: 40,
+                            height: 40,
+                          ),
+                          const SizedBox(width: 20),
+                        ],
+                      ),
                     ),
-                    const SizedBox(width: 20),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            TextUi(
-                                text:
-                                    'N° Servicio: ${databaseMain.services[index].orden}     '),
-                            TextUi(
-                                text:
-                                    'Radicado: ${databaseMain.services[index].radicado}'),
-                          ],
-                        ),
-                        TextUi(
-                            text:
-                                'Cliente:  ${databaseMain.clients[index].nombre}'),
-                        TextUi(
-                            text:
-                                'Direccion:  ${databaseMain.services[index].direccion}'),
-                        TextUi(
-                            text:
-                                'Ubicacion:  ${databaseMain.cities[index].nombre}'),
-                        TextUi(
-                            text:
-                                'Equipo:  ${databaseMain.equipments[index].nombre}'),
-                        TextUi(
-                            text:
-                                'Modelo:  ${databaseMain.models[index].descripcion}'),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            TextUi(
-                                text:
-                                    'Fecha:  ${databaseMain.services[index].fechayhorainicio.split(' ')[0]}     '),
-                            TextUi(
-                                text:
-                                    'Hora:  ${databaseMain.services[index].fechayhorainicio.split(' ')[1]}'),
-                          ],
-                        ),
-                        const SizedBox(
-                          height: 5,
-                        ),
-                        Container(
-                          color: _getStatusColor(
-                              databaseMain.servicesStatus[index].nombre),
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(20, 2, 20, 0),
-                            child: TextUi(
-                              text:
-                                  '${databaseMain.servicesStatus[index].nombre}',
-                              color: Colors.white,
+                    InkWell(
+                      onTap: () async {
+                        await session.setIndexService(index);
+                        if (databaseMain.services[index].idEstadoServicio ==
+                                10 ||
+                            databaseMain.services[index].idEstadoServicio ==
+                                2) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => ServicePage()),
+                          ).then((value) async => {
+                                await databaseMain.getServices(),
+                                setState(() {})
+                              });
+                        } else if (databaseMain
+                                    .services[index].idEstadoServicio ==
+                                3 ||
+                            databaseMain.services[index].idEstadoServicio ==
+                                4) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => MenuPage()),
+                          ).then((value) async => {
+                                await databaseMain.getServices(),
+                                setState(() {})
+                              });
+                        }
+                      },
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              TextUi(text: 'N° Servicio: ${service.orden}    '),
+                              TextUi(text: 'Radicado: ${service.radicado}'),
+                            ],
+                          ),
+                          TextUi(text: 'Cliente: ${client.nombre}'),
+                          TextUi(text: 'Dirección: ${service.direccion}'),
+                          TextUi(text: 'Ubicación: ${city.nombre}'),
+                          TextUi(text: 'Equipo: ${equipment.nombre}'),
+                          TextUi(text: 'Modelo: ${model.descripcion}'),
+                          Row(
+                            children: [
+                              TextUi(text: 'Fecha: ${dateAndTime[0]}'),
+                              const SizedBox(width: 8),
+                              TextUi(text: 'Hora: ${dateAndTime[1]}'),
+                            ],
+                          ),
+                          const SizedBox(height: 5),
+                          Container(
+                            color: statusColor,
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(20, 2, 20, 0),
+                              child: TextUi(
+                                  text: status.nombre,
+                                  color: Colors.white,
+                                  main: true),
                             ),
                           ),
-                        )
-                      ],
-                    )
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               );
             },
-            separatorBuilder: (context, index) => const SizedBox(
-              height: 2,
-            ),
+            separatorBuilder: (context, index) => const SizedBox(height: 2),
             itemCount: databaseMain.services.length,
-            scrollDirection: Axis.vertical,
           ),
-        )
+        ),
       ],
     );
   }
@@ -170,9 +213,9 @@ class _HomePageState extends State<HomePage> {
 Color _getStatusColor(String status) {
   switch (status) {
     case "Por asignar":
-      return const Color.fromARGB(255, 0, 45, 168);
-    case "Por ejecutar":
       return const Color(0xFF4CAF50);
+    case "Por ejecutar":
+      return const Color.fromARGB(255, 0, 45, 168);
     case "En ejecucion":
       return const Color(0xFFFFC107);
     case "Con novedad":

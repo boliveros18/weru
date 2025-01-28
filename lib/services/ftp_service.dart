@@ -18,9 +18,15 @@ class FTPService {
 
   static Future<String> getDeviceId() async {
     DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-    AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
-    //IosDeviceInfo iOsInfo =  await deviceInfo.iosInfo;
-    return androidInfo.id; //iosInfo.identifierForVendor;
+    late String id;
+    if (Platform.isAndroid) {
+      AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+      id = androidInfo.id;
+    } else if (Platform.isIOS) {
+      IosDeviceInfo iOsInfo = await deviceInfo.iosInfo;
+      id = iOsInfo.identifierForVendor ?? '';
+    }
+    return id;
   }
 
   Future<bool> downloadFile(String remoteFileName, String localFileName) async {
@@ -58,32 +64,37 @@ class FTPService {
       Uri.http(appRibGetMessagesUrlHost,
           appRibSetMessageReceivedUrlMethod + idDevice + "/" + idStageMessage),
     );
-    if (response.statusCode == 200) {
-      //print('Mensaje recibido reportado: ${idStageMessage}');
-    } else {
+    if (response.statusCode != 200) {
       print(
           'Error al reportar mensaje recibido: ${response.statusCode}, ${idStageMessage}');
     }
   }
 
   static Future<bool> sendMessageEntrada(
-    Map<String, Object?> body,
+    String body,
     String table,
   ) async {
     final idNegocio = DateFormat("yyyyMMddHHmmss").format(DateTime.now());
     final idDevice = await getDeviceId();
+    final Map<String, dynamic> data = {
+      "familiaMensaje": table,
+      "tipoMensaje": "INSERT",
+      "mensaje": body,
+      "keyDispositivo": idDevice,
+      "idNegocio": idNegocio
+    };
+    final formData = data.entries.map((e) {
+      return '${Uri.encodeQueryComponent(e.key)}=${Uri.encodeQueryComponent(e.value.toString())}';
+    }).join('&');
+
     final response = await http.post(
       Uri.http(appRibGetMessagesUrlHost, appRibSendMessageEntrada),
-      body: {
-        "familiaMensaje": table,
-        "tipoMensaje": "INSERT",
-        "mensaje": body,
-        "keyDispositivo": idDevice,
-        "idNegocio": idNegocio
-      },
+      headers: {"Content-Type": "text/plain"},
+      body: formData,
     );
+
     if (response.statusCode == 200) {
-      print('Mensaje de entrada enviado');
+      //print('Mensaje de entrada enviado: ${response.body}');  validar con <?xml version="1.0" encoding="utf-8"?><RecibirMensajeStreamResponse xmlns="http://tempuri.org/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><RecibirMensajeStreamResult><Mensaje>Mensaje procesado</Mensaje><IdEvento>0</IdEvento></RecibirMensajeStreamResult></RecibirMensajeStreamResponse>
       return true;
     } else {
       print('Error al enviar mensaje de entrada: ${response.statusCode}');

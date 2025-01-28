@@ -11,15 +11,16 @@ import 'package:weru/functions/response_stage_message_xml_to_json.dart';
 import 'package:weru/functions/insert_master_file_in_sqflite.dart';
 import 'package:weru/functions/insert_stage_message_list_data_to_sqflite.dart';
 import 'package:weru/functions/authentication.dart';
+import 'package:weru/pages/home.dart';
 import 'package:weru/provider/session.dart';
 import 'package:weru/permission_request.dart';
 import 'package:weru/components/text_field_ui.dart';
 import 'package:weru/components/dialog_ui.dart';
 import 'package:weru/components/progress_indicator_ui.dart';
 import 'package:weru/services/ftp_service.dart';
-import 'package:provider/provider.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:provider/provider.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
@@ -42,93 +43,11 @@ class _LoginPageState extends State<LoginPage> {
   TextEditingController passController = TextEditingController();
   late Database database;
 
-  void updatePermissionStatus(bool granted) {
-    setState(() {
-      permissionsGranted = granted;
-    });
-  }
-
-  Future<void> downloadAndUnzipMaster(String value) async {
-    isLoading = true;
-    master =
-        true; // await ftpService.downloadFile('${pathFTPS}' + value + '.zip', localFilePath);
-    isLoading = false;
-    if (master) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Archivo master descargado!")),
-      );
-      final input = InputFileStream(await localFilePath(value));
-      final archive = ZipDecoder().decodeStream(input);
-      for (final file in archive) {
-        if (file.isFile) {
-          try {
-            final output =
-                OutputFileStream('${localDirectoryPath}/${file.name}');
-            output.writeStream(file.getContent()!);
-            insertMasterFileInSqflite(file, database);
-            await file.close();
-          } catch (e, stackTrace) {
-            print('Error in file:${e}, $stackTrace');
-          }
-        } else {
-          try {
-            await Directory('${localDirectoryPath}/${file.name}')
-                .create(recursive: true);
-          } catch (e, stackTrace) {
-            print('Error in directory:${e}, $stackTrace');
-          }
-        }
-      }
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Nit errado")),
-      );
-    }
-  }
-
   @override
   void initState() {
     super.initState();
     session = Provider.of<Session>(context, listen: false);
     _initializeApp();
-  }
-
-  Future<void> _initializeApp() async {
-    await currentPosition();
-    database = await DatabaseMain(path: localDatabasePath).onCreate();
-    timer = Timer.periodic(Duration(seconds: 5), (timer) async {
-      try {
-        String response = await FTPService.getMessages();
-        if (response.isEmpty) {
-          return;
-        }
-        final data = await responseStageMessageXMLtoJSON(response);
-        if (session.user.isEmpty &&
-            data['Tecnico'] != null &&
-            data['Tecnico']?[0]['usuario']?.toString().isNotEmpty == true) {
-          bool insert =
-              await insertStageMessageListDataToSqflite(data, database);
-          if (insert) {
-            session.user = data['Tecnico']?[0]['usuario'];
-            session.pass = data['Tecnico']?[0]['clave'];
-            userController.text = session.user;
-            passController.text = session.pass;
-            Future.delayed(Duration.zero, () {
-              DialogUi.show(
-                context: context,
-                title:
-                    "Se descargaron tus servicios y credenciales. Accede a tu cuenta!",
-                textField: false,
-                onConfirm: (value) async {},
-              );
-            });
-          }
-        }
-      } catch (e, stackTrace) {
-        print('Error in _initializeApp: $e, $stackTrace');
-      }
-    });
-    isTimerInitialized = true;
   }
 
   @override
@@ -153,14 +72,14 @@ class _LoginPageState extends State<LoginPage> {
             setState(() {});
             DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
             AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
-            //IosDeviceInfo iOsInfo =  await deviceInfo.iosInfo;
+            IosDeviceInfo iOsInfo = await deviceInfo.iosInfo;
             await downloadAndUnzipMaster(value);
             Navigator.of(context).pop();
             (Future.delayed(Duration.zero, () {
               DialogUi.show(
                 context: context,
                 title:
-                    "Este es el id del dispositivo: ${androidInfo.id}", //iosInfo.identifierForVendor;
+                    "Este es el id del dispositivo: ${Platform.isAndroid ? androidInfo.id : iOsInfo.identifierForVendor}",
                 textField: false,
                 onConfirm: (value) async {},
               );
@@ -223,7 +142,7 @@ class _LoginPageState extends State<LoginPage> {
                         bool validation = await Authentication(
                             userController.text, passController.text);
                         if (validation) {
-                          session.login();
+                          await session.login();
                         } else {
                           (Future.delayed(Duration.zero, () {
                             DialogUi.show(
@@ -245,11 +164,112 @@ class _LoginPageState extends State<LoginPage> {
       ),
     );
   }
+
+  void updatePermissionStatus(bool granted) {
+    setState(() {
+      permissionsGranted = granted;
+    });
+  }
+
+  Future<void> downloadAndUnzipMaster(String value) async {
+    isLoading = true;
+    master =
+        true; // await ftpService.downloadFile('${pathFTPS}' + value + '.zip', localFilePath);
+    isLoading = false;
+    if (master) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Archivo master descargado!")),
+      );
+      final input = InputFileStream(await getLocalMasterPath(value));
+      final archive = ZipDecoder().decodeStream(input);
+      for (final file in archive) {
+        if (file.isFile) {
+          try {
+            final output =
+                OutputFileStream('${localDirectoryPath}/${file.name}');
+            output.writeStream(file.getContent()!);
+            insertMasterFileInSqflite(file, database);
+            await file.close();
+          } catch (e, stackTrace) {
+            print('Error in file:${e}, $stackTrace');
+          }
+        } else {
+          try {
+            await Directory('${localDirectoryPath}/${file.name}')
+                .create(recursive: true);
+          } catch (e, stackTrace) {
+            print('Error in directory:${e}, $stackTrace');
+          }
+        }
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Nit errado")),
+      );
+    }
+  }
+
+  Future<void> _initializeApp() async {
+    await currentPosition();
+    database =
+        await DatabaseMain(path: await getLocalDatabasePath()).onCreate();
+    timer = Timer.periodic(Duration(seconds: 2), (timer) async {
+      try {
+        String response = await FTPService.getMessages();
+        if (response.isEmpty) {
+          return;
+        }
+        final data = await responseStageMessageXMLtoJSON(response);
+        if (session.user.isEmpty &&
+            data['Tecnico'] != null &&
+            data['Tecnico']?[0]['usuario']?.toString().isNotEmpty == true) {
+          bool insert =
+              await insertStageMessageListDataToSqflite(data, database);
+          if (insert) {
+            session.user = data['Tecnico']?[0]['usuario'];
+            session.pass = data['Tecnico']?[0]['clave'];
+            userController.text = session.user;
+            passController.text = session.pass;
+            Future.delayed(Duration.zero, () {
+              DialogUi.show(
+                context: context,
+                title:
+                    "Se descargaron tus servicios y credenciales. Accede a tu cuenta!",
+                textField: false,
+                onConfirm: (value) async {},
+              );
+            });
+          }
+        }
+      } catch (e, stackTrace) {
+        print('Error in _initializeApp: $e, $stackTrace');
+      }
+    });
+    isTimerInitialized = true;
+  }
 }
 
 Future<Position> currentPosition() async {
   bool serviceEnabled;
   LocationPermission permission;
+
+  late LocationSettings locationSettings;
+  if (Platform.isAndroid) {
+    locationSettings = AndroidSettings(
+      accuracy: LocationAccuracy.high,
+      distanceFilter: 10,
+      forceLocationManager: false,
+      intervalDuration: const Duration(seconds: 5),
+    );
+  }
+  if (Platform.isIOS) {
+    locationSettings = AppleSettings(
+      accuracy: LocationAccuracy.best,
+      activityType: ActivityType.other,
+      distanceFilter: 10,
+      pauseLocationUpdatesAutomatically: false,
+    );
+  }
 
   serviceEnabled = await Geolocator.isLocationServiceEnabled();
   if (!serviceEnabled) {
@@ -270,7 +290,11 @@ Future<Position> currentPosition() async {
         'Location permissions are permanently denied, we cannot request permissions.');
   }
 
-  return await Geolocator.getCurrentPosition();
+  Position position = await Geolocator.getCurrentPosition(
+    locationSettings: locationSettings,
+  );
+
+  return position;
 }
 
 Future<void> _showLocationServiceDialog() async {

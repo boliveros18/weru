@@ -510,3 +510,10 @@
 </ArrayOfStageMessage>
 
 
+{
+        "familiaMensaje": "Tecnico",
+        "tipoMensaje": "INSERT",
+        "mensaje": { "id":79, "cedula":"1234567865", "nombre":"TECNICO PRUEBA FLUTER", "idProveedor":1, "idEstadoTecnico":1, "clave":"1234", "telefono":"3007654322", "celular":"30012345", "latitud":"0.000000000000000", "longitud":"0.000000000000000", "usuario":"Tec21", "androidID":"OPR1.170623.032", "fechaPulso":"Jan 15 2025  9:01AM", "versionApp":" " },
+        "keyDispositivo": "OPR1.170623.032",
+        "idNegocio": "20250123144512"
+      }
