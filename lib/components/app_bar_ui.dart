@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:weru/pages/home.dart';
 import 'package:weru/provider/session.dart';
 import 'package:provider/provider.dart';
 
@@ -54,13 +53,24 @@ class _AppBarUiState extends State<AppBarUi> {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      title: Text(
-        widget.header,
-        style: const TextStyle(
-          color: Colors.black,
-          fontSize: 18,
-          fontWeight: FontWeight.normal,
-        ),
+      title: Row(
+        children: [
+          if (widget.prefixIcon)
+            SvgPicture.asset(
+              widget.prefixIconPath,
+              width: widget.prefixIconWidth,
+              height: widget.prefixIconHeight,
+            ),
+          if (widget.prefixIcon) const SizedBox(width: 10),
+          Text(
+            widget.header,
+            style: const TextStyle(
+              color: Colors.black,
+              fontSize: 18,
+              fontWeight: FontWeight.normal,
+            ),
+          ),
+        ],
       ),
       backgroundColor: Colors.white,
       elevation: 0.0,

@@ -11,7 +11,6 @@ import 'package:weru/functions/response_stage_message_xml_to_json.dart';
 import 'package:weru/functions/insert_master_file_in_sqflite.dart';
 import 'package:weru/functions/insert_stage_message_list_data_to_sqflite.dart';
 import 'package:weru/functions/authentication.dart';
-import 'package:weru/pages/home.dart';
 import 'package:weru/provider/session.dart';
 import 'package:weru/permission_request.dart';
 import 'package:weru/components/text_field_ui.dart';

@@ -1,22 +1,24 @@
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:weru/components/app_bar_ui.dart';
 import 'package:flutter/material.dart';
-import 'package:weru/components/button_ui.dart';
 import 'package:weru/components/divider_ui.dart';
 import 'package:weru/components/progress_indicator_ui.dart';
-import 'package:weru/components/text_field_ui.dart';
+import 'package:weru/components/dropdown_menu_ui.dart';
 import 'package:weru/components/text_ui.dart';
 import 'package:weru/config/config.dart';
 import 'package:weru/database/main.dart';
+import 'package:weru/database/models/novedad.dart';
+import 'package:weru/database/models/novedadservicio.dart';
 import 'package:weru/database/models/servicio.dart';
+import 'package:weru/database/providers/novedad_provider.dart';
+import 'package:weru/database/providers/novedadservicio_provider.dart';
 import 'package:weru/database/providers/servicio_provider.dart';
 import 'package:weru/functions/on_connection_validation_stage.dart';
-import 'dart:convert';
-import 'package:weru/pages/home.dart';
-import 'package:weru/pages/menu.dart';
 import 'package:weru/provider/session.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:dropdown_textfield/dropdown_textfield.dart';
+import 'dart:convert';
 
 class NewsPage extends StatefulWidget {
   const NewsPage({super.key});
@@ -33,6 +35,9 @@ class _NewsPageState extends State<NewsPage> {
   bool isLoading = true;
   late ServicioProvider servicioProvider;
   late Servicio servicio;
+  late Database database;
+  late List<Novedad> novedades;
+  late List<NovedadServicio> novedadesServicio;
 
   @override
   void initState() {
@@ -44,13 +49,17 @@ class _NewsPageState extends State<NewsPage> {
 
   Future<void> initializeDatabase() async {
     databaseMain = DatabaseMain(path: await getLocalDatabasePath());
-    Database database =
+    database =
         await DatabaseMain(path: await getLocalDatabasePath()).onCreate();
     await databaseMain.getServices();
+    await databaseMain.getNews();
+    novedades = await NovedadProvider(db: database).getAll();
+    novedadesServicio = await NovedadServicioProvider(db: database).getAll();
+    servicio = databaseMain.services[index];
     setState(() {
       isLoading = false;
       servicioProvider = ServicioProvider(db: database);
-      statusServiceId = databaseMain.services[index].idEstadoServicio;
+      statusServiceId = servicio.idEstadoServicio;
     });
   }
 
@@ -66,14 +75,11 @@ class _NewsPageState extends State<NewsPage> {
     return Scaffold(
       appBar: const AppBarUi(
         header: "Novedades",
-        prefixIcon: true,
-        prefixIconHeight: 15,
-        prefixIconWidth: 15,
-        prefixIconPath: "assets/icons/chevron-left-solid.svg",
-        centerTitle: false,
+        centerTitle: true,
       ),
       backgroundColor: Colors.white,
       body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
             child: SingleChildScrollView(
@@ -81,7 +87,7 @@ class _NewsPageState extends State<NewsPage> {
                 padding: const EdgeInsets.only(left: 20, right: 20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [serviceEndedSection()],
+                  children: [Section()],
                 ),
               ),
             ),
@@ -91,56 +97,133 @@ class _NewsPageState extends State<NewsPage> {
     );
   }
 
-  Column serviceEndedSection() {
+  Column Section() {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
             const SizedBox(height: 20),
-            TextFieldUi(
-              hint: "Descripcion",
-              onChanged: (value) => session.user = value,
-              minLines: 5,
+            DropdownMenuUi(
+              list: novedades.map((item) {
+                return DropDownValueModel(
+                  name: item.descripcion,
+                  value: item.id.toString(),
+                );
+              }).toList(),
+              title: "Novedad",
+              onConfirm: (id) async {
+                int long = novedadesServicio.length;
+                bool isEqual = novedadesServicio
+                    .any((_new) => _new.idNovedad == int.parse(id));
+                if (!isEqual) {
+                  NovedadServicio novedadServicio = NovedadServicio(
+                    id: long + 1,
+                    idServicio: servicio.id,
+                    idNovedad: int.parse(id),
+                  );
+                  await NovedadServicioProvider(db: database)
+                      .insert(novedadServicio);
+                  await onConnectionValidationStage(
+                    jsonEncode(novedadServicio.toMap()),
+                    "NovedadServicio",
+                  );
+                  await databaseMain.getNews();
+                  setState(() {});
+                }
+              },
             ),
-            const SizedBox(height: 20),
+            Text("2. Lista de agregados: ",
+                style: TextStyle(fontWeight: FontWeight.w400, fontSize: 16)),
             const SizedBox(height: 10),
-            if (isLoading) const ProgressIndicatorUi()
-          ],
-        ),
-        Row(
-          children: [
-            SizedBox(width: MediaQuery.of(context).size.width / 1.8),
-            Expanded(
-              child: ButtonUi(
-                value: "Enviar",
-                onClicked: () async {
-                  if (statusServiceId == 3) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => MenuPage(),
-                      ),
-                    );
-                  } else {
-                    final Map<String, dynamic> serviceData =
-                        databaseMain.services[index].toMap();
-                    serviceData['idEstadoServicio'] = 3;
-                    final Servicio servicio = Servicio.fromMap(serviceData);
-                    await servicioProvider.insert(servicio);
-                    await onConnectionValidationStage(
-                        jsonEncode(servicio.toMap()), "Servicio");
-                    setState(() {
-                      statusServiceId = servicio.idEstadoServicio;
-                    });
-                  }
-                },
-                color: const Color.fromARGB(255, 244, 177, 54),
-                borderRadius: 0,
-                fontSize: 15,
-              ),
+            Column(
+              children: [
+                Container(
+                  child: SizedBox(
+                      height: MediaQuery.of(context).size.width - 85,
+                      child: ListView.separated(
+                        itemBuilder: (context, index) {
+                          if (index < databaseMain.news.length) {
+                            final _new = databaseMain.news[index];
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      flex: 3,
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          SizedBox(height: 5),
+                                          TextUi(
+                                              text: 'Código: ${_new.id}',
+                                              fontSize: 15),
+                                          TextUi(
+                                              text:
+                                                  'Nombre: ${_new.descripcion}',
+                                              fontSize: 15),
+                                          SizedBox(height: 10),
+                                        ],
+                                      ),
+                                    ),
+                                    SizedBox(
+                                        width:
+                                            MediaQuery.of(context).size.width *
+                                                0.09,
+                                        child: Container(
+                                          width: 30,
+                                          height: 30,
+                                          decoration: BoxDecoration(
+                                            color: Colors.grey[100],
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                          ),
+                                          child: IconButton(
+                                            onPressed: () async {
+                                              try {
+                                                await NovedadServicioProvider(
+                                                        db: database)
+                                                    .deleteByIdNovedad(_new.id);
+                                                await databaseMain.getNews();
+                                                setState(() {});
+                                              } catch (e) {
+                                                print("Error al eliminar: $e");
+                                              }
+                                            },
+                                            icon: SvgPicture.asset(
+                                              "assets/icons/trash-can-regular.svg",
+                                              width: 27,
+                                              height: 27,
+                                              colorFilter: ColorFilter.mode(
+                                                const Color.fromARGB(
+                                                    255, 255, 118, 108),
+                                                BlendMode.srcIn,
+                                              ),
+                                            ),
+                                          ),
+                                        )),
+                                  ],
+                                ),
+                                DividerUi(
+                                  paddingHorizontal: 0,
+                                ),
+                              ],
+                            );
+                          } else {
+                            return Container();
+                          }
+                        },
+                        separatorBuilder: (context, index) =>
+                            const SizedBox(height: 5),
+                        itemCount: databaseMain.news.length,
+                      )),
+                )
+              ],
             ),
+            if (isLoading) const ProgressIndicatorUi()
           ],
         ),
       ],

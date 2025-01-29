@@ -66,11 +66,7 @@ class _ServicePageState extends State<ServicePage> {
     return Scaffold(
       appBar: const AppBarUi(
         header: "Servicio",
-        prefixIcon: true,
-        prefixIconHeight: 15,
-        prefixIconWidth: 15,
-        prefixIconPath: "assets/icons/chevron-left-solid.svg",
-        centerTitle: false,
+        centerTitle: true,
       ),
       backgroundColor: Colors.white,
       body: Column(
@@ -264,7 +260,7 @@ class _ServicePageState extends State<ServicePage> {
           children: [
             Expanded(
               child: ButtonUi(
-                value: statusServiceId == 2 ? "LLEGADA A SITIO" : "INICIO",
+                value: statusServiceId == 2 ? "Llegada a sitio" : "Inicio",
                 onClicked: () async {
                   if (statusServiceId == 3) {
                     Navigator.push(
@@ -286,7 +282,7 @@ class _ServicePageState extends State<ServicePage> {
                     });
                   }
                 },
-                borderRadius: 0,
+                borderRadius: 2,
                 color: statusServiceId == 2
                     ? const Color(0xFF4CAF50)
                     : const Color(0xFF00BCD4),
@@ -295,7 +291,7 @@ class _ServicePageState extends State<ServicePage> {
             SizedBox(width: 30),
             Expanded(
               child: ButtonUi(
-                value: "CANCELAR",
+                value: "Cancelar",
                 onClicked: () async {
                   final Map<String, dynamic> serviceData =
                       databaseMain.services[index].toMap();
@@ -310,7 +306,7 @@ class _ServicePageState extends State<ServicePage> {
                   );
                 },
                 color: Colors.red,
-                borderRadius: 0,
+                borderRadius: 2,
               ),
             ),
           ],

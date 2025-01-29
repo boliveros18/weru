@@ -8,6 +8,7 @@ import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:weru/functions/authentication.dart';
 import 'package:weru/pages/home.dart';
 import 'package:weru/pages/login.dart';
+import 'package:weru/pages/news.dart';
 import 'package:weru/provider/session.dart';
 import 'package:weru/services/ftp_service.dart';
 import 'package:weru/functions/insert_stage_message_list_data_to_sqflite.dart';
@@ -47,9 +48,11 @@ class MyApp extends StatelessWidget {
     Session session = Provider.of<Session>(context);
 
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(fontFamily: 'Poppins'),
-      home: FutureBuilder<bool>(
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(fontFamily: 'Poppins'),
+        home: NewsPage()
+        /*
+      FutureBuilder<bool>(
           future: Authentication(session.user, session.pass),
           builder: (context, snapshot) {
             if (snapshot.hasData && snapshot.data == true) {
@@ -57,7 +60,8 @@ class MyApp extends StatelessWidget {
             }
             return LoginPage();
           }),
-    );
+          */
+        );
   }
 }
 

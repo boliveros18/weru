@@ -1,17 +1,13 @@
 import 'package:sqflite/sqflite.dart';
 import '../models/stagemessage.dart';
-import 'package:archive/archive.dart';
-import 'dart:convert';
 
 class StageMessageProvider {
   final Database db;
   StageMessageProvider({required this.db});
 
   Future<void> insert(String message, String table) async {
-    StageMessage stagemessage = StageMessage(
-      Message: message,
-      MessageFamily: table,
-    );
+    StageMessage stagemessage =
+        StageMessage(Message: message, MessageFamily: table, Action: "INSERT");
     await db.insert(
       'StageMessage',
       stagemessage.toMap(),
@@ -38,6 +34,7 @@ class StageMessageProvider {
         id: map['id'] as int,
         Message: map['Message'] as String,
         MessageFamily: map['MessageFamily'] as String,
+        Action: map['Action'] as String,
       );
     }).toList();
   }
@@ -57,27 +54,5 @@ class StageMessageProvider {
       where: 'id = ?',
       whereArgs: [id],
     );
-  }
-
-  Future<void> insertInitFile(ArchiveFile file) async {
-    List<int> bytes = file.content;
-    String fileContent = utf8.decode(bytes);
-    List<String> lines = fileContent.split('\n');
-    for (var line in lines) {
-      if (line.trim().isEmpty) continue;
-      List<String> parts = line.split('|');
-      StageMessage stagemessage = StageMessage(
-        id: int.parse(parts[0].trim()),
-        Message: parts[1].trim(),
-        MessageFamily: parts[2].trim(),
-      );
-      await db.transaction((database) async {
-        await database.insert(
-          'StageMessage',
-          stagemessage.toMap(),
-          conflictAlgorithm: ConflictAlgorithm.replace,
-        );
-      });
-    }
   }
 }

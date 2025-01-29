@@ -52,11 +52,7 @@ class _MenuPageState extends State<MenuPage> {
     return Scaffold(
       appBar: const AppBarUi(
         header: "Menu",
-        prefixIcon: true,
-        prefixIconHeight: 15,
-        prefixIconWidth: 15,
-        prefixIconPath: "assets/icons/chevron-left-solid.svg",
-        centerTitle: false,
+        centerTitle: true,
       ),
       backgroundColor: Colors.white,
       body: Column(

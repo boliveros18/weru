@@ -4,6 +4,8 @@ import 'package:weru/database/models/equipo.dart';
 import 'package:weru/database/models/estadoservicio.dart';
 import 'package:weru/database/models/falla.dart';
 import 'package:weru/database/models/modelo.dart';
+import 'package:weru/database/models/novedad.dart';
+import 'package:weru/database/models/novedadservicio.dart';
 import 'package:weru/database/models/servicio.dart';
 import 'package:weru/database/models/tiposervicio.dart';
 import 'package:weru/database/providers/ciudad_provider.dart';
@@ -12,6 +14,8 @@ import 'package:weru/database/providers/equipo_provider.dart';
 import 'package:weru/database/providers/estadoservicio_provider.dart';
 import 'package:weru/database/providers/falla_provider.dart';
 import 'package:weru/database/providers/modelo_provider.dart';
+import 'package:weru/database/providers/novedad_provider.dart';
+import 'package:weru/database/providers/novedadservicio_provider.dart';
 import 'package:weru/database/providers/servicio_provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
@@ -27,6 +31,8 @@ class DatabaseMain {
   List<EstadoServicio> servicesStatus = [];
   List<TipoServicio> servicesTypes = [];
   List<Falla> fails = [];
+  List<Novedad> news = [];
+  List<NovedadServicio> newsServices = [];
 
   DatabaseMain({required this.path}) {}
   Future<void> getServices() async {
@@ -68,6 +74,24 @@ class DatabaseMain {
       services = _services;
     } catch (e, stackTrace) {
       print("Error getServices() in main database: $e, $stackTrace");
+    }
+  }
+
+  Future<void> getNews() async {
+    final database = await db;
+    try {
+      final _newsServices =
+          await NovedadServicioProvider(db: database).getAll();
+
+      print(_newsServices.toList());
+
+      news = await Future.wait(_newsServices.map((_new) async {
+        return await NovedadProvider(db: database).getItemById(_new.idNovedad);
+      }).toList());
+
+      newsServices = _newsServices;
+    } catch (e, stackTrace) {
+      print("Error getNews() in main database: $e, $stackTrace");
     }
   }
 
@@ -164,7 +188,7 @@ class DatabaseMain {
       'CREATE TABLE Novedad (id INTEGER PRIMARY KEY, descripcion TEXT, estado INTEGER)',
     );
     await db.execute(
-      'CREATE TABLE NovedadServicio (id INTEGER PRIMARY KEY, idServicio INTEGER, idNovedad INTEGER)',
+      'CREATE TABLE NovedadServicio (id INTEGER PRIMARY, idServicio INTEGER, idNovedad INTEGER)',
     );
     await db.execute(
       'CREATE TABLE RegistroCamposAdicionales (id INTEGER PRIMARY KEY, idCamposAdicionales INTEGER NOT NULL, idRegistro INTEGER NOT NULL, valor INTEGER, nombre INTEGER)',

@@ -213,28 +213,28 @@ class _HomePageState extends State<HomePage> {
 Color _getStatusColor(String status) {
   switch (status) {
     case "Por asignar":
-      return const Color(0xFF4CAF50);
+      return const Color.fromARGB(255, 255, 214, 79);
     case "Por ejecutar":
-      return const Color.fromARGB(255, 0, 45, 168);
+      return const Color(0xff3F51B5);
     case "En ejecucion":
-      return const Color(0xFFFFC107);
+      return const Color(0xffaed581);
     case "Con novedad":
-      return const Color(0xFF2196F3);
+      return const Color(0xffadadad);
     case "Finalizado":
-      return const Color(0xFF8BC34A);
+      return const Color(0xff4caf50);
     case "Anulado":
-      return const Color(0xFFF44336);
+      return const Color(0xffe19800);
     case "Cancelado":
-      return const Color(0xFF9E9E9E);
+      return const Color(0xff008FCD);
     case "Vencido":
-      return const Color(0xFFB71C1C);
+      return const Color(0xffd32f2f);
     case "Fallido":
-      return const Color(0xFF757575);
+      return const Color(0xff008FCD);
     case "En sitio":
-      return const Color(0xFF00BCD4);
+      return const Color(0xff008FCD);
     case "Por Transmitir":
-      return const Color(0xFFFF5722);
+      return const Color(0xff008FCD);
     default:
-      return const Color.fromARGB(255, 0, 45, 168);
+      return const Color(0xff008FCD);
   }
 }

@@ -17,9 +17,9 @@ class NovedadServicio {
     };
   }
 
-   factory   NovedadServicio.fromMap(Map<String, dynamic> map) {
-    return   NovedadServicio(
-           id: int.tryParse(map['id']?.toString() ?? '') ?? 0,
+  factory NovedadServicio.fromMap(Map<String, dynamic> map) {
+    return NovedadServicio(
+      id: int.tryParse(map['id']?.toString() ?? '') ?? 0,
       idServicio: int.tryParse(map['idServicio']?.toString() ?? '') ?? 0,
       idNovedad: int.tryParse(map['idNovedad']?.toString() ?? '') ?? 0,
     );

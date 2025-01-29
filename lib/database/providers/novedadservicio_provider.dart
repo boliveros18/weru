@@ -55,6 +55,14 @@ class NovedadServicioProvider {
     );
   }
 
+  Future<void> deleteByIdNovedad(int id) async {
+    await db.delete(
+      'NovedadServicio',
+      where: 'idNovedad = ?',
+      whereArgs: [id],
+    );
+  }
+
   Future<void> insertInitFile(ArchiveFile file) async {
     List<int> bytes = file.content;
     String fileContent = utf8.decode(bytes);
