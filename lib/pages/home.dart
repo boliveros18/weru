@@ -5,6 +5,7 @@ import 'package:weru/components/progress_indicator_ui.dart';
 import 'package:weru/components/text_ui.dart';
 import 'package:weru/config/config.dart';
 import 'package:weru/database/main.dart';
+import 'package:weru/functions/get_status_color.dart';
 import 'package:weru/pages/menu.dart';
 import 'package:weru/pages/service.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -51,8 +52,8 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBarUi(
         header: "Servicios",
         prefixIcon: true,
-        prefixIconHeight: 32,
-        prefixIconWidth: 32,
+        prefixIconHeight: 34,
+        prefixIconWidth: 34,
         prefixIconPath: "assets/icon/icon.svg",
         centerTitle: false,
         menuIcon: true,
@@ -97,7 +98,7 @@ class _HomePageState extends State<HomePage> {
               final encodedAddress = Uri.encodeComponent(address);
               final googleMapsUrl =
                   "https://www.google.com/maps/search/?api=1&query=$encodedAddress";
-              final statusColor = _getStatusColor(status.nombre);
+              final statusColor = getStatusColor(status.nombre);
 
               return Container(
                 height: 161,
@@ -207,34 +208,5 @@ class _HomePageState extends State<HomePage> {
         ),
       ],
     );
-  }
-}
-
-Color _getStatusColor(String status) {
-  switch (status) {
-    case "Por asignar":
-      return const Color.fromARGB(255, 255, 214, 79);
-    case "Por ejecutar":
-      return const Color(0xff3F51B5);
-    case "En ejecucion":
-      return const Color(0xffaed581);
-    case "Con novedad":
-      return const Color(0xffadadad);
-    case "Finalizado":
-      return const Color(0xff4caf50);
-    case "Anulado":
-      return const Color(0xffe19800);
-    case "Cancelado":
-      return const Color(0xff008FCD);
-    case "Vencido":
-      return const Color(0xffd32f2f);
-    case "Fallido":
-      return const Color(0xff008FCD);
-    case "En sitio":
-      return const Color(0xff008FCD);
-    case "Por Transmitir":
-      return const Color(0xff008FCD);
-    default:
-      return const Color(0xff008FCD);
   }
 }

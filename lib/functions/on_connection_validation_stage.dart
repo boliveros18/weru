@@ -5,16 +5,27 @@ import 'package:sqflite/sqflite.dart';
 import 'package:weru/database/main.dart';
 import 'package:weru/config/config.dart';
 
+Future<void> stageMessageProviderInsert(String message, String table) async {
+  Database database =
+      await DatabaseMain(path: await getLocalDatabasePath()).onCreate();
+  final stageMessageProvider = StageMessageProvider(db: database);
+  await stageMessageProvider.insert(message, table);
+}
+
 Future<void> onConnectionValidationStage(String message, String table) async {
   final List<ConnectivityResult> connectivityResult =
       await (Connectivity().checkConnectivity());
   if (connectivityResult.contains(ConnectivityResult.mobile) ||
       connectivityResult.contains(ConnectivityResult.wifi)) {
-    await FTPService.sendMessageEntrada(message, table);
+    try {
+      await FTPService.sendMessageEntrada(message, table);
+    } catch (e) {
+      if (e.toString().contains("Connection timed out") ||
+          e.toString().contains("Failed host lookup")) {
+        await stageMessageProviderInsert(message, table);
+      }
+    }
   } else {
-    Database database =
-        await DatabaseMain(path: await getLocalDatabasePath()).onCreate();
-    final stageMessageProvider = StageMessageProvider(db: database);
-    await stageMessageProvider.insert(message, table);
+    await stageMessageProviderInsert(message, table);
   }
 }

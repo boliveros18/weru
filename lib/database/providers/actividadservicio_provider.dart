@@ -27,6 +27,18 @@ class ActividadServicioProvider {
     return ActividadServicio.fromMap(items.first);
   }
 
+  Future<ActividadServicio> getItemByIdActividad(int id) async {
+    final List<Map<String, dynamic>> items = await db.query(
+      'ActividadServicio',
+      where: 'idActividad = ?',
+      whereArgs: [id],
+    );
+    if (items.isEmpty) {
+      throw Exception('Item de ActividadServicio no encontrado!');
+    }
+    return ActividadServicio.fromMap(items.first);
+  }
+
   Future<List<ActividadServicio>> getAll() async {
     final List<Map<String, Object?>> maps = await db.query('ActividadServicio');
     return maps.map((map) {
@@ -55,6 +67,14 @@ class ActividadServicioProvider {
     await db.delete(
       'ActividadServicio',
       where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  Future<void> deleteByIdActividad(int id) async {
+    await db.delete(
+      'ActividadServicio',
+      where: 'idActividad = ?',
       whereArgs: [id],
     );
   }

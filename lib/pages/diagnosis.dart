@@ -7,37 +7,34 @@ import 'package:weru/components/dropdown_menu_ui.dart';
 import 'package:weru/components/text_ui.dart';
 import 'package:weru/config/config.dart';
 import 'package:weru/database/main.dart';
-import 'package:weru/database/models/novedad.dart';
-import 'package:weru/database/models/novedadservicio.dart';
+import 'package:weru/database/models/diagnostico.dart';
+import 'package:weru/database/models/diagnosticoservicio.dart';
 import 'package:weru/database/models/servicio.dart';
-import 'package:weru/database/providers/novedad_provider.dart';
-import 'package:weru/database/providers/novedadservicio_provider.dart';
+import 'package:weru/database/providers/diagnostico_provider.dart';
+import 'package:weru/database/providers/diagnosticoservicio_provider.dart';
 import 'package:weru/database/providers/servicio_provider.dart';
-import 'package:weru/functions/on_connection_validation_stage.dart';
 import 'package:weru/provider/session.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:dropdown_textfield/dropdown_textfield.dart';
-import 'dart:convert';
 
-class NewsPage extends StatefulWidget {
-  const NewsPage({super.key});
+class DiagnosisPage extends StatefulWidget {
+  const DiagnosisPage({super.key});
 
   @override
-  State<NewsPage> createState() => _NewsPageState();
+  State<DiagnosisPage> createState() => _DiagnosisPageState();
 }
 
-class _NewsPageState extends State<NewsPage> {
+class _DiagnosisPageState extends State<DiagnosisPage> {
   late DatabaseMain databaseMain;
   late Session session;
-  late int statusServiceId;
   int index = 0;
   bool isLoading = true;
   late ServicioProvider servicioProvider;
-  late Servicio servicio;
+  late Servicio service;
   late Database database;
-  late List<Novedad> novedades;
-  late List<NovedadServicio> novedadesServicio;
+  late List<Diagnostico> diagnoses;
+  late List<DiagnosticoServicio> diagnosesService;
 
   @override
   void initState() {
@@ -52,14 +49,13 @@ class _NewsPageState extends State<NewsPage> {
     database =
         await DatabaseMain(path: await getLocalDatabasePath()).onCreate();
     await databaseMain.getServices();
-    await databaseMain.getNews();
-    novedades = await NovedadProvider(db: database).getAll();
-    novedadesServicio = await databaseMain.newsServices;
-    servicio = databaseMain.services[index];
+    await databaseMain.getDiagnoses();
+    diagnoses = await DiagnosticoProvider(db: database).getAll();
+    diagnosesService = await databaseMain.diagnosesServices;
+    service = databaseMain.services[index];
     setState(() {
       isLoading = false;
       servicioProvider = ServicioProvider(db: database);
-      statusServiceId = servicio.idEstadoServicio;
     });
   }
 
@@ -74,7 +70,7 @@ class _NewsPageState extends State<NewsPage> {
     }
     return Scaffold(
       appBar: const AppBarUi(
-        header: "Novedades",
+        header: "Diagnosticos",
         centerTitle: true,
       ),
       backgroundColor: Colors.white,
@@ -106,30 +102,26 @@ class _NewsPageState extends State<NewsPage> {
           children: [
             const SizedBox(height: 20),
             DropdownMenuUi(
-              list: novedades.map((item) {
+              list: diagnoses.map((item) {
                 return DropDownValueModel(
                   name: item.descripcion,
                   value: item.id.toString(),
                 );
               }).toList(),
-              title: "Novedad",
+              title: "Diagnostico",
               onConfirm: (id) async {
-                int long = databaseMain.newsServices.length;
-                bool isEqual = databaseMain.newsServices
-                    .any((_new) => _new.idNovedad == int.parse(id));
+                int long = await databaseMain.diagnosesServices.length;
+                bool isEqual = await databaseMain.diagnosesServices
+                    .any((_new) => _new.idDiagnostico == int.parse(id));
                 if (!isEqual) {
-                  NovedadServicio novedadServicio = NovedadServicio(
+                  DiagnosticoServicio diagnosisService = DiagnosticoServicio(
                     id: long + 1,
-                    idServicio: servicio.id,
-                    idNovedad: int.parse(id),
+                    idServicio: service.id,
+                    idDiagnostico: int.parse(id),
                   );
-                  await NovedadServicioProvider(db: database)
-                      .insert(novedadServicio);
-                  await onConnectionValidationStage(
-                    jsonEncode(novedadServicio.toMap()),
-                    "NovedadServicio",
-                  );
-                  await databaseMain.getNews();
+                  await DiagnosticoServicioProvider(db: database)
+                      .insert(diagnosisService);
+                  await databaseMain.getDiagnoses();
                   setState(() {});
                 }
               },
@@ -144,8 +136,8 @@ class _NewsPageState extends State<NewsPage> {
                       height: MediaQuery.of(context).size.width - 85,
                       child: ListView.separated(
                         itemBuilder: (context, index) {
-                          if (index < databaseMain.news.length) {
-                            final _new = databaseMain.news[index];
+                          if (index < databaseMain.diagnoses.length) {
+                            final _new = databaseMain.diagnoses[index];
                             return Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -184,10 +176,12 @@ class _NewsPageState extends State<NewsPage> {
                                           child: IconButton(
                                             onPressed: () async {
                                               try {
-                                                await NovedadServicioProvider(
+                                                await DiagnosticoServicioProvider(
                                                         db: database)
-                                                    .deleteByIdNovedad(_new.id);
-                                                await databaseMain.getNews();
+                                                    .deleteByIdDiagnostico(
+                                                        _new.id);
+                                                await databaseMain
+                                                    .getDiagnoses();
                                                 setState(() {});
                                               } catch (e) {
                                                 print("Error al eliminar: $e");
@@ -218,7 +212,7 @@ class _NewsPageState extends State<NewsPage> {
                         },
                         separatorBuilder: (context, index) =>
                             const SizedBox(height: 5),
-                        itemCount: databaseMain.news.length,
+                        itemCount: databaseMain.diagnoses.length,
                       )),
                 )
               ],

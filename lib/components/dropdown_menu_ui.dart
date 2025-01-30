@@ -1,18 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:dropdown_textfield/dropdown_textfield.dart';
 import 'package:weru/components/button_ui.dart';
+import 'package:weru/components/text_field_ui.dart';
 
 class DropdownMenuUi extends StatefulWidget {
   final List<DropDownValueModel> list;
   final String title;
   final Function(String) onConfirm;
+  final bool textfield;
+  final String hint;
 
-  const DropdownMenuUi({
-    super.key,
-    required this.list,
-    required this.title,
-    required this.onConfirm,
-  });
+  const DropdownMenuUi(
+      {super.key,
+      required this.list,
+      required this.title,
+      required this.onConfirm,
+      this.textfield = false,
+      this.hint = ""});
 
   @override
   State<DropdownMenuUi> createState() => _DropdownMenuUiState();
@@ -38,14 +42,14 @@ class _DropdownMenuUiState extends State<DropdownMenuUi> {
       children: [
         const SizedBox(height: 10),
         Text(
-          "1. Selecciona o busca una ${widget.title.toLowerCase()}:",
+          "1. Selecciona o busca un(a) ${widget.title.toLowerCase()}:",
           style: const TextStyle(fontWeight: FontWeight.w400, fontSize: 16),
         ),
         const SizedBox(height: 20),
         DropDownTextField(
           controller: _dropdownController,
-          textFieldDecoration: const InputDecoration(
-            labelText: "Selecciona un ítem",
+          textFieldDecoration: InputDecoration(
+            labelText: "Selecciona un ítem (${widget.list.length})",
             labelStyle: TextStyle(fontWeight: FontWeight.w400, fontSize: 16),
             border: OutlineInputBorder(),
           ),
@@ -68,6 +72,8 @@ class _DropdownMenuUiState extends State<DropdownMenuUi> {
           },
         ),
         const SizedBox(height: 20),
+        widget.textfield ? TextFieldUi(hint: widget.hint) : Container(),
+        widget.textfield ? const SizedBox(height: 20) : Container(),
         Row(
           children: [
             Spacer(),

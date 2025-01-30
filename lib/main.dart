@@ -6,9 +6,11 @@ import 'dart:convert';
 import 'package:provider/provider.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:weru/functions/authentication.dart';
+import 'package:weru/pages/activity.dart';
+import 'package:weru/pages/diagnosis.dart';
 import 'package:weru/pages/home.dart';
 import 'package:weru/pages/login.dart';
-import 'package:weru/pages/news.dart';
+import 'package:weru/pages/menu.dart';
 import 'package:weru/provider/session.dart';
 import 'package:weru/services/ftp_service.dart';
 import 'package:weru/functions/insert_stage_message_list_data_to_sqflite.dart';
@@ -48,11 +50,9 @@ class MyApp extends StatelessWidget {
     Session session = Provider.of<Session>(context);
 
     return MaterialApp(
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(fontFamily: 'Poppins'),
-        home: NewsPage()
-        /*
-      FutureBuilder<bool>(
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(fontFamily: 'Poppins'),
+      home: FutureBuilder<bool>(
           future: Authentication(session.user, session.pass),
           builder: (context, snapshot) {
             if (snapshot.hasData && snapshot.data == true) {
@@ -60,8 +60,7 @@ class MyApp extends StatelessWidget {
             }
             return LoginPage();
           }),
-          */
-        );
+    );
   }
 }
 
@@ -144,7 +143,7 @@ void onStart(ServiceInstance service) async {
     return;
   }
 
-  Timer.periodic(Duration(seconds: 30), (timer) async {
+  Timer.periodic(Duration(seconds: 5), (timer) async {
     final List<ConnectivityResult> connectivityResult =
         await (Connectivity().checkConnectivity());
     if (connectivityResult.contains(ConnectivityResult.mobile) ||
@@ -172,13 +171,21 @@ void onStart(ServiceInstance service) async {
         Tecnico updated = Tecnico.fromMap(technician);
         TecnicoProvider(db: database).insert(updated);
 
+        Future<void> pulseStageInsert(Tecnico updated) async {
+          await PulsoProvider(db: database).insert(Pulso(
+            idTecnico: updated.id,
+            latitud: latitud,
+            longitud: longitud,
+            fechaPulso: fechaPulso,
+          ));
+        }
+
         if (internet) {
           try {
             String message = await FTPService.getMessages();
             if (message.isNotEmpty) {
               final data = await responseStageMessageXMLtoJSON(message);
               await insertStageMessageListDataToSqflite(data, database);
-
               List<Pulso> pulses = await PulsoProvider(db: database).getAll();
               if (pulses.isNotEmpty) {
                 for (final pulse in pulses) {
@@ -196,17 +203,15 @@ void onStart(ServiceInstance service) async {
                   jsonEncode(technician), 'Tecnico');
               await StageService.sendStageMessages2Server();
             }
-          } catch (e, stackTrace) {
-            print('Error in background process: $e, $stackTrace');
+          } catch (e) {
+            if (e.toString().contains("Connection timed out") ||
+                e.toString().contains("Failed host lookup")) {
+              await pulseStageInsert(updated);
+            }
           }
         } else {
           try {
-            await PulsoProvider(db: database).insert(Pulso(
-              idTecnico: updated.id,
-              latitud: latitud,
-              longitud: longitud,
-              fechaPulso: fechaPulso,
-            ));
+            await pulseStageInsert(updated);
           } catch (e) {
             print('Error al insertar pulso: $e');
           }

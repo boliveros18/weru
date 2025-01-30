@@ -3,6 +3,7 @@ import '../config/config.dart';
 import 'package:ftpconnect/ftpconnect.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:intl/intl.dart';
+import 'package:xml/xml.dart';
 import 'dart:io';
 
 class FTPService {
@@ -59,15 +60,21 @@ class FTPService {
   }
 
   static Future<void> setMessageReceived(String idStageMessage) async {
-    final idDevice = await getDeviceId();
-    final response = await http.get(
-      Uri.http(appRibGetMessagesUrlHost,
-          appRibSetMessageReceivedUrlMethod + idDevice + "/" + idStageMessage),
-    );
-    if (response.statusCode != 200) {
-      print(
-          'Error al reportar mensaje recibido: ${response.statusCode}, ${idStageMessage}');
-    }
+    try {
+      final idDevice = await getDeviceId();
+      final response = await http.get(
+        Uri.http(
+            appRibGetMessagesUrlHost,
+            appRibSetMessageReceivedUrlMethod +
+                idDevice +
+                "/" +
+                idStageMessage),
+      );
+      if (response.statusCode != 200) {
+        print(
+            'Error al reportar mensaje recibido: ${response.statusCode}, ${idStageMessage}');
+      }
+    } catch (e) {}
   }
 
   static Future<bool> sendMessageEntrada(
@@ -94,8 +101,16 @@ class FTPService {
     );
 
     if (response.statusCode == 200) {
-      //print('Mensaje de entrada enviado: ${response.body}');  validar con <?xml version="1.0" encoding="utf-8"?><RecibirMensajeStreamResponse xmlns="http://tempuri.org/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><RecibirMensajeStreamResult><Mensaje>Mensaje procesado</Mensaje><IdEvento>0</IdEvento></RecibirMensajeStreamResult></RecibirMensajeStreamResponse>
-      return true;
+      final document = XmlDocument.parse(response.body);
+      final idEvento = document
+          .findAllElements("IdEvento")
+          .map((node) => node.innerText)
+          .join();
+      if (idEvento == "0") {
+        return true;
+      } else {
+        return false;
+      }
     } else {
       print('Error al enviar mensaje de entrada: ${response.statusCode}');
       return false;

@@ -48,6 +48,7 @@ class TextUi extends StatelessWidget {
         ],
       ),
       maxLines: 1,
+      textAlign: TextAlign.center,
     );
   }
 }

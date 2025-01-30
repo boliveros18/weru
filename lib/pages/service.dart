@@ -7,11 +7,14 @@ import 'package:weru/components/text_ui.dart';
 import 'package:weru/config/config.dart';
 import 'package:weru/database/main.dart';
 import 'package:weru/database/models/servicio.dart';
+import 'package:weru/database/providers/novedadservicio_provider.dart';
 import 'package:weru/database/providers/servicio_provider.dart';
+import 'package:weru/functions/get_status_color.dart';
 import 'package:weru/functions/on_connection_validation_stage.dart';
 import 'dart:convert';
 import 'package:weru/pages/home.dart';
 import 'package:weru/pages/menu.dart';
+import 'package:weru/pages/more_info.dart';
 import 'package:weru/pages/news.dart';
 import 'package:weru/provider/session.dart';
 import 'package:provider/provider.dart';
@@ -29,10 +32,12 @@ class _ServicePageState extends State<ServicePage> {
   late DatabaseMain databaseMain;
   late Session session;
   late int statusServiceId;
+  late int statusServiceIdMenu;
   int index = 0;
   bool isLoading = true;
   late ServicioProvider servicioProvider;
   late Servicio servicio;
+  late Database database;
 
   @override
   void initState() {
@@ -44,13 +49,14 @@ class _ServicePageState extends State<ServicePage> {
 
   Future<void> initializeDatabase() async {
     databaseMain = DatabaseMain(path: await getLocalDatabasePath());
-    Database database =
+    database =
         await DatabaseMain(path: await getLocalDatabasePath()).onCreate();
     await databaseMain.getServices();
     setState(() {
       isLoading = false;
       servicioProvider = ServicioProvider(db: database);
       statusServiceId = databaseMain.services[index].idEstadoServicio;
+      statusServiceIdMenu = statusServiceId;
     });
   }
 
@@ -96,21 +102,42 @@ class _ServicePageState extends State<ServicePage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(
-          height: 150,
+          height: statusServiceIdMenu == 3 ? 200 : 150,
           child: ListView.separated(
             itemBuilder: (context, index) {
               final service = databaseMain.services[index];
               final client = databaseMain.clients[index];
-
+              final servicesStatus = databaseMain.servicesStatus[index];
               return Container(
-                height: 150,
+                height: statusServiceIdMenu == 3 ? 200 : 150,
                 width: MediaQuery.of(context).size.width,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
+                    Center(
                       child: TextUi(text: 'N° Servicio: ${service.orden}'),
                     ),
+                    const SizedBox(height: 10),
+                    statusServiceIdMenu == 3
+                        ? Container(
+                            color: getStatusColor(servicesStatus.nombre),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.fromLTRB(30, 2, 30, 2),
+                                  child: TextUi(
+                                    text: servicesStatus.nombre,
+                                    color: Colors.white,
+                                    main: true,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        : Container(),
                     const SizedBox(height: 10),
                     Container(
                       color: const Color.fromARGB(255, 0, 45, 168),
@@ -174,16 +201,17 @@ class _ServicePageState extends State<ServicePage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(
-          height: 200,
+          height: statusServiceIdMenu == 3 ? 250 : 200,
           child: ListView.separated(
             itemBuilder: (context, index) {
               final service = databaseMain.services[index];
               final type = databaseMain.servicesTypes[index];
               final fail = databaseMain.fails[index];
+              final equipment = databaseMain.equipments[index];
               final dateTime = service.fechayhorainicio.split(' ');
 
               return Container(
-                height: 200,
+                height: statusServiceIdMenu == 3 ? 250 : 200,
                 width: MediaQuery.of(context).size.width,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -235,7 +263,48 @@ class _ServicePageState extends State<ServicePage> {
                           TextUi(
                               text:
                                   'Observación: ${service.observacionReporte}'),
-                        ])
+                        ]),
+                    const SizedBox(height: 10),
+                    statusServiceIdMenu == 3
+                        ? Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Container(
+                                color: const Color.fromARGB(255, 0, 45, 168),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.fromLTRB(
+                                          20, 2, 20, 2),
+                                      child: TextUi(
+                                        text: 'Datos del equipo',
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              DividerUi(paddingHorizontal: 0),
+                              const SizedBox(height: 10),
+                              Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    TextUi(
+                                      text:
+                                          'Numero de contrado del equipo: ${equipment.serial}',
+                                      long: 50,
+                                    ),
+                                    TextUi(
+                                      text:
+                                          'Nombre del equipo: ${equipment.nombre}',
+                                      long: 50,
+                                    ),
+                                  ]),
+                            ],
+                          )
+                        : Container()
                   ],
                 ),
               );
@@ -255,88 +324,127 @@ class _ServicePageState extends State<ServicePage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Expanded(
-              child: ButtonUi(
-                value: statusServiceId == 2 ? "Llegada a sitio" : "Inicio",
-                onClicked: () async {
-                  if (statusServiceId == 3) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => MenuPage(),
+        statusServiceIdMenu == 3
+            ? Center(
+                child: Column(
+                children: [
+                  const SizedBox(height: 30),
+                  SizedBox(
+                    width: 200,
+                    child: ButtonUi(
+                      value: "Mas informacion",
+                      onClicked: () async {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => MoreInfoPage(),
+                          ),
+                        );
+                      },
+                      color: const Color.fromARGB(255, 66, 153, 149),
+                      borderRadius: 2,
+                    ),
+                  ),
+                ],
+              ))
+            : Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: ButtonUi(
+                          value: statusServiceId == 2
+                              ? "Llegada a sitio"
+                              : "Inicio",
+                          onClicked: () async {
+                            if (statusServiceId == 3) {
+                              final Map<String, dynamic> serviceData =
+                                  databaseMain.services[index].toMap();
+                              final Servicio servicio =
+                                  Servicio.fromMap(serviceData);
+                              await NovedadServicioProvider(db: database)
+                                  .deleteByIdServicio(servicio.id);
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => MenuPage(),
+                                ),
+                              );
+                            } else {
+                              final Map<String, dynamic> serviceData =
+                                  databaseMain.services[index].toMap();
+                              serviceData['idEstadoServicio'] = 3;
+                              final Servicio servicio =
+                                  Servicio.fromMap(serviceData);
+                              await NovedadServicioProvider(db: database)
+                                  .deleteByIdServicio(servicio.id);
+                              await servicioProvider.insert(servicio);
+                              await onConnectionValidationStage(
+                                  jsonEncode(servicio.toMap()), "Servicio");
+                              setState(() {
+                                statusServiceId = servicio.idEstadoServicio;
+                              });
+                            }
+                          },
+                          borderRadius: 2,
+                          color: statusServiceId == 2
+                              ? const Color(0xFF4CAF50)
+                              : const Color(0xFF00BCD4),
+                        ),
                       ),
-                    );
-                  } else {
-                    final Map<String, dynamic> serviceData =
-                        databaseMain.services[index].toMap();
-                    serviceData['idEstadoServicio'] = 3;
-                    final Servicio servicio = Servicio.fromMap(serviceData);
-                    await servicioProvider.insert(servicio);
-                    await onConnectionValidationStage(
-                        jsonEncode(servicio.toMap()), "Servicio");
-                    setState(() {
-                      statusServiceId = servicio.idEstadoServicio;
-                    });
-                  }
-                },
-                borderRadius: 2,
-                color: statusServiceId == 2
-                    ? const Color(0xFF4CAF50)
-                    : const Color(0xFF00BCD4),
-              ),
-            ),
-            SizedBox(width: 30),
-            Expanded(
-              child: ButtonUi(
-                value: "Cancelar",
-                onClicked: () async {
-                  final Map<String, dynamic> serviceData =
-                      databaseMain.services[index].toMap();
-                  serviceData['idEstadoServicio'] = 7;
-                  final Servicio servicio = Servicio.fromMap(serviceData);
-                  await servicioProvider.insert(servicio);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => HomePage(),
-                    ),
-                  );
-                },
-                color: Colors.red,
-                borderRadius: 2,
-              ),
-            ),
-          ],
-        ),
-        SizedBox(height: 50),
-        Row(
-          children: [
-            SizedBox(width: MediaQuery.of(context).size.width / 1.99),
-            TextUi(
-              text: 'Novedades: ',
-              fontSize: 15,
-            ),
-            Expanded(
-              child: ButtonUi(
-                value: "+",
-                onClicked: () => {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => NewsPage(),
-                    ),
-                  )
-                },
-                color: const Color.fromARGB(255, 244, 177, 54),
-                borderRadius: 20,
-                fontSize: 30,
-              ),
-            ),
-          ],
-        ),
+                      SizedBox(width: 30),
+                      Expanded(
+                        child: ButtonUi(
+                          value: "Cancelar",
+                          onClicked: () async {
+                            final Map<String, dynamic> serviceData =
+                                databaseMain.services[index].toMap();
+                            serviceData['idEstadoServicio'] = 7;
+                            final Servicio servicio =
+                                Servicio.fromMap(serviceData);
+                            await servicioProvider.insert(servicio);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => HomePage(),
+                              ),
+                            );
+                          },
+                          color: Colors.red,
+                          borderRadius: 2,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 50),
+                  Row(
+                    children: [
+                      SizedBox(width: MediaQuery.of(context).size.width / 1.99),
+                      TextUi(
+                        text: 'Novedades: ',
+                        fontSize: 15,
+                      ),
+                      Expanded(
+                        child: ButtonUi(
+                          value: "+",
+                          onClicked: () => {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => NewsPage(),
+                              ),
+                            )
+                          },
+                          color: const Color.fromARGB(255, 244, 177, 54),
+                          borderRadius: 20,
+                          fontSize: 30,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              )
       ],
     );
   }

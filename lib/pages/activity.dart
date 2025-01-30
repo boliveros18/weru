@@ -7,37 +7,34 @@ import 'package:weru/components/dropdown_menu_ui.dart';
 import 'package:weru/components/text_ui.dart';
 import 'package:weru/config/config.dart';
 import 'package:weru/database/main.dart';
-import 'package:weru/database/models/novedad.dart';
-import 'package:weru/database/models/novedadservicio.dart';
+import 'package:weru/database/models/actividad.dart';
+import 'package:weru/database/models/actividadservicio.dart';
 import 'package:weru/database/models/servicio.dart';
-import 'package:weru/database/providers/novedad_provider.dart';
-import 'package:weru/database/providers/novedadservicio_provider.dart';
+import 'package:weru/database/providers/actividad_provider.dart';
+import 'package:weru/database/providers/actividadservicio_provider.dart';
 import 'package:weru/database/providers/servicio_provider.dart';
-import 'package:weru/functions/on_connection_validation_stage.dart';
 import 'package:weru/provider/session.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:dropdown_textfield/dropdown_textfield.dart';
-import 'dart:convert';
 
-class NewsPage extends StatefulWidget {
-  const NewsPage({super.key});
+class ActivityPage extends StatefulWidget {
+  const ActivityPage({super.key});
 
   @override
-  State<NewsPage> createState() => _NewsPageState();
+  State<ActivityPage> createState() => _ActivityPageState();
 }
 
-class _NewsPageState extends State<NewsPage> {
+class _ActivityPageState extends State<ActivityPage> {
   late DatabaseMain databaseMain;
   late Session session;
-  late int statusServiceId;
   int index = 0;
   bool isLoading = true;
   late ServicioProvider servicioProvider;
-  late Servicio servicio;
+  late Servicio service;
   late Database database;
-  late List<Novedad> novedades;
-  late List<NovedadServicio> novedadesServicio;
+  late List<Actividad> activities;
+  late List<ActividadServicio> activitiesService;
 
   @override
   void initState() {
@@ -52,14 +49,13 @@ class _NewsPageState extends State<NewsPage> {
     database =
         await DatabaseMain(path: await getLocalDatabasePath()).onCreate();
     await databaseMain.getServices();
-    await databaseMain.getNews();
-    novedades = await NovedadProvider(db: database).getAll();
-    novedadesServicio = await databaseMain.newsServices;
-    servicio = databaseMain.services[index];
+    await databaseMain.getActivities();
+    activities = await ActividadProvider(db: database).getAll();
+    activitiesService = await databaseMain.activitiesServices;
+    service = databaseMain.services[index];
     setState(() {
       isLoading = false;
       servicioProvider = ServicioProvider(db: database);
-      statusServiceId = servicio.idEstadoServicio;
     });
   }
 
@@ -72,9 +68,10 @@ class _NewsPageState extends State<NewsPage> {
         ),
       );
     }
+
     return Scaffold(
       appBar: const AppBarUi(
-        header: "Novedades",
+        header: "Actividades",
         centerTitle: true,
       ),
       backgroundColor: Colors.white,
@@ -106,30 +103,32 @@ class _NewsPageState extends State<NewsPage> {
           children: [
             const SizedBox(height: 20),
             DropdownMenuUi(
-              list: novedades.map((item) {
+              list: activities.map((item) {
                 return DropDownValueModel(
                   name: item.descripcion,
                   value: item.id.toString(),
                 );
               }).toList(),
-              title: "Novedad",
+              title: "Actividad",
               onConfirm: (id) async {
-                int long = databaseMain.newsServices.length;
-                bool isEqual = databaseMain.newsServices
-                    .any((_new) => _new.idNovedad == int.parse(id));
+                int long = await databaseMain.activitiesServices.length;
+                Actividad activity = await ActividadProvider(db: database)
+                    .getItemById(int.parse(id));
+                bool isEqual = await databaseMain.activitiesServices
+                    .any((_new) => _new.idActividad == int.parse(id));
                 if (!isEqual) {
-                  NovedadServicio novedadServicio = NovedadServicio(
+                  ActividadServicio actividadServicio = ActividadServicio(
                     id: long + 1,
-                    idServicio: servicio.id,
-                    idNovedad: int.parse(id),
+                    idServicio: service.id,
+                    idActividad: int.parse(id),
+                    cantidad: 1,
+                    costo: activity.costo,
+                    valor: activity.valor,
+                    ejecutada: 0,
                   );
-                  await NovedadServicioProvider(db: database)
-                      .insert(novedadServicio);
-                  await onConnectionValidationStage(
-                    jsonEncode(novedadServicio.toMap()),
-                    "NovedadServicio",
-                  );
-                  await databaseMain.getNews();
+                  await ActividadServicioProvider(db: database)
+                      .insert(actividadServicio);
+                  await databaseMain.getActivities();
                   setState(() {});
                 }
               },
@@ -144,8 +143,12 @@ class _NewsPageState extends State<NewsPage> {
                       height: MediaQuery.of(context).size.width - 85,
                       child: ListView.separated(
                         itemBuilder: (context, index) {
-                          if (index < databaseMain.news.length) {
-                            final _new = databaseMain.news[index];
+                          if (index < databaseMain.activities.length) {
+                            final _new = databaseMain.activities[index];
+                            final ejecutada = databaseMain.activitiesServices
+                                .where((item) => item.idActividad == _new.id)
+                                .first
+                                .ejecutada;
                             return Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -165,7 +168,61 @@ class _NewsPageState extends State<NewsPage> {
                                               text:
                                                   'Nombre: ${_new.descripcion}',
                                               fontSize: 15),
-                                          SizedBox(height: 10),
+                                          Row(
+                                            children: [
+                                              TextUi(
+                                                text:
+                                                    'Estado:  ${ejecutada == 1 ? 'Activa' : 'Inactiva'}',
+                                                long: 40,
+                                                fontSize: 15,
+                                              ),
+                                              SizedBox(
+                                                  width:
+                                                      ejecutada == 1 ? 19 : 5),
+                                              SizedBox(
+                                                width: 24,
+                                                height: 24,
+                                                child: Checkbox(
+                                                  materialTapTargetSize:
+                                                      MaterialTapTargetSize
+                                                          .shrinkWrap,
+                                                  visualDensity:
+                                                      VisualDensity.compact,
+                                                  checkColor: Colors.white,
+                                                  value: ejecutada == 1,
+                                                  onChanged:
+                                                      (bool? value) async {
+                                                    ActividadServicio
+                                                        activityService =
+                                                        await ActividadServicioProvider(
+                                                                db: database)
+                                                            .getItemByIdActividad(
+                                                                _new.id);
+                                                    Map<String, Object?>
+                                                        activityService2 =
+                                                        activityService.toMap();
+                                                    activityService2[
+                                                            'ejecutada'] =
+                                                        ejecutada == 1 ? 0 : 1;
+                                                    ActividadServicio
+                                                        activityService2Update =
+                                                        ActividadServicio.fromMap(
+                                                            activityService2);
+                                                    await ActividadServicioProvider(
+                                                            db: database)
+                                                        .update(
+                                                            activityService2Update);
+                                                    await databaseMain
+                                                        .getActivities();
+                                                    setState(() {
+                                                      value;
+                                                    });
+                                                  },
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 10),
                                         ],
                                       ),
                                     ),
@@ -184,10 +241,12 @@ class _NewsPageState extends State<NewsPage> {
                                           child: IconButton(
                                             onPressed: () async {
                                               try {
-                                                await NovedadServicioProvider(
+                                                await ActividadServicioProvider(
                                                         db: database)
-                                                    .deleteByIdNovedad(_new.id);
-                                                await databaseMain.getNews();
+                                                    .deleteByIdActividad(
+                                                        _new.id);
+                                                await databaseMain
+                                                    .getActivities();
                                                 setState(() {});
                                               } catch (e) {
                                                 print("Error al eliminar: $e");
@@ -218,7 +277,7 @@ class _NewsPageState extends State<NewsPage> {
                         },
                         separatorBuilder: (context, index) =>
                             const SizedBox(height: 5),
-                        itemCount: databaseMain.news.length,
+                        itemCount: databaseMain.activities.length,
                       )),
                 )
               ],

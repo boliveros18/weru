@@ -1,5 +1,9 @@
+import 'package:weru/database/models/actividad.dart';
+import 'package:weru/database/models/actividadservicio.dart';
 import 'package:weru/database/models/ciudad.dart';
 import 'package:weru/database/models/cliente.dart';
+import 'package:weru/database/models/diagnostico.dart';
+import 'package:weru/database/models/diagnosticoservicio.dart';
 import 'package:weru/database/models/equipo.dart';
 import 'package:weru/database/models/estadoservicio.dart';
 import 'package:weru/database/models/falla.dart';
@@ -8,8 +12,12 @@ import 'package:weru/database/models/novedad.dart';
 import 'package:weru/database/models/novedadservicio.dart';
 import 'package:weru/database/models/servicio.dart';
 import 'package:weru/database/models/tiposervicio.dart';
+import 'package:weru/database/providers/actividad_provider.dart';
+import 'package:weru/database/providers/actividadservicio_provider.dart';
 import 'package:weru/database/providers/ciudad_provider.dart';
 import 'package:weru/database/providers/cliente_provider.dart';
+import 'package:weru/database/providers/diagnostico_provider.dart';
+import 'package:weru/database/providers/diagnosticoservicio_provider.dart';
 import 'package:weru/database/providers/equipo_provider.dart';
 import 'package:weru/database/providers/estadoservicio_provider.dart';
 import 'package:weru/database/providers/falla_provider.dart';
@@ -33,6 +41,10 @@ class DatabaseMain {
   List<Falla> fails = [];
   List<Novedad> news = [];
   List<NovedadServicio> newsServices = [];
+  List<Diagnostico> diagnoses = [];
+  List<DiagnosticoServicio> diagnosesServices = [];
+  List<Actividad> activities = [];
+  List<ActividadServicio> activitiesServices = [];
 
   DatabaseMain({required this.path}) {}
   Future<void> getServices() async {
@@ -83,8 +95,6 @@ class DatabaseMain {
       final _newsServices =
           await NovedadServicioProvider(db: database).getAll();
 
-      print(_newsServices.toList());
-
       news = await Future.wait(_newsServices.map((_new) async {
         return await NovedadProvider(db: database).getItemById(_new.idNovedad);
       }).toList());
@@ -92,6 +102,40 @@ class DatabaseMain {
       newsServices = _newsServices;
     } catch (e, stackTrace) {
       print("Error getNews() in main database: $e, $stackTrace");
+    }
+  }
+
+  Future<void> getDiagnoses() async {
+    final database = await db;
+    try {
+      final _diagnosesServices =
+          await DiagnosticoServicioProvider(db: database).getAll();
+
+      diagnoses = await Future.wait(_diagnosesServices.map((diagnosis) async {
+        return await DiagnosticoProvider(db: database)
+            .getItemById(diagnosis.idDiagnostico);
+      }).toList());
+
+      diagnosesServices = _diagnosesServices;
+    } catch (e, stackTrace) {
+      print("Error getDiagnoses() in main database: $e, $stackTrace");
+    }
+  }
+
+  Future<void> getActivities() async {
+    final database = await db;
+    try {
+      final _activitiesServices =
+          await ActividadServicioProvider(db: database).getAll();
+
+      activities = await Future.wait(_activitiesServices.map((activity) async {
+        return await ActividadProvider(db: database)
+            .getItemById(activity.idActividad);
+      }).toList());
+
+      activitiesServices = _activitiesServices;
+    } catch (e, stackTrace) {
+      print("Error getActivities() in main database: $e, $stackTrace");
     }
   }
 
