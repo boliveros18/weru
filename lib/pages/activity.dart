@@ -1,6 +1,7 @@
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:weru/components/app_bar_ui.dart';
 import 'package:flutter/material.dart';
+import 'package:weru/components/app_status.dart';
 import 'package:weru/components/divider_ui.dart';
 import 'package:weru/components/progress_indicator_ui.dart';
 import 'package:weru/components/dropdown_menu_ui.dart';
@@ -84,7 +85,7 @@ class _ActivityPageState extends State<ActivityPage> {
                 padding: const EdgeInsets.only(left: 20, right: 20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [Section()],
+                  children: [AppStatus(), Section()],
                 ),
               ),
             ),

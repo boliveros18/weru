@@ -1,5 +1,6 @@
 import 'package:weru/components/app_bar_ui.dart';
 import 'package:flutter/material.dart';
+import 'package:weru/components/app_status.dart';
 import 'package:weru/components/button_ui.dart';
 import 'package:weru/components/divider_ui.dart';
 import 'package:weru/components/progress_indicator_ui.dart';
@@ -84,6 +85,7 @@ class _ServicePageState extends State<ServicePage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    AppStatus(),
                     serviceMainSection(),
                     serviceMiddleSection(),
                     serviceEndedSection()
@@ -359,12 +361,6 @@ class _ServicePageState extends State<ServicePage> {
                               : "Inicio",
                           onClicked: () async {
                             if (statusServiceId == 3) {
-                              final Map<String, dynamic> serviceData =
-                                  databaseMain.services[index].toMap();
-                              final Servicio servicio =
-                                  Servicio.fromMap(serviceData);
-                              await NovedadServicioProvider(db: database)
-                                  .deleteByIdServicio(servicio.id);
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
@@ -377,8 +373,6 @@ class _ServicePageState extends State<ServicePage> {
                               serviceData['idEstadoServicio'] = 3;
                               final Servicio servicio =
                                   Servicio.fromMap(serviceData);
-                              await NovedadServicioProvider(db: database)
-                                  .deleteByIdServicio(servicio.id);
                               await servicioProvider.insert(servicio);
                               await onConnectionValidationStage(
                                   jsonEncode(servicio.toMap()), "Servicio");

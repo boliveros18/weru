@@ -13,23 +13,24 @@ class Tecnico {
   final String androidID;
   final String fechaPulso;
   final String versionApp;
+  final String? situacionActual;
 
-  Tecnico({
-    required this.id,
-    required this.cedula,
-    required this.nombre,
-    required this.idProveedor,
-    required this.idEstadoTecnico,
-    required this.usuario,
-    required this.clave,
-    required this.telefono,
-    required this.celular,
-    required this.latitud,
-    required this.longitud,
-    required this.androidID,
-    required this.fechaPulso,
-    required this.versionApp,
-  });
+  Tecnico(
+      {required this.id,
+      required this.cedula,
+      required this.nombre,
+      required this.idProveedor,
+      required this.idEstadoTecnico,
+      required this.usuario,
+      required this.clave,
+      required this.telefono,
+      required this.celular,
+      required this.latitud,
+      required this.longitud,
+      required this.androidID,
+      required this.fechaPulso,
+      required this.versionApp,
+      this.situacionActual});
 
   Map<String, Object?> toMap() {
     return {
@@ -47,16 +48,18 @@ class Tecnico {
       'androidID': androidID,
       'fechaPulso': fechaPulso,
       'versionApp': versionApp,
+      'situacionActual': situacionActual
     };
   }
 
-   factory   Tecnico.fromMap(Map<String, dynamic> map) {
-    return   Tecnico(
-           id: int.tryParse(map['id']?.toString() ?? '') ?? 0,
+  factory Tecnico.fromMap(Map<String, dynamic> map) {
+    return Tecnico(
+      id: int.tryParse(map['id']?.toString() ?? '') ?? 0,
       cedula: map['cedula']?.toString() ?? '',
       nombre: map['nombre']?.toString() ?? '',
       idProveedor: int.tryParse(map['idProveedor']?.toString() ?? '') ?? 0,
-      idEstadoTecnico: int.tryParse(map['idEstadoTecnico']?.toString() ?? '') ?? 0,
+      idEstadoTecnico:
+          int.tryParse(map['idEstadoTecnico']?.toString() ?? '') ?? 0,
       usuario: map['usuario']?.toString() ?? '',
       clave: map['clave']?.toString() ?? '',
       telefono: map['telefono']?.toString() ?? '',
@@ -66,11 +69,12 @@ class Tecnico {
       androidID: map['androidID']?.toString() ?? '',
       fechaPulso: map['fechaPulso']?.toString() ?? '',
       versionApp: map['versionApp']?.toString() ?? '',
+      situacionActual: map['situacionActual']?.toString() ?? '',
     );
   }
 
   @override
   String toString() {
-    return 'Tecnico{id: $id, cedula: $cedula, nombre: $nombre, idProveedor: $idProveedor, idEstadoTecnico: $idEstadoTecnico, usuario: $usuario, clave: $clave, telefono: $telefono, celular: $celular, latitud: $latitud, longitud: $longitud, androidID: $androidID, fechaPulso: $fechaPulso, versionApp: $versionApp}';
+    return 'Tecnico{id: $id, cedula: $cedula, nombre: $nombre, idProveedor: $idProveedor, idEstadoTecnico: $idEstadoTecnico, usuario: $usuario, clave: $clave, telefono: $telefono, celular: $celular, latitud: $latitud, longitud: $longitud, androidID: $androidID, fechaPulso: $fechaPulso, versionApp: $versionApp, situacionActual: $situacionActual}';
   }
 }

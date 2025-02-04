@@ -6,6 +6,7 @@ import 'dart:convert';
 import 'package:provider/provider.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:weru/functions/authentication.dart';
+import 'package:weru/functions/current_situation.dart';
 import 'package:weru/pages/activity.dart';
 import 'package:weru/pages/diagnosis.dart';
 import 'package:weru/pages/home.dart';
@@ -143,15 +144,25 @@ void onStart(ServiceInstance service) async {
     return;
   }
 
-  Timer.periodic(Duration(seconds: 5), (timer) async {
+  Timer.periodic(Duration(seconds: 30), (timer) async {
     final List<ConnectivityResult> connectivityResult =
         await (Connectivity().checkConnectivity());
     if (connectivityResult.contains(ConnectivityResult.mobile) ||
         connectivityResult.contains(ConnectivityResult.wifi)) {
       internet = true;
-    } else {
+      await currentSituation("ModoAvion-Desactivado");
+    } else if (connectivityResult.contains(ConnectivityResult.none)) {
       internet = false;
+      await currentSituation("ModoAvion-Activado");
     }
+
+    Geolocator.getServiceStatusStream().listen((ServiceStatus status) async {
+      if (status == ServiceStatus.enabled) {
+        await currentSituation("Gps-Activado");
+      } else {
+        await currentSituation("Gps-Desactivado");
+      }
+    });
 
     Position position = await Geolocator.getCurrentPosition(
       locationSettings: locationSettings,
@@ -182,6 +193,7 @@ void onStart(ServiceInstance service) async {
 
         if (internet) {
           try {
+            await currentSituation("Señal-Activada");
             String message = await FTPService.getMessages();
             if (message.isNotEmpty) {
               final data = await responseStageMessageXMLtoJSON(message);
@@ -206,6 +218,7 @@ void onStart(ServiceInstance service) async {
           } catch (e) {
             if (e.toString().contains("Connection timed out") ||
                 e.toString().contains("Failed host lookup")) {
+              await currentSituation("Señal-Desactivada");
               await pulseStageInsert(updated);
             }
           }

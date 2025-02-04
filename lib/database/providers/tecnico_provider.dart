@@ -45,6 +45,7 @@ class TecnicoProvider {
         androidID: map['androidID'] as String,
         fechaPulso: map['fechaPulso'] as String,
         versionApp: map['versionApp'] as String,
+        situacionActual: map['situacionActual'] as String,
       );
     }).toList();
   }
@@ -88,6 +89,7 @@ class TecnicoProvider {
         androidID: parts[11].trim(),
         fechaPulso: parts[12].trim(),
         versionApp: parts[13].trim(),
+        situacionActual: parts[14].trim(),
       );
       await db.transaction((database) async {
         await database.insert(

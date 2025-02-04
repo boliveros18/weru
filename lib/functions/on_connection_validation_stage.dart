@@ -8,8 +8,8 @@ import 'package:weru/config/config.dart';
 Future<void> stageMessageProviderInsert(String message, String table) async {
   Database database =
       await DatabaseMain(path: await getLocalDatabasePath()).onCreate();
-  final stageMessageProvider = StageMessageProvider(db: database);
-  await stageMessageProvider.insert(message, table);
+  final stageMessageProvider = await StageMessageProvider(db: database);
+  stageMessageProvider.insert(message, table);
 }
 
 Future<void> onConnectionValidationStage(String message, String table) async {

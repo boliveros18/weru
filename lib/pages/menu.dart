@@ -1,5 +1,6 @@
 import 'package:weru/components/app_bar_ui.dart';
 import 'package:flutter/material.dart';
+import 'package:weru/components/app_status.dart';
 import 'package:weru/components/menu_item_ui.dart';
 import 'package:weru/components/progress_indicator_ui.dart';
 import 'package:weru/components/text_ui.dart';
@@ -69,7 +70,11 @@ class _MenuPageState extends State<MenuPage> {
                   child: Padding(
                     padding: const EdgeInsets.only(left: 20, right: 20),
                     child: Column(
-                      children: [serviceHeaderSection(), serviceBodySection()],
+                      children: [
+                        AppStatus(),
+                        serviceHeaderSection(),
+                        serviceBodySection()
+                      ],
                     ),
                   ),
                 ),

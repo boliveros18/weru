@@ -1,6 +1,7 @@
 import 'package:weru/components/app_bar_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:weru/components/app_status.dart';
 import 'package:weru/components/progress_indicator_ui.dart';
 import 'package:weru/components/text_ui.dart';
 import 'package:weru/config/config.dart';
@@ -68,6 +69,7 @@ class _HomePageState extends State<HomePage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    AppStatus(),
                     servicesSection(),
                   ],
                 ),

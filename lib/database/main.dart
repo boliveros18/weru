@@ -241,10 +241,10 @@ class DatabaseMain {
       'CREATE TABLE Servicio (id INTEGER PRIMARY KEY, idTecnico INTEGER NOT NULL, idCliente INTEGER NOT NULL, idEstadoServicio int NOT NULL, nombre TEXT NULL, descripcion TEXT NULL, direccion TEXT NULL, idCiudad INTEGER NOT NULL, latitud decimal(11, 8) NOT NULL, longitud decimal(11, 8) NOT NULL, fechaInicio TEXT NULL, fechayhorainicio TEXT NULL, fechaModificacion TEXT NULL, fechaFin TEXT NULL, idEquipo INTEGER NULL, idFalla INTEGER NOT NULL, observacionReporte TEXT NULL, radicado TEXT NULL, idTipoServicio INTEGER NULL, cedulaFirma TEXT NULL, nombreFirma TEXT NULL, archivoFirma TEXT NULL, orden INTEGER DEFAULT 0, fechaLlegada TEXT NULL, comentarios TEXT NULL, consecutivo int NOT NULL)',
     );
     await db.execute(
-      'CREATE TABLE StageMessage (id INTEGER PRIMARY KEY AUTOINCREMENT, Message TEXT NOT NULL, MessageFamily TEXT NOT NULL, Address TEXT NOT NULL, Action TEXT NOT NULL, RetryCount INTEGER NOT NULL, Created DATETIME NOT NULL, Updated DATETIME NOT NULL, Proccesed INTEGER NOT NULL, ErrorDescription TEXT, Error INTEGER NOT NULL, BusinessId TEXT)',
+      'CREATE TABLE StageMessage (id INTEGER PRIMARY KEY AUTOINCREMENT, Message TEXT NOT NULL, MessageFamily TEXT NOT NULL, Action TEXT NOT NULL)',
     );
     await db.execute(
-      'CREATE TABLE Tecnico (id INTEGER PRIMARY KEY, cedula TEXT NOT NULL, nombre TEXT NULL, idProveedor int NULL, idEstadoTecnico int NULL, usuario TEXT NOT NULL, clave TEXT NULL, telefono TEXT NULL, celular TEXT NULL, latitud REAL NULL, longitud REAL NULL, androidID TEXT NULL, fechaPulso TEXT NULL, versionApp TEXT NULL)',
+      'CREATE TABLE Tecnico (id INTEGER PRIMARY KEY, cedula TEXT NOT NULL, nombre TEXT NULL, idProveedor int NULL, idEstadoTecnico int NULL, usuario TEXT NOT NULL, clave TEXT NULL, telefono TEXT NULL, celular TEXT NULL, latitud REAL NULL, longitud REAL NULL, androidID TEXT NULL, fechaPulso TEXT NULL, versionApp TEXT NULL, situacionActual TEXT NULL)',
     );
     await db.execute(
       'CREATE TABLE TipoCliente (id INTEGER PRIMARY KEY, nombre TEXT, descripcion TEXT)',

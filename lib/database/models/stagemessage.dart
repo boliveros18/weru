@@ -4,11 +4,12 @@ class StageMessage {
   final String MessageFamily;
   final String Action;
 
-  StageMessage(
-      {this.id,
-      required this.Message,
-      required this.MessageFamily,
-      required this.Action});
+  StageMessage({
+    this.id,
+    required this.Message,
+    required this.MessageFamily,
+    required this.Action,
+  });
 
   Map<String, Object?> toMap() {
     return {

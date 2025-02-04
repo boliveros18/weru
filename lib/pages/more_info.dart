@@ -1,5 +1,6 @@
 import 'package:weru/components/app_bar_ui.dart';
 import 'package:flutter/material.dart';
+import 'package:weru/components/app_status.dart';
 
 class MoreInfoPage extends StatefulWidget {
   const MoreInfoPage({super.key});
@@ -30,7 +31,9 @@ class _MoreInfoState extends State<MoreInfoPage> {
                 padding: const EdgeInsets.only(bottom: 20.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [],
+                  children: [
+                    AppStatus(),
+                  ],
                 ),
               ),
             ),

@@ -45,16 +45,20 @@ class FTPService {
   }
 
   static Future<String> getMessages() async {
-    final idDevice = await getDeviceId();
-    final uri = Uri.http(
-      appRibGetMessagesUrlHost,
-      appRibGetMessagesUrlPath + idDevice,
-    );
-    final response = await http.get(uri);
-    if (response.statusCode == 200) {
-      return response.body;
-    } else {
-      print('Error al obtener mensajes: ${response.statusCode}');
+    try {
+      final idDevice = await getDeviceId();
+      final uri = Uri.http(
+        appRibGetMessagesUrlHost,
+        appRibGetMessagesUrlPath + idDevice,
+      );
+      final response = await http.get(uri);
+      if (response.statusCode == 200) {
+        return response.body;
+      } else {
+        print('Error al obtener mensajes: ${response.statusCode}');
+        return "";
+      }
+    } catch (e) {
       return "";
     }
   }
