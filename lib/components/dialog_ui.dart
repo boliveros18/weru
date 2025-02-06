@@ -59,6 +59,7 @@ class DialogUi extends StatelessWidget {
               child: TextFieldUi(
                 hint: hintText,
                 controller: textController,
+                regular: false,
               ),
             )
           : null,
@@ -76,9 +77,19 @@ class DialogUi extends StatelessWidget {
             } else {
               onConfirm("id");
             }
+            FocusScope.of(context).unfocus();
           },
           child: const Text("Aceptar"),
         ),
+        textField
+            ? ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  FocusScope.of(context).unfocus();
+                },
+                child: const Text("Cancelar"),
+              )
+            : Container(),
       ],
     );
   }

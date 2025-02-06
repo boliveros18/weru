@@ -8,7 +8,6 @@ import 'package:weru/components/text_ui.dart';
 import 'package:weru/config/config.dart';
 import 'package:weru/database/main.dart';
 import 'package:weru/database/models/servicio.dart';
-import 'package:weru/database/providers/novedadservicio_provider.dart';
 import 'package:weru/database/providers/servicio_provider.dart';
 import 'package:weru/functions/get_status_color.dart';
 import 'package:weru/functions/on_connection_validation_stage.dart';

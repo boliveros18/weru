@@ -7,24 +7,27 @@ class TextFieldUi extends StatelessWidget {
   final int minLines;
   final TextEditingController? controller;
   final Function(String)? onChanged;
+  final bool regular;
 
-  const TextFieldUi({
-    super.key,
-    required this.hint,
-    this.prefixIcon = false,
-    this.prefixIconPath,
-    this.minLines = 1,
-    this.controller,
-    this.onChanged,
-  });
+  const TextFieldUi(
+      {super.key,
+      required this.hint,
+      this.prefixIcon = false,
+      this.prefixIconPath,
+      this.minLines = 1,
+      this.controller,
+      this.onChanged,
+      this.regular = true});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(boxShadow: [
         BoxShadow(
-          color: const Color(0xff1D1617).withValues(alpha: 0.11),
-          blurRadius: 20,
+          color: regular
+              ? const Color(0xff1D1617)
+              : const Color(0xff1D1617).withValues(alpha: 0.11),
+          blurRadius: regular ? 0 : 20,
           spreadRadius: 0.0,
         ),
       ]),
@@ -36,11 +39,11 @@ class TextFieldUi extends StatelessWidget {
         decoration: InputDecoration(
           filled: true,
           fillColor: Colors.white,
-          contentPadding: const EdgeInsets.only(left: 20, right: 20),
+          contentPadding: const EdgeInsets.only(left: 12, right: 20),
           hintText: hint,
           hintStyle: const TextStyle(
-              color: Color(0xffDDDADA),
-              fontSize: 18,
+              color: Color.fromARGB(255, 180, 180, 180),
+              fontSize: 15,
               fontWeight: FontWeight.w300),
           prefixIcon: prefixIcon && prefixIconPath != null
               ? Padding(
@@ -55,8 +58,8 @@ class TextFieldUi extends StatelessWidget {
                 )
               : null,
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-            borderSide: BorderSide.none,
+            borderRadius: BorderRadius.circular(regular ? 0 : 10),
+            borderSide: regular ? BorderSide() : BorderSide.none,
           ),
         ),
       ),

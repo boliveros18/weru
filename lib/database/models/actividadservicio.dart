@@ -1,5 +1,5 @@
 class ActividadServicio {
-  final int id;
+  final int? id;
   final int idActividad;
   final int idServicio;
   final int cantidad;
@@ -8,7 +8,7 @@ class ActividadServicio {
   final int ejecutada;
 
   ActividadServicio({
-    required this.id,
+    this.id,
     required this.idActividad,
     required this.idServicio,
     required this.cantidad,
@@ -29,9 +29,9 @@ class ActividadServicio {
     };
   }
 
-   factory   ActividadServicio.fromMap(Map<String, dynamic> map) {
-    return   ActividadServicio(
-           id: int.tryParse(map['id']?.toString() ?? '') ?? 0,
+  factory ActividadServicio.fromMap(Map<String, dynamic> map) {
+    return ActividadServicio(
+      id: int.tryParse(map['id']?.toString() ?? '') ?? 0,
       idActividad: int.tryParse(map['idActividad']?.toString() ?? '') ?? 0,
       idServicio: int.tryParse(map['idServicio']?.toString() ?? '') ?? 0,
       cantidad: int.tryParse(map['cantidad']?.toString() ?? '') ?? 0,

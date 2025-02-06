@@ -61,6 +61,14 @@ class ItemServicioProvider {
     );
   }
 
+  Future<void> deleteByIdItem(int id) async {
+    await db.delete(
+      'ItemServicio',
+      where: 'idItem = ?',
+      whereArgs: [id],
+    );
+  }
+
   Future<void> insertInitFile(ArchiveFile file) async {
     List<int> bytes = file.content;
     String fileContent = utf8.decode(bytes);

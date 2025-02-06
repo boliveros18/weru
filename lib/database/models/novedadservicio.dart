@@ -1,10 +1,10 @@
 class NovedadServicio {
-  final int id;
+  final int? id;
   final int idServicio;
   final int idNovedad;
 
   NovedadServicio({
-    required this.id,
+    this.id,
     required this.idServicio,
     required this.idNovedad,
   });

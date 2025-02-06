@@ -1,5 +1,5 @@
 class IndirectoServicio {
-  final int id;
+  final int? id;
   final int idIndirecto;
   final int idServicio;
   final int cantidad;
@@ -7,7 +7,7 @@ class IndirectoServicio {
   final int valor;
 
   IndirectoServicio({
-    required this.id,
+    this.id,
     required this.idIndirecto,
     required this.idServicio,
     required this.cantidad,
@@ -26,9 +26,9 @@ class IndirectoServicio {
     };
   }
 
-   factory   IndirectoServicio.fromMap(Map<String, dynamic> map) {
-    return   IndirectoServicio(
-           id: int.tryParse(map['id']?.toString() ?? '') ?? 0,
+  factory IndirectoServicio.fromMap(Map<String, dynamic> map) {
+    return IndirectoServicio(
+      id: int.tryParse(map['id']?.toString() ?? '') ?? 0,
       idIndirecto: int.tryParse(map['idIndirecto']?.toString() ?? '') ?? 0,
       idServicio: int.tryParse(map['idServicio']?.toString() ?? '') ?? 0,
       cantidad: int.tryParse(map['cantidad']?.toString() ?? '') ?? 0,

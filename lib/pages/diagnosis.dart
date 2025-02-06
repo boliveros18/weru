@@ -106,19 +106,17 @@ class _DiagnosisPageState extends State<DiagnosisPage> {
               list: diagnoses.map((item) {
                 return DropDownValueModel(
                   name: item.descripcion,
-                  value: item.id.toString(),
+                  value: item.id,
                 );
               }).toList(),
               title: "Diagnostico",
-              onConfirm: (id) async {
-                int long = await databaseMain.diagnosesServices.length;
+              onConfirm: (id, value) async {
                 bool isEqual = await databaseMain.diagnosesServices
-                    .any((_new) => _new.idDiagnostico == int.parse(id));
+                    .any((_new) => _new.idDiagnostico == id);
                 if (!isEqual) {
                   DiagnosticoServicio diagnosisService = DiagnosticoServicio(
-                    id: long + 1,
                     idServicio: service.id,
-                    idDiagnostico: int.parse(id),
+                    idDiagnostico: id,
                   );
                   await DiagnosticoServicioProvider(db: database)
                       .insert(diagnosisService);
@@ -127,14 +125,14 @@ class _DiagnosisPageState extends State<DiagnosisPage> {
                 }
               },
             ),
-            Text("2. Lista de agregados: ",
+            Text("2. Lista de agregados (${databaseMain.diagnoses.length}): ",
                 style: TextStyle(fontWeight: FontWeight.w400, fontSize: 16)),
             const SizedBox(height: 10),
             Column(
               children: [
                 Container(
                   child: SizedBox(
-                      height: MediaQuery.of(context).size.width - 85,
+                      height: MediaQuery.of(context).size.width - 120,
                       child: ListView.separated(
                         itemBuilder: (context, index) {
                           if (index < databaseMain.diagnoses.length) {

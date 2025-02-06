@@ -107,21 +107,19 @@ class _ActivityPageState extends State<ActivityPage> {
               list: activities.map((item) {
                 return DropDownValueModel(
                   name: item.descripcion,
-                  value: item.id.toString(),
+                  value: item.id,
                 );
               }).toList(),
               title: "Actividad",
-              onConfirm: (id) async {
-                int long = await databaseMain.activitiesServices.length;
-                Actividad activity = await ActividadProvider(db: database)
-                    .getItemById(int.parse(id));
+              onConfirm: (id, value) async {
+                Actividad activity =
+                    await ActividadProvider(db: database).getItemById(id);
                 bool isEqual = await databaseMain.activitiesServices
-                    .any((_new) => _new.idActividad == int.parse(id));
+                    .any((_new) => _new.idActividad == id);
                 if (!isEqual) {
                   ActividadServicio actividadServicio = ActividadServicio(
-                    id: long + 1,
                     idServicio: service.id,
-                    idActividad: int.parse(id),
+                    idActividad: id,
                     cantidad: 1,
                     costo: activity.costo,
                     valor: activity.valor,
@@ -134,14 +132,14 @@ class _ActivityPageState extends State<ActivityPage> {
                 }
               },
             ),
-            Text("2. Lista de agregados: ",
+            Text("2. Lista de agregados (${databaseMain.activities.length}): ",
                 style: TextStyle(fontWeight: FontWeight.w400, fontSize: 16)),
             const SizedBox(height: 10),
             Column(
               children: [
                 Container(
                   child: SizedBox(
-                      height: MediaQuery.of(context).size.width - 85,
+                      height: MediaQuery.of(context).size.width - 120,
                       child: ListView.separated(
                         itemBuilder: (context, index) {
                           if (index < databaseMain.activities.length) {

@@ -110,19 +110,17 @@ class _NewsPageState extends State<NewsPage> {
               list: novedades.map((item) {
                 return DropDownValueModel(
                   name: item.descripcion,
-                  value: item.id.toString(),
+                  value: item.id,
                 );
               }).toList(),
               title: "Novedad",
-              onConfirm: (id) async {
-                int long = databaseMain.newsServices.length;
+              onConfirm: (id, value) async {
                 bool isEqual = databaseMain.newsServices
-                    .any((_new) => _new.idNovedad == int.parse(id));
+                    .any((_new) => _new.idNovedad == id);
                 if (!isEqual) {
                   NovedadServicio novedadServicio = NovedadServicio(
-                    id: long + 1,
                     idServicio: servicio.id,
-                    idNovedad: int.parse(id),
+                    idNovedad: id,
                   );
                   await NovedadServicioProvider(db: database)
                       .insert(novedadServicio);
@@ -135,14 +133,14 @@ class _NewsPageState extends State<NewsPage> {
                 }
               },
             ),
-            Text("2. Lista de agregados: ",
+            Text("2. Lista de agregados (${databaseMain.news.length}): ",
                 style: TextStyle(fontWeight: FontWeight.w400, fontSize: 16)),
             const SizedBox(height: 10),
             Column(
               children: [
                 Container(
                   child: SizedBox(
-                      height: MediaQuery.of(context).size.width - 85,
+                      height: MediaQuery.of(context).size.width - 120,
                       child: ListView.separated(
                         itemBuilder: (context, index) {
                           if (index < databaseMain.news.length) {

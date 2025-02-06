@@ -7,6 +7,13 @@ import 'package:weru/database/models/diagnosticoservicio.dart';
 import 'package:weru/database/models/equipo.dart';
 import 'package:weru/database/models/estadoservicio.dart';
 import 'package:weru/database/models/falla.dart';
+import 'package:weru/database/models/indicador.dart';
+import 'package:weru/database/models/indicadorservicio.dart';
+import 'package:weru/database/models/indirecto.dart';
+import 'package:weru/database/models/indirectoservicio.dart';
+import 'package:weru/database/models/item.dart';
+import 'package:weru/database/models/itemservicio.dart';
+import 'package:weru/database/models/maletin.dart';
 import 'package:weru/database/models/modelo.dart';
 import 'package:weru/database/models/novedad.dart';
 import 'package:weru/database/models/novedadservicio.dart';
@@ -21,6 +28,13 @@ import 'package:weru/database/providers/diagnosticoservicio_provider.dart';
 import 'package:weru/database/providers/equipo_provider.dart';
 import 'package:weru/database/providers/estadoservicio_provider.dart';
 import 'package:weru/database/providers/falla_provider.dart';
+import 'package:weru/database/providers/indicador_provider.dart';
+import 'package:weru/database/providers/indicadorservicio_provider.dart';
+import 'package:weru/database/providers/indirecto_provider.dart';
+import 'package:weru/database/providers/indirectoservicio_provider.dart';
+import 'package:weru/database/providers/item_provider.dart';
+import 'package:weru/database/providers/itemservicio_provider.dart';
+import 'package:weru/database/providers/maletin_provider.dart';
 import 'package:weru/database/providers/modelo_provider.dart';
 import 'package:weru/database/providers/novedad_provider.dart';
 import 'package:weru/database/providers/novedadservicio_provider.dart';
@@ -45,6 +59,14 @@ class DatabaseMain {
   List<DiagnosticoServicio> diagnosesServices = [];
   List<Actividad> activities = [];
   List<ActividadServicio> activitiesServices = [];
+  List<Item> refills = [];
+  List<ItemServicio> refillsServices = [];
+  List<Item> tools = [];
+  List<Maletin> briefcase = [];
+  List<Indirecto> overheads = [];
+  List<IndirectoServicio> overheadsServices = [];
+  List<Indicador> indicators = [];
+  List<IndicadorServicio> indicatorsServices = [];
 
   DatabaseMain({required this.path}) {}
   Future<void> getServices() async {
@@ -139,6 +161,71 @@ class DatabaseMain {
     }
   }
 
+  Future<void> getRefills() async {
+    final database = await db;
+    try {
+      final _refillsServices =
+          await ItemServicioProvider(db: database).getAll();
+
+      refills = await Future.wait(_refillsServices.map((item) async {
+        return await ItemProvider(db: database).getItemById(item.idItem);
+      }).toList());
+
+      refillsServices = _refillsServices;
+    } catch (e, stackTrace) {
+      print("Error getRefills() in main database: $e, $stackTrace");
+    }
+  }
+
+  Future<void> getTools() async {
+    final database = await db;
+    try {
+      final _briefcase = await MaletinProvider(db: database).getAll();
+
+      tools = await Future.wait(_briefcase.map((tool) async {
+        return await ItemProvider(db: database).getItemById(tool.idItem);
+      }).toList());
+
+      briefcase = _briefcase;
+    } catch (e, stackTrace) {
+      print("Error getTools() in main database: $e, $stackTrace");
+    }
+  }
+
+  Future<void> getOverheads() async {
+    final database = await db;
+    try {
+      final _overheadsServices =
+          await IndirectoServicioProvider(db: database).getAll();
+
+      overheads = await Future.wait(_overheadsServices.map((item) async {
+        return await IndirectoProvider(db: database)
+            .getItemById(item.idIndirecto);
+      }).toList());
+
+      overheadsServices = _overheadsServices;
+    } catch (e, stackTrace) {
+      print("Error getOverheads() in main database: $e, $stackTrace");
+    }
+  }
+
+  Future<void> getIndicators() async {
+    final database = await db;
+    try {
+      final _indicatorsServices =
+          await IndicadorServicioProvider(db: database).getAll();
+
+      indicators = await Future.wait(_indicatorsServices.map((item) async {
+        return await IndicadorProvider(db: database)
+            .getItemById(item.idIndicador);
+      }).toList());
+
+      indicatorsServices = _indicatorsServices;
+    } catch (e, stackTrace) {
+      print("Error getIndicators() in main database: $e, $stackTrace");
+    }
+  }
+
   Future<Database> onCreate() async {
     return await db;
   }
@@ -161,7 +248,7 @@ class DatabaseMain {
       'CREATE TABLE ActividadModelo (id INTEGER PRIMARY KEY, idActividad INTEGER, idModelo INTEGER)',
     );
     await db.execute(
-      'CREATE TABLE ActividadServicio (id INTEGER PRIMARY KEY, idActividad INTEGER NOT NULL, idServicio TEXT NOT NULL, cantidad INTEGER, costo INTEGER, valor INTEGER, ejecutada INTEGER DEFAULT 0)',
+      'CREATE TABLE ActividadServicio (id INTEGER PRIMARY KEY AUTOINCREMENT, idActividad INTEGER NOT NULL, idServicio TEXT NOT NULL, cantidad INTEGER, costo INTEGER, valor INTEGER, ejecutada INTEGER DEFAULT 0)',
     );
     await db.execute(
       'CREATE TABLE AdjuntoServicio (id INTEGER PRIMARY KEY, idServicio TEXT NOT NULL, idTecnico INTEGER, titulo TEXT, descripcion TEXT, tipo TEXT)',
@@ -179,7 +266,7 @@ class DatabaseMain {
       'CREATE TABLE Diagnostico (id INTEGER PRIMARY KEY, descripcion TEXT, estado INTEGER)',
     );
     await db.execute(
-      'CREATE TABLE DiagnosticoServicio (id INTEGER PRIMARY KEY, idServicio INTEGER, idDiagnostico INTEGER)',
+      'CREATE TABLE DiagnosticoServicio (id INTEGER PRIMARY KEY AUTOINCREMENT, idServicio INTEGER, idDiagnostico INTEGER)',
     );
     await db.execute(
         'CREATE TABLE Equipo (id INTEGER PRIMARY KEY, serial TEXT, nombre TEXT, fechaCompra TEXT, fechaGarantia TEXT, idModelo INTEGER, idEstadoEquipo INTEGER, idProveedor INTEGER, idCliente INTEGER)');
@@ -199,7 +286,7 @@ class DatabaseMain {
       'CREATE TABLE IndicadorModelo (id INTEGER PRIMARY KEY, idIndicador INTEGER, idModelo INTEGER)',
     );
     await db.execute(
-      'CREATE TABLE IndicadorServicio (id INTEGER PRIMARY KEY, idIndicador INTEGER NOT NULL,idServicio TEXT NOT NULL,idTecnico INTEGER,valor TEXT)',
+      'CREATE TABLE IndicadorServicio (id INTEGER PRIMARY KEY AUTOINCREMENT, idIndicador INTEGER NOT NULL,idServicio TEXT NOT NULL,idTecnico INTEGER,valor TEXT)',
     );
     await db.execute(
       'CREATE TABLE Indirecto (id INTEGER PRIMARY KEY, idEstado INTEGER NOT NULL, descripcion TEXT NOT NULL, costo INTEGER, valor INTEGER)',
@@ -208,7 +295,7 @@ class DatabaseMain {
       'CREATE TABLE IndirectoModelo (id INTEGER PRIMARY KEY, idIndirecto INTEGER, idModelo INTEGER)',
     );
     await db.execute(
-      'CREATE TABLE IndirectoServicio (id INTEGER PRIMARY KEY, idIndirecto INTEGER NOT NULL, idServicio TEXT NOT NULL, cantidad INTEGER, costo INTEGER, valor INTEGER)',
+      'CREATE TABLE IndirectoServicio (id INTEGER PRIMARY KEY AUTOINCREMENT, idIndirecto INTEGER NOT NULL, idServicio TEXT NOT NULL, cantidad INTEGER, costo INTEGER, valor INTEGER)',
     );
     await db.execute(
       'CREATE TABLE Item (id INTEGER PRIMARY KEY, SKU TEXT NOT NULL, descripcion TEXT, tipo INTEGER, costo INTEGER, precio INTEGER, idEstadoItem INTEGER, foto TEXT)',
@@ -220,10 +307,10 @@ class DatabaseMain {
       'CREATE TABLE ItemModelo (id INTEGER PRIMARY KEY, idItem INTEGER, idModelo INTEGER)',
     );
     await db.execute(
-      'CREATE TABLE ItemServicio (id INTEGER PRIMARY KEY, idItem INTEGER NOT NULL, idServicio INTEGER NOT NULL, cantidad REAL DEFAULT 0, costo INTEGER, valor INTEGER, cantidadReq REAL DEFAULT 0, fechaUltimaVez TEXT, vidaUtil TEXT)',
+      'CREATE TABLE ItemServicio (id INTEGER PRIMARY KEY AUTOINCREMENT, idItem INTEGER NOT NULL, idServicio INTEGER NOT NULL, cantidad REAL DEFAULT 0, costo INTEGER, valor INTEGER, cantidadReq REAL DEFAULT 0, fechaUltimaVez TEXT, vidaUtil TEXT)',
     );
     await db.execute(
-      'CREATE TABLE Maletin (id INTEGER PRIMARY KEY, idItem INTEGER NOT NULL, idTecnico INTEGER NOT NULL, cantidad REAL, costo REAL, valor REAL)',
+      'CREATE TABLE Maletin (id INTEGER PRIMARY KEY AUTOINCREMENT, idItem INTEGER NOT NULL, idTecnico INTEGER NOT NULL, cantidad INTEGER, costo REAL, valor REAL)',
     );
     await db.execute(
       'CREATE TABLE Modelo (id INTEGER PRIMARY KEY, descripcion TEXT)',
@@ -232,7 +319,7 @@ class DatabaseMain {
       'CREATE TABLE Novedad (id INTEGER PRIMARY KEY, descripcion TEXT, estado INTEGER)',
     );
     await db.execute(
-      'CREATE TABLE NovedadServicio (id INTEGER PRIMARY, idServicio INTEGER, idNovedad INTEGER)',
+      'CREATE TABLE NovedadServicio (id INTEGER PRIMARY AUTOINCREMENT, idServicio INTEGER, idNovedad INTEGER)',
     );
     await db.execute(
       'CREATE TABLE RegistroCamposAdicionales (id INTEGER PRIMARY KEY, idCamposAdicionales INTEGER NOT NULL, idRegistro INTEGER NOT NULL, valor INTEGER, nombre INTEGER)',

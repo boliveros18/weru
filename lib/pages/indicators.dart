@@ -1,0 +1,264 @@
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:weru/components/app_bar_ui.dart';
+import 'package:flutter/material.dart';
+import 'package:weru/components/app_status.dart';
+import 'package:weru/components/dialog_ui.dart';
+import 'package:weru/components/divider_ui.dart';
+import 'package:weru/components/progress_indicator_ui.dart';
+import 'package:weru/components/dropdown_menu_ui.dart';
+import 'package:weru/components/text_ui.dart';
+import 'package:weru/config/config.dart';
+import 'package:weru/database/main.dart';
+import 'package:weru/database/models/indicador.dart';
+import 'package:weru/database/models/indicadorservicio.dart';
+import 'package:weru/database/models/servicio.dart';
+import 'package:weru/database/providers/indicador_provider.dart';
+import 'package:weru/database/providers/indicadorservicio_provider.dart';
+import 'package:weru/database/providers/servicio_provider.dart';
+import 'package:weru/provider/session.dart';
+import 'package:provider/provider.dart';
+import 'package:sqflite/sqflite.dart';
+import 'package:dropdown_textfield/dropdown_textfield.dart';
+
+class IndicatorsPage extends StatefulWidget {
+  const IndicatorsPage({super.key});
+
+  @override
+  State<IndicatorsPage> createState() => _IndicatorPageState();
+}
+
+class _IndicatorPageState extends State<IndicatorsPage> {
+  late DatabaseMain databaseMain;
+  late Session session;
+  int index = 0;
+  bool isLoading = true;
+  late ServicioProvider servicioProvider;
+  late Servicio service;
+  late Database database;
+  late List<Indicador> indicators;
+  late List<IndicadorServicio> indicatorsServices;
+
+  @override
+  void initState() {
+    super.initState();
+    initializeDatabase();
+    session = Provider.of<Session>(context, listen: false);
+    index = session.indexServicio;
+  }
+
+  Future<void> initializeDatabase() async {
+    databaseMain = DatabaseMain(path: await getLocalDatabasePath());
+    database =
+        await DatabaseMain(path: await getLocalDatabasePath()).onCreate();
+    await databaseMain.getServices();
+    await databaseMain.getIndicators();
+    indicators = await IndicadorProvider(db: database).getAll();
+    indicatorsServices = await databaseMain.indicatorsServices;
+    service = databaseMain.services[index];
+    setState(() {
+      isLoading = false;
+      servicioProvider = ServicioProvider(db: database);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (isLoading) {
+      return const Scaffold(
+        body: Center(
+          child: ProgressIndicatorUi(),
+        ),
+      );
+    }
+    return Scaffold(
+      appBar: const AppBarUi(
+        header: "Indicadores",
+        centerTitle: true,
+      ),
+      backgroundColor: Colors.white,
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.only(left: 20, right: 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [AppStatus(), Section()],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Column Section() {
+    return Column(
+      children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 20),
+            DropdownMenuUi(
+              hint: "Valor",
+              textfield: true,
+              list: indicators.map((item) {
+                return DropDownValueModel(
+                  name: item.descripcion,
+                  value: item.id,
+                );
+              }).toList(),
+              title: "Indicador",
+              onConfirm: (id, value) async {
+                bool isEqual = await databaseMain.indicatorsServices
+                    .any((_new) => _new.idIndicador == id);
+                if (!isEqual) {
+                  IndicadorServicio indicatorServices = IndicadorServicio(
+                      idIndicador: id,
+                      idServicio: service.id,
+                      idTecnico: service.idTecnico,
+                      valor: value);
+                  await IndicadorServicioProvider(db: database)
+                      .insert(indicatorServices);
+                  await databaseMain.getIndicators();
+                  setState(() {});
+                }
+              },
+            ),
+            Text(
+                "2. Lista de agregados (${databaseMain.indicatorsServices.length}): ",
+                style: TextStyle(fontWeight: FontWeight.w400, fontSize: 16)),
+            const SizedBox(height: 10),
+            Column(
+              children: [
+                Container(
+                  child: SizedBox(
+                      height: MediaQuery.of(context).size.width - 120,
+                      child: ListView.separated(
+                        itemBuilder: (context, index) {
+                          if (index < databaseMain.indicatorsServices.length) {
+                            final _new = databaseMain.indicatorsServices[index];
+                            final _indicator = databaseMain.indicators
+                                .where((item) => item.id == _new.idIndicador)
+                                .first;
+                            return GestureDetector(
+                                onTap: () {
+                                  (Future.delayed(Duration.zero, () {
+                                    DialogUi.show(
+                                      hintText: "Valor",
+                                      context: context,
+                                      title:
+                                          'Edita el campo de cantidad de este item: ${_indicator.descripcion}',
+                                      textField: true,
+                                      onConfirm: (value) async {
+                                        Map<String, Object?> indicatorItem =
+                                            _new.toMap();
+                                        indicatorItem['valor'] = value;
+                                        IndicadorServicio updated =
+                                            IndicadorServicio.fromMap(
+                                                indicatorItem);
+                                        await IndicadorServicioProvider(
+                                                db: database)
+                                            .update(updated);
+                                        await databaseMain.getIndicators();
+                                        setState(() {});
+                                      },
+                                    );
+                                  }));
+                                },
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          flex: 3,
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              SizedBox(height: 5),
+                                              TextUi(
+                                                  text:
+                                                      'Código: ${_indicator.id}',
+                                                  fontSize: 15),
+                                              TextUi(
+                                                  text:
+                                                      'Nombre: ${_indicator.descripcion}',
+                                                  fontSize: 15),
+                                              TextUi(
+                                                  text: 'Valor: ${_new.valor}',
+                                                  fontSize: 15),
+                                              SizedBox(height: 10),
+                                            ],
+                                          ),
+                                        ),
+                                        SizedBox(
+                                            width: MediaQuery.of(context)
+                                                    .size
+                                                    .width *
+                                                0.09,
+                                            child: Container(
+                                              width: 30,
+                                              height: 30,
+                                              decoration: BoxDecoration(
+                                                color: Colors.grey[100],
+                                                borderRadius:
+                                                    BorderRadius.circular(10),
+                                              ),
+                                              child: IconButton(
+                                                onPressed: () async {
+                                                  try {
+                                                    await IndicadorServicioProvider(
+                                                            db: database)
+                                                        .deleteByIdIndicador(
+                                                            _new.idIndicador);
+                                                    await databaseMain
+                                                        .getIndicators();
+                                                    setState(() {});
+                                                  } catch (e) {
+                                                    print(
+                                                        "Error al eliminar: $e");
+                                                  }
+                                                },
+                                                icon: SvgPicture.asset(
+                                                  "assets/icons/trash-can-regular.svg",
+                                                  width: 27,
+                                                  height: 27,
+                                                  colorFilter: ColorFilter.mode(
+                                                    const Color.fromARGB(
+                                                        255, 255, 118, 108),
+                                                    BlendMode.srcIn,
+                                                  ),
+                                                ),
+                                              ),
+                                            )),
+                                      ],
+                                    ),
+                                    DividerUi(
+                                      paddingHorizontal: 0,
+                                    ),
+                                  ],
+                                ));
+                          } else {
+                            return Container();
+                          }
+                        },
+                        separatorBuilder: (context, index) =>
+                            const SizedBox(height: 5),
+                        itemCount: databaseMain.indicatorsServices.length,
+                      )),
+                )
+              ],
+            ),
+            if (isLoading) const ProgressIndicatorUi()
+          ],
+        ),
+      ],
+    );
+  }
+}

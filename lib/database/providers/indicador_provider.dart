@@ -34,8 +34,8 @@ class IndicadorProvider {
         id: map['id'] as int,
         idEstadoIndicador: map['idEstadoIndicador'] as int,
         descripcion: map['descripcion'] as String,
-        valorMin: map['valorMin'] as double,
-        valorMax: map['valorMax'] as double,
+        valorMin: (map['valorMin'] as num).toDouble(),
+        valorMax: (map['valorMax'] as num).toDouble(),
         tipo: map['tipo'] as String,
         icono: map['icono'] as String,
       );

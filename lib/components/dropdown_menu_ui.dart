@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:dropdown_textfield/dropdown_textfield.dart';
 import 'package:weru/components/button_ui.dart';
+import 'package:weru/components/dialog_ui.dart';
 import 'package:weru/components/text_field_ui.dart';
 
 class DropdownMenuUi extends StatefulWidget {
   final List<DropDownValueModel> list;
   final String title;
-  final Function(String) onConfirm;
+  final Function(int id, String value) onConfirm;
   final bool textfield;
   final String hint;
 
@@ -23,7 +24,9 @@ class DropdownMenuUi extends StatefulWidget {
 }
 
 class _DropdownMenuUiState extends State<DropdownMenuUi> {
-  String selectedId = "";
+  int selectedId = 0;
+  String TextFieldValue = "";
+  final TextEditingController _textController = TextEditingController();
   final SingleValueDropDownController _dropdownController =
       SingleValueDropDownController(
     data: null,
@@ -65,14 +68,19 @@ class _DropdownMenuUiState extends State<DropdownMenuUi> {
           dropDownItemCount: 5,
           onChanged: (dropDownValue) {
             if (dropDownValue is DropDownValueModel) {
-              selectedId = dropDownValue.value ?? "";
+              selectedId = dropDownValue.value ?? 0;
             } else {
-              selectedId = "";
+              selectedId = 0;
             }
           },
         ),
         const SizedBox(height: 20),
-        widget.textfield ? TextFieldUi(hint: widget.hint) : Container(),
+        widget.textfield
+            ? TextFieldUi(
+                hint: widget.hint,
+                onChanged: (value) => TextFieldValue = value,
+                controller: _textController)
+            : Container(),
         widget.textfield ? const SizedBox(height: 20) : Container(),
         Row(
           children: [
@@ -81,9 +89,39 @@ class _DropdownMenuUiState extends State<DropdownMenuUi> {
               child: ButtonUi(
                 value: "Agregar",
                 onClicked: () {
-                  if (selectedId.isNotEmpty) {
-                    widget.onConfirm(selectedId);
-                    _dropdownController.setDropDown(null);
+                  if (widget.textfield) {
+                    if (widget.textfield && TextFieldValue.isEmpty) {
+                      (Future.delayed(Duration.zero, () {
+                        DialogUi.show(
+                          context: context,
+                          title:
+                              "Por favor rellena el campo de ${widget.hint.toLowerCase()}",
+                          textField: false,
+                          onConfirm: (value) async {},
+                        );
+                      }));
+                    } else {
+                      if (selectedId > 0) {
+                        widget.onConfirm(selectedId, TextFieldValue);
+                        _dropdownController.setDropDown(null);
+                        _textController.clear();
+                        FocusScope.of(context).unfocus();
+                      } else {
+                        (Future.delayed(Duration.zero, () {
+                          DialogUi.show(
+                            context: context,
+                            title: "Por favor selecciona un item",
+                            textField: false,
+                            onConfirm: (value) async {},
+                          );
+                        }));
+                      }
+                    }
+                  } else {
+                    if (selectedId > 0) {
+                      widget.onConfirm(selectedId, TextFieldValue);
+                      _dropdownController.setDropDown(null);
+                    }
                   }
                 },
                 color: const Color(0xff4caf50),

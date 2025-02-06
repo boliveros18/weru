@@ -1,12 +1,12 @@
 class IndicadorServicio {
-  final int id;
+  final int? id;
   final int idIndicador;
   final int idServicio;
   final int idTecnico;
   final String valor;
 
   IndicadorServicio({
-    required this.id,
+    this.id,
     required this.idIndicador,
     required this.idServicio,
     required this.idTecnico,
@@ -23,9 +23,9 @@ class IndicadorServicio {
     };
   }
 
-   factory   IndicadorServicio.fromMap(Map<String, dynamic> map) {
-    return   IndicadorServicio(
-           id: int.tryParse(map['id']?.toString() ?? '') ?? 0,
+  factory IndicadorServicio.fromMap(Map<String, dynamic> map) {
+    return IndicadorServicio(
+      id: int.tryParse(map['id']?.toString() ?? '') ?? 0,
       idIndicador: int.tryParse(map['idIndicador']?.toString() ?? '') ?? 0,
       idServicio: int.tryParse(map['idServicio']?.toString() ?? '') ?? 0,
       idTecnico: int.tryParse(map['idTecnico']?.toString() ?? '') ?? 0,

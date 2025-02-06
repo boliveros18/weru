@@ -34,7 +34,7 @@ class MaletinProvider {
         id: map['id'] as int,
         idItem: map['idItem'] as int,
         idTecnico: map['idTecnico'] as int,
-        cantidad: map['cantidad'] as double,
+        cantidad: map['cantidad'] as int,
         costo: map['costo'] as double,
         valor: map['valor'] as double,
       );
@@ -58,6 +58,14 @@ class MaletinProvider {
     );
   }
 
+  Future<void> deleteByIdItem(int id) async {
+    await db.delete(
+      'Maletin',
+      where: 'idItem = ?',
+      whereArgs: [id],
+    );
+  }
+
   Future<void> insertInitFile(ArchiveFile file) async {
     List<int> bytes = file.content;
     String fileContent = utf8.decode(bytes);
@@ -69,7 +77,7 @@ class MaletinProvider {
         id: int.parse(parts[0].trim()),
         idItem: int.parse(parts[1].trim()),
         idTecnico: int.parse(parts[2].trim()),
-        cantidad: double.parse(parts[3].trim()),
+        cantidad: int.parse(parts[3].trim()),
         costo: double.parse(parts[4].trim()),
         valor: double.parse(parts[5].trim()),
       );

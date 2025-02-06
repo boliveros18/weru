@@ -58,6 +58,14 @@ class IndirectoServicioProvider {
     );
   }
 
+  Future<void> deleteByIdIndirecto(int id) async {
+    await db.delete(
+      'IndirectoServicio',
+      where: 'idIndirecto = ?',
+      whereArgs: [id],
+    );
+  }
+
   Future<void> insertInitFile(ArchiveFile file) async {
     List<int> bytes = file.content;
     String fileContent = utf8.decode(bytes);

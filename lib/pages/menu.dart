@@ -10,7 +10,11 @@ import 'package:weru/database/models/servicio.dart';
 import 'package:weru/database/providers/servicio_provider.dart';
 import 'package:weru/pages/activity.dart';
 import 'package:weru/pages/diagnosis.dart';
+import 'package:weru/pages/indicators.dart';
+import 'package:weru/pages/overhead.dart';
+import 'package:weru/pages/refills.dart';
 import 'package:weru/pages/service.dart';
+import 'package:weru/pages/tools.dart';
 import 'package:weru/provider/session.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
@@ -142,17 +146,17 @@ class _MenuPageState extends State<MenuPage> {
             MenuItemUi(
                 IconPath: "assets/icons/repuestos.png",
                 title: "Repuestos",
-                page: ServicePage()),
+                page: RefillsPage()),
             const SizedBox(width: 10),
             MenuItemUi(
                 IconPath: "assets/icons/herramientas.png",
                 title: "Herramientas",
-                page: ServicePage()),
+                page: ToolsPage()),
             const SizedBox(width: 10),
             MenuItemUi(
                 IconPath: "assets/icons/indirectos.png",
                 title: "Indirectos",
-                page: ServicePage()),
+                page: OverheadPage()),
           ],
         ),
         const SizedBox(height: 30),
@@ -168,7 +172,7 @@ class _MenuPageState extends State<MenuPage> {
             MenuItemUi(
                 IconPath: "assets/icons/indicador.png",
                 title: "Indicadores",
-                page: ServicePage()),
+                page: IndicatorsPage()),
             const SizedBox(width: 10),
             MenuItemUi(
                 IconPath: "assets/icons/pencil.png",
