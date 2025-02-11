@@ -51,10 +51,10 @@ class _ToolsPageState extends State<ToolsPage> {
     database =
         await DatabaseMain(path: await getLocalDatabasePath()).onCreate();
     await databaseMain.getServices();
-    await databaseMain.getTools();
+    service = databaseMain.services[index];
+    await databaseMain.getTools(service.idTecnico);
     tools = await ItemProvider(db: database).getAllByType(2);
     briefcase = await databaseMain.briefcase;
-    service = databaseMain.services[index];
     setState(() {
       isLoading = false;
       servicioProvider = ServicioProvider(db: database);
@@ -100,7 +100,6 @@ class _ToolsPageState extends State<ToolsPage> {
       children: [
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
           children: [
             const SizedBox(height: 20),
             DropdownMenuUi(
@@ -126,7 +125,7 @@ class _ToolsPageState extends State<ToolsPage> {
                         costo: tool.costo.toDouble(),
                         valor: tool.precio.toDouble());
                     await MaletinProvider(db: database).insert(briefcase);
-                    await databaseMain.getTools();
+                    await databaseMain.getTools(service.idTecnico);
                     setState(() {});
                   }
                 } else {
@@ -174,7 +173,8 @@ class _ToolsPageState extends State<ToolsPage> {
                                               Maletin.fromMap(toolItem);
                                           await MaletinProvider(db: database)
                                               .update(updated);
-                                          await databaseMain.getTools();
+                                          await databaseMain
+                                              .getTools(service.idTecnico);
                                           setState(() {});
                                         } else {
                                           (Future.delayed(Duration.zero, () {
@@ -238,8 +238,8 @@ class _ToolsPageState extends State<ToolsPage> {
                                                             db: database)
                                                         .deleteByIdItem(
                                                             _new.id);
-                                                    await databaseMain
-                                                        .getTools();
+                                                    await databaseMain.getTools(
+                                                        service.idTecnico);
                                                     setState(() {});
                                                   } catch (e) {
                                                     print(

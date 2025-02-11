@@ -51,10 +51,10 @@ class _OverheadPageState extends State<OverheadPage> {
     database =
         await DatabaseMain(path: await getLocalDatabasePath()).onCreate();
     await databaseMain.getServices();
-    await databaseMain.getOverheads();
+    service = databaseMain.services[index];
+    await databaseMain.getOverheads(service.id);
     overheads = await IndirectoProvider(db: database).getAll();
     overheadsServices = await databaseMain.overheadsServices;
-    service = databaseMain.services[index];
     setState(() {
       isLoading = false;
       servicioProvider = ServicioProvider(db: database);
@@ -128,7 +128,7 @@ class _OverheadPageState extends State<OverheadPage> {
                         valor: overhead.valor.toInt());
                     await IndirectoServicioProvider(db: database)
                         .insert(overheadServices);
-                    await databaseMain.getOverheads();
+                    await databaseMain.getOverheads(service.id);
                     setState(() {});
                   }
                 } else {
@@ -178,7 +178,8 @@ class _OverheadPageState extends State<OverheadPage> {
                                           await IndirectoServicioProvider(
                                                   db: database)
                                               .update(updated);
-                                          await databaseMain.getOverheads();
+                                          await databaseMain
+                                              .getOverheads(service.id);
                                           setState(() {});
                                         } else {
                                           (Future.delayed(Duration.zero, () {
@@ -218,9 +219,6 @@ class _OverheadPageState extends State<OverheadPage> {
                                                   text:
                                                       'Cantidad: ${_overhead.cantidad}',
                                                   fontSize: 15),
-                                              TextUi(
-                                                  text: 'Precio: ${_new.costo}',
-                                                  fontSize: 15),
                                               SizedBox(height: 10),
                                             ],
                                           ),
@@ -246,7 +244,8 @@ class _OverheadPageState extends State<OverheadPage> {
                                                         .deleteByIdIndirecto(
                                                             _new.id);
                                                     await databaseMain
-                                                        .getOverheads();
+                                                        .getOverheads(
+                                                            service.id);
                                                     setState(() {});
                                                   } catch (e) {
                                                     print(

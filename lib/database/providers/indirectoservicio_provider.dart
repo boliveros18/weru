@@ -41,6 +41,24 @@ class IndirectoServicioProvider {
     }).toList();
   }
 
+  Future<List<IndirectoServicio>> getAllByIdServicio(int idServicio) async {
+    final List<Map<String, Object?>> maps = await db.query(
+      'IndirectoServicio',
+      where: 'idServicio = ?',
+      whereArgs: [idServicio],
+    );
+    return maps.map((map) {
+      return IndirectoServicio(
+        id: map['id'] as int,
+        idIndirecto: map['idIndirecto'] as int,
+        idServicio: map['idServicio'] as int,
+        cantidad: map['cantidad'] as int,
+        costo: map['costo'] as int,
+        valor: map['valor'] as int,
+      );
+    }).toList();
+  }
+
   Future<void> update(IndirectoServicio indirectoservicio) async {
     await db.update(
       'IndirectoServicio',

@@ -51,10 +51,10 @@ class _IndicatorPageState extends State<IndicatorsPage> {
     database =
         await DatabaseMain(path: await getLocalDatabasePath()).onCreate();
     await databaseMain.getServices();
-    await databaseMain.getIndicators();
+    service = databaseMain.services[index];
+    await databaseMain.getIndicators(service.id);
     indicators = await IndicadorProvider(db: database).getAll();
     indicatorsServices = await databaseMain.indicatorsServices;
-    service = databaseMain.services[index];
     setState(() {
       isLoading = false;
       servicioProvider = ServicioProvider(db: database);
@@ -124,7 +124,7 @@ class _IndicatorPageState extends State<IndicatorsPage> {
                       valor: value);
                   await IndicadorServicioProvider(db: database)
                       .insert(indicatorServices);
-                  await databaseMain.getIndicators();
+                  await databaseMain.getIndicators(service.id);
                   setState(() {});
                 }
               },
@@ -152,7 +152,7 @@ class _IndicatorPageState extends State<IndicatorsPage> {
                                       hintText: "Valor",
                                       context: context,
                                       title:
-                                          'Edita el campo de cantidad de este item: ${_indicator.descripcion}',
+                                          'Edita el campo de valor de este item: ${_indicator.descripcion}',
                                       textField: true,
                                       onConfirm: (value) async {
                                         Map<String, Object?> indicatorItem =
@@ -164,7 +164,8 @@ class _IndicatorPageState extends State<IndicatorsPage> {
                                         await IndicadorServicioProvider(
                                                 db: database)
                                             .update(updated);
-                                        await databaseMain.getIndicators();
+                                        await databaseMain
+                                            .getIndicators(service.id);
                                         setState(() {});
                                       },
                                     );
@@ -218,7 +219,8 @@ class _IndicatorPageState extends State<IndicatorsPage> {
                                                         .deleteByIdIndicador(
                                                             _new.idIndicador);
                                                     await databaseMain
-                                                        .getIndicators();
+                                                        .getIndicators(
+                                                            service.id);
                                                     setState(() {});
                                                   } catch (e) {
                                                     print(

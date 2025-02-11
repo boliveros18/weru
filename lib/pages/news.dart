@@ -53,10 +53,11 @@ class _NewsPageState extends State<NewsPage> {
     database =
         await DatabaseMain(path: await getLocalDatabasePath()).onCreate();
     await databaseMain.getServices();
-    await databaseMain.getNews();
+    servicio = databaseMain.services[index];
+    await databaseMain.getNews(servicio.id);
     novedades = await NovedadProvider(db: database).getAll();
     novedadesServicio = await databaseMain.newsServices;
-    servicio = databaseMain.services[index];
+
     setState(() {
       isLoading = false;
       servicioProvider = ServicioProvider(db: database);
@@ -128,7 +129,7 @@ class _NewsPageState extends State<NewsPage> {
                     jsonEncode(novedadServicio.toMap()),
                     "NovedadServicio",
                   );
-                  await databaseMain.getNews();
+                  await databaseMain.getNews(servicio.id);
                   setState(() {});
                 }
               },
@@ -186,7 +187,8 @@ class _NewsPageState extends State<NewsPage> {
                                                 await NovedadServicioProvider(
                                                         db: database)
                                                     .deleteByIdNovedad(_new.id);
-                                                await databaseMain.getNews();
+                                                await databaseMain
+                                                    .getNews(servicio.id);
                                                 setState(() {});
                                               } catch (e) {
                                                 print("Error al eliminar: $e");

@@ -39,6 +39,21 @@ class DiagnosticoServicioProvider {
     }).toList();
   }
 
+  Future<List<DiagnosticoServicio>> getAllByIdServicio(int idServicio) async {
+    final List<Map<String, Object?>> maps = await db.query(
+      'DiagnosticoServicio',
+      where: 'idServicio = ?',
+      whereArgs: [idServicio],
+    );
+    return maps.map((map) {
+      return DiagnosticoServicio(
+        id: map['id'] as int,
+        idServicio: map['idServicio'] as int,
+        idDiagnostico: map['idDiagnostico'] as int,
+      );
+    }).toList();
+  }
+
   Future<void> update(DiagnosticoServicio diagnosticoservicio) async {
     await db.update(
       'DiagnosticoServicio',

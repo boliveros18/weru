@@ -54,6 +54,25 @@ class ActividadServicioProvider {
     }).toList();
   }
 
+  Future<List<ActividadServicio>> getAllByIdServicio(int idServicio) async {
+    final List<Map<String, Object?>> maps = await db.query(
+      'ActividadServicio',
+      where: 'idServicio = ?',
+      whereArgs: [idServicio],
+    );
+    return maps.map((map) {
+      return ActividadServicio(
+        id: map['id'] as int,
+        idActividad: map['idActividad'] as int,
+        idServicio: map['idServicio'] as int,
+        cantidad: map['cantidad'] as int,
+        costo: map['costo'] as int,
+        valor: map['valor'] as int,
+        ejecutada: map['ejecutada'] as int,
+      );
+    }).toList();
+  }
+
   Future<void> update(ActividadServicio actividadservicio) async {
     await db.update(
       'ActividadServicio',

@@ -9,15 +9,16 @@ class TextFieldUi extends StatelessWidget {
   final Function(String)? onChanged;
   final bool regular;
 
-  const TextFieldUi(
-      {super.key,
-      required this.hint,
-      this.prefixIcon = false,
-      this.prefixIconPath,
-      this.minLines = 1,
-      this.controller,
-      this.onChanged,
-      this.regular = true});
+  const TextFieldUi({
+    super.key,
+    required this.hint,
+    this.prefixIcon = false,
+    this.prefixIconPath,
+    this.minLines = 1,
+    this.controller,
+    this.onChanged,
+    this.regular = true,
+  });
 
   @override
   Widget build(BuildContext context) {

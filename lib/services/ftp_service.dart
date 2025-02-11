@@ -143,13 +143,16 @@ class FTPService {
     }
   }
 
-  static Future<void> sendImages(String imagePath) async {
-    final response = await http.post(
-      Uri.http(appRibGetMessagesUrlHost, appRibSendImagesUrlMethod),
-      body: imagePath,
-    );
+  static Future<void> sendImage(String imagePath) async {
+    final request = http.MultipartRequest(
+        "POST", Uri.http(appRibGetMessagesUrlHost, appRibSendImagesUrlMethod));
+    var file = File(imagePath);
+    request.files.add(await http.MultipartFile.fromPath('file', file.path));
+    final response = await http.Response.fromStream(await request.send());
+
     if (response.statusCode == 200) {
-      print('Imagen enviada');
+      print("Imagen enviada");
+      await file.delete();
     } else {
       print('Error al enviar imagen: ${response.statusCode}');
     }

@@ -50,10 +50,11 @@ class _ActivityPageState extends State<ActivityPage> {
     database =
         await DatabaseMain(path: await getLocalDatabasePath()).onCreate();
     await databaseMain.getServices();
-    await databaseMain.getActivities();
+    service = databaseMain.services[index];
+    await databaseMain.getActivities(service.id);
     activities = await ActividadProvider(db: database).getAll();
     activitiesService = await databaseMain.activitiesServices;
-    service = databaseMain.services[index];
+
     setState(() {
       isLoading = false;
       servicioProvider = ServicioProvider(db: database);
@@ -127,7 +128,7 @@ class _ActivityPageState extends State<ActivityPage> {
                   );
                   await ActividadServicioProvider(db: database)
                       .insert(actividadServicio);
-                  await databaseMain.getActivities();
+                  await databaseMain.getActivities(service.id);
                   setState(() {});
                 }
               },
@@ -212,7 +213,8 @@ class _ActivityPageState extends State<ActivityPage> {
                                                         .update(
                                                             activityService2Update);
                                                     await databaseMain
-                                                        .getActivities();
+                                                        .getActivities(
+                                                            service.id);
                                                     setState(() {
                                                       value;
                                                     });
@@ -245,7 +247,7 @@ class _ActivityPageState extends State<ActivityPage> {
                                                     .deleteByIdActividad(
                                                         _new.id);
                                                 await databaseMain
-                                                    .getActivities();
+                                                    .getActivities(service.id);
                                                 setState(() {});
                                               } catch (e) {
                                                 print("Error al eliminar: $e");

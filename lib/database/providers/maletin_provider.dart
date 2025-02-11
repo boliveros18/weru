@@ -41,6 +41,24 @@ class MaletinProvider {
     }).toList();
   }
 
+  Future<List<Maletin>> getAllByIdTecnico(int idTecnico) async {
+    final List<Map<String, Object?>> maps = await db.query(
+      'Maletin',
+      where: 'idTecnico = ?',
+      whereArgs: [idTecnico],
+    );
+    return maps.map((map) {
+      return Maletin(
+        id: map['id'] as int,
+        idItem: map['idItem'] as int,
+        idTecnico: map['idTecnico'] as int,
+        cantidad: map['cantidad'] as int,
+        costo: map['costo'] as double,
+        valor: map['valor'] as double,
+      );
+    }).toList();
+  }
+
   Future<void> update(Maletin maletin) async {
     await db.update(
       'Maletin',

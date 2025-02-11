@@ -51,10 +51,10 @@ class _RefillsPageState extends State<RefillsPage> {
     database =
         await DatabaseMain(path: await getLocalDatabasePath()).onCreate();
     await databaseMain.getServices();
-    await databaseMain.getRefills();
+    service = databaseMain.services[index];
+    await databaseMain.getRefills(service.id);
     refills = await ItemProvider(db: database).getAllByType(1);
     refillsServices = await databaseMain.refillsServices;
-    service = databaseMain.services[index];
     setState(() {
       isLoading = false;
       servicioProvider = ServicioProvider(db: database);
@@ -131,7 +131,7 @@ class _RefillsPageState extends State<RefillsPage> {
                         vidaUtil: "");
                     await ItemServicioProvider(db: database)
                         .insert(refillService);
-                    await databaseMain.getRefills();
+                    await databaseMain.getRefills(service.id);
                     setState(() {});
                   }
                 } else {
@@ -181,7 +181,8 @@ class _RefillsPageState extends State<RefillsPage> {
                                           await ItemServicioProvider(
                                                   db: database)
                                               .update(updated);
-                                          await databaseMain.getRefills();
+                                          await databaseMain
+                                              .getRefills(service.id);
                                           setState(() {});
                                         } else {
                                           (Future.delayed(Duration.zero, () {
@@ -258,7 +259,7 @@ class _RefillsPageState extends State<RefillsPage> {
                                                             db: database)
                                                         .delete(_new.id!);
                                                     await databaseMain
-                                                        .getRefills();
+                                                        .getRefills(service.id);
                                                     setState(() {});
                                                   } catch (e) {
                                                     print(

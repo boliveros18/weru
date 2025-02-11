@@ -103,7 +103,7 @@ class _HomePageState extends State<HomePage> {
               final statusColor = getStatusColor(status.nombre);
 
               return Container(
-                height: 161,
+                height: 180,
                 width: MediaQuery.of(context).size.width,
                 decoration: BoxDecoration(
                   color: Colors.white,
@@ -167,10 +167,15 @@ class _HomePageState extends State<HomePage> {
                       },
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.start,
                         children: [
                           Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.max,
                             children: [
-                              TextUi(text: 'N° Servicio: ${service.orden}    '),
+                              TextUi(text: 'N° Servicio: ${service.orden}'),
+                              const SizedBox(width: 15),
                               TextUi(text: 'Radicado: ${service.radicado}'),
                             ],
                           ),
@@ -178,6 +183,7 @@ class _HomePageState extends State<HomePage> {
                           TextUi(text: 'Dirección: ${service.direccion}'),
                           TextUi(text: 'Ubicación: ${city.nombre}'),
                           TextUi(text: 'Equipo: ${equipment.nombre}'),
+                          TextUi(text: 'Serial: ${equipment.serial}'),
                           TextUi(text: 'Modelo: ${model.descripcion}'),
                           Row(
                             children: [

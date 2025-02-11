@@ -99,222 +99,197 @@ class _ServicePageState extends State<ServicePage> {
   }
 
   Column serviceMainSection() {
+    final service = databaseMain.services[index];
+    final client = databaseMain.clients[index];
+    final servicesStatus = databaseMain.servicesStatus[index];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(
-          height: statusServiceIdMenu == 3 ? 200 : 150,
-          child: ListView.separated(
-            itemBuilder: (context, index) {
-              final service = databaseMain.services[index];
-              final client = databaseMain.clients[index];
-              final servicesStatus = databaseMain.servicesStatus[index];
-              return Container(
-                height: statusServiceIdMenu == 3 ? 200 : 150,
-                width: MediaQuery.of(context).size.width,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Center(
-                      child: TextUi(text: 'N° Servicio: ${service.orden}'),
-                    ),
-                    const SizedBox(height: 10),
-                    statusServiceIdMenu == 3
-                        ? Container(
-                            color: getStatusColor(servicesStatus.nombre),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Padding(
-                                  padding:
-                                      const EdgeInsets.fromLTRB(30, 2, 30, 2),
-                                  child: TextUi(
-                                    text: servicesStatus.nombre,
-                                    color: Colors.white,
-                                    main: true,
-                                    fontSize: 16,
-                                  ),
+            height: statusServiceIdMenu == 3 ? 200 : 150,
+            child: Container(
+              height: statusServiceIdMenu == 3 ? 200 : 150,
+              width: MediaQuery.of(context).size.width,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: TextUi(text: 'N° Servicio: ${service.orden}'),
+                  ),
+                  const SizedBox(height: 10),
+                  statusServiceIdMenu == 3
+                      ? Container(
+                          color: getStatusColor(servicesStatus.nombre),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Padding(
+                                padding:
+                                    const EdgeInsets.fromLTRB(30, 2, 30, 2),
+                                child: TextUi(
+                                  text: servicesStatus.nombre,
+                                  color: Colors.white,
+                                  main: true,
+                                  fontSize: 16,
                                 ),
-                              ],
-                            ),
-                          )
-                        : Container(),
-                    const SizedBox(height: 10),
-                    Container(
-                      color: const Color.fromARGB(255, 0, 45, 168),
-                      child: Column(
+                              ),
+                            ],
+                          ),
+                        )
+                      : Container(),
+                  const SizedBox(height: 10),
+                  Container(
+                    color: const Color.fromARGB(255, 0, 45, 168),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(20, 2, 20, 2),
+                          child: TextUi(
+                            text: 'Datos del cliente',
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  DividerUi(paddingHorizontal: 0),
+                  const SizedBox(height: 10),
+                  Row(children: [
+                    Row(
+                      children: [
+                        const SizedBox(width: 20),
+                        SvgPicture.asset(
+                          "assets/icons/pen-solid.svg",
+                          width: 40,
+                          height: 40,
+                          colorFilter: const ColorFilter.mode(
+                            Color(0xFF03a9f4),
+                            BlendMode.srcIn,
+                          ),
+                        ),
+                        const SizedBox(width: 20),
+                      ],
+                    ),
+                    Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(20, 2, 20, 2),
-                            child: TextUi(
-                              text: 'Datos del cliente',
-                              color: Colors.white,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    DividerUi(paddingHorizontal: 0),
-                    const SizedBox(height: 10),
-                    Row(children: [
-                      Row(
-                        children: [
-                          const SizedBox(width: 20),
-                          SvgPicture.asset(
-                            "assets/icons/pen-solid.svg",
-                            width: 40,
-                            height: 40,
-                            colorFilter: const ColorFilter.mode(
-                              Color(0xFF03a9f4),
-                              BlendMode.srcIn,
-                            ),
-                          ),
-                          const SizedBox(width: 20),
-                        ],
-                      ),
-                      Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            TextUi(text: 'Dirección: ${service.direccion}'),
-                            TextUi(text: 'Establecimiento: ${service.nombre}'),
-                            TextUi(text: 'Telefono: ${client.celular}'),
-                            TextUi(text: 'Celular: ${client.celular}'),
-                          ])
-                    ]),
-                  ],
-                ),
-              );
-            },
-            separatorBuilder: (context, index) => const SizedBox(
-              height: 2,
-            ),
-            itemCount: databaseMain.services.length,
-            scrollDirection: Axis.vertical,
-          ),
-        ),
+                          TextUi(text: 'Dirección: ${service.direccion}'),
+                          TextUi(text: 'Establecimiento: ${service.nombre}'),
+                          TextUi(text: 'Telefono: ${client.celular}'),
+                          TextUi(text: 'Celular: ${client.celular}'),
+                        ])
+                  ]),
+                ],
+              ),
+            )),
       ],
     );
   }
 
   Column serviceMiddleSection() {
+    final service = databaseMain.services[index];
+    final type = databaseMain.servicesTypes[index];
+    final fail = databaseMain.fails[index];
+    final equipment = databaseMain.equipments[index];
+    final dateTime = service.fechayhorainicio.split(' ');
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(
           height: statusServiceIdMenu == 3 ? 250 : 200,
-          child: ListView.separated(
-            itemBuilder: (context, index) {
-              final service = databaseMain.services[index];
-              final type = databaseMain.servicesTypes[index];
-              final fail = databaseMain.fails[index];
-              final equipment = databaseMain.equipments[index];
-              final dateTime = service.fechayhorainicio.split(' ');
-
-              return Container(
-                height: statusServiceIdMenu == 3 ? 250 : 200,
-                width: MediaQuery.of(context).size.width,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 10),
-                    Container(
-                      color: const Color.fromARGB(255, 0, 45, 168),
-                      child: Column(
+          child: Container(
+            height: statusServiceIdMenu == 3 ? 250 : 200,
+            width: MediaQuery.of(context).size.width,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 10),
+                Container(
+                  color: const Color.fromARGB(255, 0, 45, 168),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(20, 2, 20, 2),
+                        child: TextUi(
+                          text: 'Datos del servicio',
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                DividerUi(paddingHorizontal: 0),
+                const SizedBox(height: 10),
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Row(
+                    children: [
+                      TextUi(text: 'Fecha: ${dateTime[0]}'),
+                      const SizedBox(width: 30),
+                      TextUi(text: 'Hora: ${dateTime[1]}'),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      TextUi(text: 'N° Servicio: ${service.orden}'),
+                      const SizedBox(width: 59),
+                      TextUi(text: 'Radicado: ${service.radicado}')
+                    ],
+                  ),
+                  TextUi(
+                    text: 'Tipo de servicio: ${type.descripcion}',
+                    long: 50,
+                  ),
+                  TextUi(
+                    text: 'Establecimiento: ${service.nombre}',
+                    long: 50,
+                  ),
+                  TextUi(text: 'Falla: ${fail.descripcion}'),
+                  TextUi(text: 'Observación: ${service.observacionReporte}'),
+                ]),
+                const SizedBox(height: 10),
+                statusServiceIdMenu == 3
+                    ? Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.start,
                         children: [
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(20, 2, 20, 2),
-                            child: TextUi(
-                              text: 'Datos del servicio',
-                              color: Colors.white,
+                          Container(
+                            color: const Color.fromARGB(255, 0, 45, 168),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.fromLTRB(20, 2, 20, 2),
+                                  child: TextUi(
+                                    text: 'Datos del equipo',
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-                    DividerUi(paddingHorizontal: 0),
-                    const SizedBox(height: 10),
-                    Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              TextUi(text: 'Fecha: ${dateTime[0]}'),
-                              const SizedBox(width: 30),
-                              TextUi(text: 'Hora: ${dateTime[1]}'),
-                            ],
-                          ),
-                          Row(
-                            children: [
-                              TextUi(text: 'N° Servicio: ${service.orden}'),
-                              const SizedBox(width: 59),
-                              TextUi(text: 'Radicado: ${service.radicado}')
-                            ],
-                          ),
-                          TextUi(
-                            text: 'Tipo de servicio: ${type.descripcion}',
-                            long: 50,
-                          ),
-                          TextUi(
-                            text: 'Establecimiento: ${service.nombre}',
-                            long: 50,
-                          ),
-                          TextUi(text: 'Falla: ${fail.descripcion}'),
-                          TextUi(
-                              text:
-                                  'Observación: ${service.observacionReporte}'),
-                        ]),
-                    const SizedBox(height: 10),
-                    statusServiceIdMenu == 3
-                        ? Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              Container(
-                                color: const Color.fromARGB(255, 0, 45, 168),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsets.fromLTRB(
-                                          20, 2, 20, 2),
-                                      child: TextUi(
-                                        text: 'Datos del equipo',
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ],
+                          DividerUi(paddingHorizontal: 0),
+                          const SizedBox(height: 10),
+                          Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                TextUi(
+                                  text: 'Serial: ${equipment.serial}',
+                                  long: 50,
                                 ),
-                              ),
-                              DividerUi(paddingHorizontal: 0),
-                              const SizedBox(height: 10),
-                              Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    TextUi(
-                                      text:
-                                          'Numero de contrado del equipo: ${equipment.serial}',
-                                      long: 50,
-                                    ),
-                                    TextUi(
-                                      text:
-                                          'Nombre del equipo: ${equipment.nombre}',
-                                      long: 50,
-                                    ),
-                                  ]),
-                            ],
-                          )
-                        : Container()
-                  ],
-                ),
-              );
-            },
-            separatorBuilder: (context, index) => const SizedBox(
-              height: 2,
+                                TextUi(
+                                  text:
+                                      'Nombre del equipo: ${equipment.nombre}',
+                                  long: 50,
+                                ),
+                              ]),
+                        ],
+                      )
+                    : Container()
+              ],
             ),
-            itemCount: databaseMain.services.length,
-            scrollDirection: Axis.vertical,
           ),
         ),
       ],
@@ -370,6 +345,12 @@ class _ServicePageState extends State<ServicePage> {
                               final Map<String, dynamic> serviceData =
                                   databaseMain.services[index].toMap();
                               serviceData['idEstadoServicio'] = 3;
+                              serviceData['fechayhorainicio'] =
+                                  DateTime.now().toString().substring(0, 19);
+                              serviceData['fechaInicio'] =
+                                  DateTime.now().toString().substring(0, 19);
+                              serviceData['fechaLlegada'] =
+                                  DateTime.now().toString().substring(0, 19);
                               final Servicio servicio =
                                   Servicio.fromMap(serviceData);
                               await servicioProvider.insert(servicio);

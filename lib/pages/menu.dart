@@ -12,8 +12,10 @@ import 'package:weru/pages/activity.dart';
 import 'package:weru/pages/diagnosis.dart';
 import 'package:weru/pages/indicators.dart';
 import 'package:weru/pages/overhead.dart';
+import 'package:weru/pages/photograph.dart';
 import 'package:weru/pages/refills.dart';
 import 'package:weru/pages/service.dart';
+import 'package:weru/pages/signature.dart';
 import 'package:weru/pages/tools.dart';
 import 'package:weru/provider/session.dart';
 import 'package:provider/provider.dart';
@@ -167,7 +169,7 @@ class _MenuPageState extends State<MenuPage> {
             MenuItemUi(
                 IconPath: "assets/icons/fotografia.png",
                 title: "Fotografia",
-                page: ServicePage()),
+                page: PhotographPage()),
             const SizedBox(width: 10),
             MenuItemUi(
                 IconPath: "assets/icons/indicador.png",
@@ -177,7 +179,7 @@ class _MenuPageState extends State<MenuPage> {
             MenuItemUi(
                 IconPath: "assets/icons/pencil.png",
                 title: "Firmar-cerrar",
-                page: ServicePage()),
+                page: SignaturePage()),
           ],
         ),
       ],

@@ -16,11 +16,25 @@ class StageService {
   static Future<void> sendStageMessages2Server() async {
     List<StageMessage> items =
         await StageMessageProvider(db: await database()).getAll();
+    final now = DateTime.now();
 
     for (final item in items) {
       String message = item.Message;
       String table = item.MessageFamily;
-      await FTPService.sendMessageEntrada(jsonEncode(message), table);
+      if (item.Sent == 1) {
+        final difference =
+            now.difference(DateTime.parse(item.CreatedAt)).inDays;
+        if (difference > 7) {
+          StageMessageProvider(db: await database()).delete(item.id!);
+        }
+      } else {
+        bool sent =
+            await FTPService.sendMessageEntrada(jsonEncode(message), table);
+        Map<String, Object?> stageMessage = item.toMap();
+        stageMessage['Sent'] = sent ? 1 : 0;
+        StageMessage updated = StageMessage.fromMap(stageMessage);
+        await StageMessageProvider(db: await database()).update(updated);
+      }
     }
   }
 }

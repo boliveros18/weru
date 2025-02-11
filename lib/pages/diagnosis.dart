@@ -50,10 +50,10 @@ class _DiagnosisPageState extends State<DiagnosisPage> {
     database =
         await DatabaseMain(path: await getLocalDatabasePath()).onCreate();
     await databaseMain.getServices();
-    await databaseMain.getDiagnoses();
+    service = databaseMain.services[index];
+    await databaseMain.getDiagnoses(service.id);
     diagnoses = await DiagnosticoProvider(db: database).getAll();
     diagnosesService = await databaseMain.diagnosesServices;
-    service = databaseMain.services[index];
     setState(() {
       isLoading = false;
       servicioProvider = ServicioProvider(db: database);
@@ -120,7 +120,7 @@ class _DiagnosisPageState extends State<DiagnosisPage> {
                   );
                   await DiagnosticoServicioProvider(db: database)
                       .insert(diagnosisService);
-                  await databaseMain.getDiagnoses();
+                  await databaseMain.getDiagnoses(service.id);
                   setState(() {});
                 }
               },
@@ -180,7 +180,7 @@ class _DiagnosisPageState extends State<DiagnosisPage> {
                                                     .deleteByIdDiagnostico(
                                                         _new.id);
                                                 await databaseMain
-                                                    .getDiagnoses();
+                                                    .getDiagnoses(service.id);
                                                 setState(() {});
                                               } catch (e) {
                                                 print("Error al eliminar: $e");

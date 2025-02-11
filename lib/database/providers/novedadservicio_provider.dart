@@ -28,7 +28,24 @@ class NovedadServicioProvider {
   }
 
   Future<List<NovedadServicio>> getAll() async {
-    final List<Map<String, Object?>> maps = await db.query('NovedadServicio');
+    final List<Map<String, Object?>> maps = await db.query(
+      'NovedadServicio',
+    );
+    return maps.map((map) {
+      return NovedadServicio(
+        id: map['id'] as int,
+        idServicio: map['idServicio'] as int,
+        idNovedad: map['idNovedad'] as int,
+      );
+    }).toList();
+  }
+
+  Future<List<NovedadServicio>> getAllByIdServicio(int idServicio) async {
+    final List<Map<String, Object?>> maps = await db.query(
+      'NovedadServicio',
+      where: 'idServicio = ?',
+      whereArgs: [idServicio],
+    );
     return maps.map((map) {
       return NovedadServicio(
         id: map['id'] as int,

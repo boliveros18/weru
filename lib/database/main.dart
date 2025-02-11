@@ -7,6 +7,7 @@ import 'package:weru/database/models/diagnosticoservicio.dart';
 import 'package:weru/database/models/equipo.dart';
 import 'package:weru/database/models/estadoservicio.dart';
 import 'package:weru/database/models/falla.dart';
+import 'package:weru/database/models/fotoservicio.dart';
 import 'package:weru/database/models/indicador.dart';
 import 'package:weru/database/models/indicadorservicio.dart';
 import 'package:weru/database/models/indirecto.dart';
@@ -28,6 +29,7 @@ import 'package:weru/database/providers/diagnosticoservicio_provider.dart';
 import 'package:weru/database/providers/equipo_provider.dart';
 import 'package:weru/database/providers/estadoservicio_provider.dart';
 import 'package:weru/database/providers/falla_provider.dart';
+import 'package:weru/database/providers/fotoservicio_provider.dart';
 import 'package:weru/database/providers/indicador_provider.dart';
 import 'package:weru/database/providers/indicadorservicio_provider.dart';
 import 'package:weru/database/providers/indirecto_provider.dart';
@@ -67,6 +69,7 @@ class DatabaseMain {
   List<IndirectoServicio> overheadsServices = [];
   List<Indicador> indicators = [];
   List<IndicadorServicio> indicatorsServices = [];
+  List<FotoServicio> photosServices = [];
 
   DatabaseMain({required this.path}) {}
   Future<void> getServices() async {
@@ -111,11 +114,11 @@ class DatabaseMain {
     }
   }
 
-  Future<void> getNews() async {
+  Future<void> getNews(int idService) async {
     final database = await db;
     try {
-      final _newsServices =
-          await NovedadServicioProvider(db: database).getAll();
+      final _newsServices = await NovedadServicioProvider(db: database)
+          .getAllByIdServicio(idService);
 
       news = await Future.wait(_newsServices.map((_new) async {
         return await NovedadProvider(db: database).getItemById(_new.idNovedad);
@@ -127,11 +130,11 @@ class DatabaseMain {
     }
   }
 
-  Future<void> getDiagnoses() async {
+  Future<void> getDiagnoses(int idService) async {
     final database = await db;
     try {
-      final _diagnosesServices =
-          await DiagnosticoServicioProvider(db: database).getAll();
+      final _diagnosesServices = await DiagnosticoServicioProvider(db: database)
+          .getAllByIdServicio(idService);
 
       diagnoses = await Future.wait(_diagnosesServices.map((diagnosis) async {
         return await DiagnosticoProvider(db: database)
@@ -144,11 +147,11 @@ class DatabaseMain {
     }
   }
 
-  Future<void> getActivities() async {
+  Future<void> getActivities(int idService) async {
     final database = await db;
     try {
-      final _activitiesServices =
-          await ActividadServicioProvider(db: database).getAll();
+      final _activitiesServices = await ActividadServicioProvider(db: database)
+          .getAllByIdServicio(idService);
 
       activities = await Future.wait(_activitiesServices.map((activity) async {
         return await ActividadProvider(db: database)
@@ -161,11 +164,11 @@ class DatabaseMain {
     }
   }
 
-  Future<void> getRefills() async {
+  Future<void> getRefills(int idService) async {
     final database = await db;
     try {
-      final _refillsServices =
-          await ItemServicioProvider(db: database).getAll();
+      final _refillsServices = await ItemServicioProvider(db: database)
+          .getAllByIdServicio(idService);
 
       refills = await Future.wait(_refillsServices.map((item) async {
         return await ItemProvider(db: database).getItemById(item.idItem);
@@ -177,10 +180,11 @@ class DatabaseMain {
     }
   }
 
-  Future<void> getTools() async {
+  Future<void> getTools(int idTecnico) async {
     final database = await db;
     try {
-      final _briefcase = await MaletinProvider(db: database).getAll();
+      final _briefcase =
+          await MaletinProvider(db: database).getAllByIdTecnico(idTecnico);
 
       tools = await Future.wait(_briefcase.map((tool) async {
         return await ItemProvider(db: database).getItemById(tool.idItem);
@@ -192,11 +196,11 @@ class DatabaseMain {
     }
   }
 
-  Future<void> getOverheads() async {
+  Future<void> getOverheads(int idService) async {
     final database = await db;
     try {
-      final _overheadsServices =
-          await IndirectoServicioProvider(db: database).getAll();
+      final _overheadsServices = await IndirectoServicioProvider(db: database)
+          .getAllByIdServicio(idService);
 
       overheads = await Future.wait(_overheadsServices.map((item) async {
         return await IndirectoProvider(db: database)
@@ -209,11 +213,11 @@ class DatabaseMain {
     }
   }
 
-  Future<void> getIndicators() async {
+  Future<void> getIndicators(int idService) async {
     final database = await db;
     try {
-      final _indicatorsServices =
-          await IndicadorServicioProvider(db: database).getAll();
+      final _indicatorsServices = await IndicadorServicioProvider(db: database)
+          .getAllByIdServicio(idService);
 
       indicators = await Future.wait(_indicatorsServices.map((item) async {
         return await IndicadorProvider(db: database)
@@ -223,6 +227,17 @@ class DatabaseMain {
       indicatorsServices = _indicatorsServices;
     } catch (e, stackTrace) {
       print("Error getIndicators() in main database: $e, $stackTrace");
+    }
+  }
+
+  Future<void> getPhotosService(int idService) async {
+    final database = await db;
+    try {
+      final _photosServices = await FotoServicioProvider(db: database)
+          .getAllByIdServicio(idService);
+      photosServices = _photosServices;
+    } catch (e, stackTrace) {
+      print("Error getPhotosService() in main database: $e, $stackTrace");
     }
   }
 
@@ -277,7 +292,7 @@ class DatabaseMain {
       'CREATE TABLE Falla (id INTEGER PRIMARY KEY, descripcion TEXT, estado INTEGER)',
     );
     await db.execute(
-      'CREATE TABLE FotoServicio (id INTEGER PRIMARY KEY, idServicio INTEGER, archivo TEXT, comentario TEXT)',
+      'CREATE TABLE FotoServicio (id INTEGER PRIMARY KEY AUTOINCREMENT, idServicio INTEGER NOT NULL, archivo BLOB, comentario TEXT)',
     );
     await db.execute(
       'CREATE TABLE Indicador (id INTEGER PRIMARY KEY, idEstadoIndicador INTEGER NOT NULL, descripcion TEXT, valorMin decimal(18, 3), valorMax decimal(18, 3), tipo TEXT, icono TEXT)',
@@ -328,7 +343,7 @@ class DatabaseMain {
       'CREATE TABLE Servicio (id INTEGER PRIMARY KEY, idTecnico INTEGER NOT NULL, idCliente INTEGER NOT NULL, idEstadoServicio int NOT NULL, nombre TEXT NULL, descripcion TEXT NULL, direccion TEXT NULL, idCiudad INTEGER NOT NULL, latitud decimal(11, 8) NOT NULL, longitud decimal(11, 8) NOT NULL, fechaInicio TEXT NULL, fechayhorainicio TEXT NULL, fechaModificacion TEXT NULL, fechaFin TEXT NULL, idEquipo INTEGER NULL, idFalla INTEGER NOT NULL, observacionReporte TEXT NULL, radicado TEXT NULL, idTipoServicio INTEGER NULL, cedulaFirma TEXT NULL, nombreFirma TEXT NULL, archivoFirma TEXT NULL, orden INTEGER DEFAULT 0, fechaLlegada TEXT NULL, comentarios TEXT NULL, consecutivo int NOT NULL)',
     );
     await db.execute(
-      'CREATE TABLE StageMessage (id INTEGER PRIMARY KEY AUTOINCREMENT, Message TEXT NOT NULL, MessageFamily TEXT NOT NULL, Action TEXT NOT NULL)',
+      'CREATE TABLE StageMessage (id INTEGER PRIMARY KEY AUTOINCREMENT, Message TEXT NOT NULL, MessageFamily TEXT NOT NULL, Action TEXT NOT NULL, Sent INTEGER NOT NULL, CreatedAt TEXT NOT NULL)',
     );
     await db.execute(
       'CREATE TABLE Tecnico (id INTEGER PRIMARY KEY, cedula TEXT NOT NULL, nombre TEXT NULL, idProveedor int NULL, idEstadoTecnico int NULL, usuario TEXT NOT NULL, clave TEXT NULL, telefono TEXT NULL, celular TEXT NULL, latitud REAL NULL, longitud REAL NULL, androidID TEXT NULL, fechaPulso TEXT NULL, versionApp TEXT NULL, situacionActual TEXT NULL)',
