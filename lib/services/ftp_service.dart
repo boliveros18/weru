@@ -151,7 +151,6 @@ class FTPService {
     final response = await http.Response.fromStream(await request.send());
 
     if (response.statusCode == 200) {
-      print("Imagen enviada");
       await file.delete();
     } else {
       print('Error al enviar imagen: ${response.statusCode}');

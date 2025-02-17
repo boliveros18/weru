@@ -41,6 +41,9 @@ class _LoginPageState extends State<LoginPage> {
   TextEditingController userController = TextEditingController();
   TextEditingController passController = TextEditingController();
   late Database database;
+  DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+  late AndroidDeviceInfo androidInfo;
+  late IosDeviceInfo iOsInfo;
 
   @override
   void initState() {
@@ -61,20 +64,22 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (!Directory(localDirectoryPath).existsSync()) {
-      Future.delayed(Duration.zero, () {
+    Future.delayed(Duration.zero, () {
+      if (!Directory(localDirectoryPath).existsSync()) {
         DialogUi.show(
           context: context,
           title: "Ingrese el nit de la organización",
           hintText: "nit",
           onConfirm: (value) async {
-            setState(() {});
-            DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-            AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
-            IosDeviceInfo iOsInfo = await deviceInfo.iosInfo;
+            if (Platform.isAndroid) {
+              androidInfo = await deviceInfo.androidInfo;
+            } else {
+              iOsInfo = await deviceInfo.iosInfo;
+            }
             await downloadAndUnzipMaster(value);
             Navigator.of(context).pop();
-            (Future.delayed(Duration.zero, () {
+            Navigator.of(context).pop();
+            (Future.delayed(Duration(milliseconds: 500), () {
               DialogUi.show(
                 context: context,
                 title:
@@ -85,8 +90,8 @@ class _LoginPageState extends State<LoginPage> {
             }));
           },
         );
-      });
-    }
+      }
+    });
 
     return Scaffold(
       body: Container(

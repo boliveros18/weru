@@ -9,8 +9,6 @@ import 'package:weru/functions/authentication.dart';
 import 'package:weru/functions/current_situation.dart';
 import 'package:weru/pages/home.dart';
 import 'package:weru/pages/login.dart';
-import 'package:weru/pages/menu.dart';
-import 'package:weru/pages/news.dart';
 import 'package:weru/pages/signature.dart';
 import 'package:weru/provider/session.dart';
 import 'package:weru/services/ftp_service.dart';
@@ -51,11 +49,9 @@ class MyApp extends StatelessWidget {
     Session session = Provider.of<Session>(context);
 
     return MaterialApp(
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(fontFamily: 'Poppins'),
-        home: MenuPage()
-        /*
-       FutureBuilder<bool>(
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(fontFamily: 'Poppins'),
+      home: FutureBuilder<bool>(
           future: Authentication(session.user, session.pass),
           builder: (context, snapshot) {
             if (snapshot.hasData && snapshot.data == true) {
@@ -63,8 +59,7 @@ class MyApp extends StatelessWidget {
             }
             return LoginPage();
           }),
-          */
-        );
+    );
   }
 }
 

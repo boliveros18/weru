@@ -23,6 +23,7 @@ class ButtonUi extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: double.infinity,
+      height: 45,
       child: ElevatedButton(
         onPressed: disabled ? null : onClicked,
         style: ElevatedButton.styleFrom(

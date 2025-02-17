@@ -44,6 +44,14 @@ Future<String> getLocalDatabasePath() async {
       : "${directory.path}/database";
 }
 
+Future<String> getLocalCachePath() async {
+  final directory = await getTemporaryDirectory();
+
+  return Platform.isAndroid
+      ? "/data/data/com.example.weru/cache"
+      : "${directory.path}";
+}
+
 Future<String> getLocalDatabasePathFile() async {
   final databasePath = await getLocalDatabasePath();
   return Platform.isAndroid

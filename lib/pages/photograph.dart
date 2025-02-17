@@ -17,6 +17,7 @@ import 'package:weru/provider/session.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'dart:io';
 
 class PhotographPage extends StatefulWidget {
@@ -134,7 +135,7 @@ class _PhotographPageState extends State<PhotographPage> {
                           value: "Foto",
                           onClicked: () async {
                             pickedFile = await picker.pickImage(
-                                source: ImageSource.camera);
+                                source: ImageSource.camera, imageQuality: 25);
                             setState(() {});
                           },
                           color: const Color(0xff4caf50),
@@ -173,9 +174,16 @@ class _PhotographPageState extends State<PhotographPage> {
                                 if (!await backupDir.exists()) {
                                   await backupDir.create(recursive: true);
                                 }
+                                final String date = DateFormat("yyyyMMddHHmmss")
+                                    .format(DateTime.now());
+                                final String name =
+                                    "Servicio_${service.id}_Foto-$date.png";
                                 final String filePath =
-                                    '${await getLocalDatabasePath()}/backup/${pickedFile!.name}';
+                                    '${await getLocalDatabasePath()}/backup/${name}';
                                 await pickedFile!.saveTo(filePath);
+                                final cachePath =
+                                    '${await getLocalCachePath()}/${pickedFile!.name}';
+                                await File(cachePath).delete();
                                 FotoServicio fotoservicio = FotoServicio(
                                     idServicio: service.id,
                                     archivo: filePath,
@@ -203,7 +211,7 @@ class _PhotographPageState extends State<PhotographPage> {
               ),
             ),
             Text(
-                "2. Lista de fotos agregadas (${databaseMain.photosServices.length}): ",
+                "Lista de fotos agregadas (${databaseMain.photosServices.length}): ",
                 style: TextStyle(fontWeight: FontWeight.w400, fontSize: 16)),
             const SizedBox(height: 10),
             Column(
@@ -241,10 +249,6 @@ class _PhotographPageState extends State<PhotographPage> {
                                         children: [
                                           const SizedBox(height: 10),
                                           TextUi(
-                                            text: 'Código: ${_new.id}',
-                                            fontSize: 15,
-                                          ),
-                                          TextUi(
                                             text:
                                                 'Comentario: ${_new.comentario}',
                                             fontSize: 15,
@@ -270,6 +274,8 @@ class _PhotographPageState extends State<PhotographPage> {
                                               await FotoServicioProvider(
                                                       db: database)
                                                   .delete(_new.id!);
+                                              var file = File(_new.archivo);
+                                              await file.delete();
                                               await databaseMain
                                                   .getPhotosService(service.id);
                                               setState(() {});

@@ -11,8 +11,10 @@ import 'package:weru/components/text_field_ui.dart';
 import 'package:weru/config/config.dart';
 import 'package:weru/database/main.dart';
 import 'package:weru/database/models/servicio.dart';
+import 'package:weru/database/models/tecnico.dart';
 import 'package:weru/database/providers/fotoservicio_provider.dart';
 import 'package:weru/database/providers/servicio_provider.dart';
+import 'package:weru/database/providers/tecnico_provider.dart';
 import 'package:weru/functions/on_connection_validation_stage.dart';
 import 'package:weru/provider/session.dart';
 import 'package:provider/provider.dart';
@@ -20,6 +22,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:intl/intl.dart';
 import 'package:signature/signature.dart';
 import 'package:weru/services/ftp_service.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 class SignaturePage extends StatefulWidget {
   const SignaturePage({super.key});
@@ -60,6 +63,10 @@ class _SignaturePageState extends State<SignaturePage> {
         await DatabaseMain(path: await getLocalDatabasePath()).onCreate();
     await databaseMain.getServices();
     service = databaseMain.services[index];
+    final file = File(service.archivoFirma);
+    if (file.existsSync()) {
+      saved = true;
+    }
     await databaseMain.getNews(service.id);
     await databaseMain.getDiagnoses(service.id);
     await databaseMain.getActivities(service.id);
@@ -252,11 +259,16 @@ class _SignaturePageState extends State<SignaturePage> {
                 onClicked: () async {
                   final Uint8List? signature = await signatureController
                       .toPngBytes(height: 250, width: 500);
-                  if (TextFieldName.isNotEmpty &&
+                  final fields = TextFieldName.isNotEmpty &&
                       TextFieldComment.isNotEmpty &&
                       TextFieldId.isNotEmpty &&
                       signature != Null &&
-                      signature!.isNotEmpty) {
+                      signature!.isNotEmpty;
+                  final signatureFile = File(service.archivoFirma);
+                  if (signatureFile.existsSync()) {
+                    saved = true;
+                  }
+                  if (fields || saved) {
                     if (!saved) {
                       final String date =
                           DateFormat("yyyyMMddHHmmss").format(DateTime.now());
@@ -265,7 +277,7 @@ class _SignaturePageState extends State<SignaturePage> {
                       final String filePath =
                           '${await getLocalDatabasePath()}/backup/${name}';
                       final File img = File(filePath);
-                      await img.writeAsBytes(signature);
+                      await img.writeAsBytes(signature!);
                       Map<String, Object?> serviceItem = service.toMap();
                       serviceItem['nombreFirma'] = TextFieldName;
                       serviceItem['comentarios'] = TextFieldComment;
@@ -277,59 +289,81 @@ class _SignaturePageState extends State<SignaturePage> {
                       await servicioProvider.update(updated);
                       await databaseMain.getServices();
                       service = databaseMain.services[index];
+                      FocusScope.of(context).unfocus();
                       setState(() {
                         saved = true;
                       });
                     } else {
-                      await databaseMain.getPhotosService(service.id);
-                      final photoServices = databaseMain.photosServices
-                          .map((item) => item.toMap())
-                          .toList();
-                      if (photoServices.isNotEmpty) {
-                        for (final photo in photoServices) {
-                          final String? filePath = photo["archivo"] as String?;
-                          final int id = photo["id"] as int;
-                          if (filePath != null && filePath.isNotEmpty) {
-                            await FTPService.sendImage(filePath);
-                            await FotoServicioProvider(db: database).delete(id);
-                          } else {
-                            print("Archivo no válido: $filePath");
+                      final List<ConnectivityResult> connectivityResult =
+                          await (Connectivity().checkConnectivity());
+                      if (connectivityResult
+                              .contains(ConnectivityResult.mobile) ||
+                          connectivityResult
+                              .contains(ConnectivityResult.wifi)) {
+                        try {
+                          List<Tecnico> technicians =
+                              await TecnicoProvider(db: database).getAll();
+                          Map<String, Object?> technician =
+                              technicians[0].toMap();
+                          bool send = await FTPService.sendMessageEntrada(
+                              jsonEncode(technician), 'Tecnico');
+                          if (send) {
+                            await databaseMain.getPhotosService(service.id);
+                            final photoServices = databaseMain.photosServices
+                                .map((item) => item.toMap())
+                                .toList();
+                            if (photoServices.isNotEmpty) {
+                              for (final photo in photoServices) {
+                                final String? filePath =
+                                    photo["archivo"] as String?;
+                                final int id = photo["id"] as int;
+                                if (filePath != null && filePath.isNotEmpty) {
+                                  await FTPService.sendImage(filePath);
+                                  await FotoServicioProvider(db: database)
+                                      .delete(id);
+                                } else {
+                                  print("Archivo no válido: $filePath");
+                                }
+                              }
+                            }
+                            await FTPService.sendImage(service.archivoFirma);
+                            Map<String, Object?> serviceItem = service.toMap();
+                            serviceItem['idEstadoServicio'] = 5;
+                            serviceItem['fechaModificacion'] =
+                                DateTime.now().toString().substring(0, 19);
+                            serviceItem['fechaFin'] =
+                                DateTime.now().toString().substring(0, 19);
+                            serviceItem['archivoFirma'] =
+                                service.archivoFirma.split('/').last;
+                            Servicio updated = Servicio.fromMap(serviceItem);
+                            await servicioProvider.update(updated);
+                            await databaseMain.getServices();
+                            service = databaseMain.services[index];
+                            onConnectionValidationStage(
+                                jsonEncode({...message, ...service.toMap()}),
+                                "Servicio");
+                            nameController.clear();
+                            commentController.clear();
+                            idController.clear();
+                            signatureController.clear();
+                            setState(() {
+                              saved = false;
+                            });
+                          }
+                        } catch (e) {
+                          if (e.toString().contains("Connection timed out") ||
+                              e.toString().contains("Failed host lookup")) {
+                            MessageAlert(
+                                'Revisa tu conexion a internet e intentalo más tarde!');
                           }
                         }
+                      } else {
+                        MessageAlert(
+                            'Revisa tu conexion a internet e intentalo más tarde!');
                       }
-                      await FTPService.sendImage(service.archivoFirma);
-                      Map<String, Object?> serviceItem = service.toMap();
-                      serviceItem['idEstadoServicio'] = 5;
-                      serviceItem['fechaModificacion'] =
-                          DateTime.now().toString().substring(0, 19);
-                      serviceItem['fechaFin'] =
-                          DateTime.now().toString().substring(0, 19);
-                      serviceItem['archivoFirma'] =
-                          service.archivoFirma.split('/').last;
-                      Servicio updated = Servicio.fromMap(serviceItem);
-                      await servicioProvider.update(updated);
-                      await databaseMain.getServices();
-                      service = databaseMain.services[index];
-                      onConnectionValidationStage(
-                          jsonEncode({...message, ...service.toMap()}),
-                          "Servicio");
-                      nameController.clear();
-                      commentController.clear();
-                      idController.clear();
-                      signatureController.clear();
-                      setState(() {
-                        saved = false;
-                      });
                     }
                   } else {
-                    (Future.delayed(Duration.zero, () {
-                      DialogUi.show(
-                        textField: false,
-                        context: context,
-                        title: 'Rellena los campos y la firma',
-                        onConfirm: (value) async {},
-                      );
-                    }));
+                    MessageAlert('Rellena los campos y la firma');
                   }
                 },
                 color: saved
@@ -343,5 +377,16 @@ class _SignaturePageState extends State<SignaturePage> {
         ))
       ],
     );
+  }
+
+  void MessageAlert(String text) {
+    (Future.delayed(Duration.zero, () {
+      DialogUi.show(
+        textField: false,
+        context: context,
+        title: text,
+        onConfirm: (value) async {},
+      );
+    }));
   }
 }

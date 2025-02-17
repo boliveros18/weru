@@ -334,7 +334,7 @@ class DatabaseMain {
       'CREATE TABLE Novedad (id INTEGER PRIMARY KEY, descripcion TEXT, estado INTEGER)',
     );
     await db.execute(
-      'CREATE TABLE NovedadServicio (id INTEGER PRIMARY AUTOINCREMENT, idServicio INTEGER, idNovedad INTEGER)',
+      'CREATE TABLE NovedadServicio (id INTEGER PRIMARY KEY AUTOINCREMENT, idServicio INTEGER, idNovedad INTEGER)',
     );
     await db.execute(
       'CREATE TABLE RegistroCamposAdicionales (id INTEGER PRIMARY KEY, idCamposAdicionales INTEGER NOT NULL, idRegistro INTEGER NOT NULL, valor INTEGER, nombre INTEGER)',
