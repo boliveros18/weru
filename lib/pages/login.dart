@@ -70,15 +70,16 @@ class _LoginPageState extends State<LoginPage> {
           context: context,
           title: "Ingrese el nit de la organización",
           hintText: "nit",
+          cancel: false,
           onConfirm: (value) async {
             if (Platform.isAndroid) {
               androidInfo = await deviceInfo.androidInfo;
             } else {
               iOsInfo = await deviceInfo.iosInfo;
             }
+            Navigator.of(context).pop();
+            Navigator.of(context).pop();
             await downloadAndUnzipMaster(value);
-            Navigator.of(context).pop();
-            Navigator.of(context).pop();
             (Future.delayed(Duration(milliseconds: 500), () {
               DialogUi.show(
                 context: context,
@@ -181,9 +182,9 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> downloadAndUnzipMaster(String value) async {
     isLoading = true;
-    master =
-        true; // await ftpService.downloadFile('${pathFTPS}' + value + '.zip', localFilePath);
+    master = await ftpService.downloadFile(value);
     isLoading = false;
+    /*
     if (master) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Archivo master descargado!")),
@@ -215,6 +216,7 @@ class _LoginPageState extends State<LoginPage> {
         const SnackBar(content: Text("Nit errado")),
       );
     }
+    */
   }
 
   Future<void> _initializeApp() async {
@@ -230,7 +232,9 @@ class _LoginPageState extends State<LoginPage> {
         final data = await responseStageMessageXMLtoJSON(response);
         if (session.user.isEmpty &&
             data['Tecnico'] != null &&
-            data['Tecnico']?[0]['usuario']?.toString().isNotEmpty == true) {
+            data['Tecnico'] is List &&
+            data['Tecnico']!.isNotEmpty &&
+            data['Tecnico']![0]['usuario']?.toString().isNotEmpty == true) {
           bool insert =
               await insertStageMessageListDataToSqflite(data, database);
           if (insert) {

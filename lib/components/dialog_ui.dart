@@ -5,12 +5,14 @@ class DialogUi extends StatelessWidget {
   final String title;
   final String hintText;
   final bool textField;
+  final bool cancel;
   final Function(String) onConfirm;
 
   const DialogUi({
     super.key,
     required this.title,
     this.hintText = "",
+    this.cancel = true,
     this.textField = true,
     required this.onConfirm,
   });
@@ -20,6 +22,7 @@ class DialogUi extends StatelessWidget {
     required String title,
     String hintText = "",
     bool textField = true,
+    bool cancel = true,
     required Function(String) onConfirm,
   }) async {
     await showDialog(
@@ -31,6 +34,7 @@ class DialogUi extends StatelessWidget {
           title: title,
           hintText: hintText,
           textField: textField,
+          cancel: cancel,
           onConfirm: (value) {
             onConfirm(value);
             Navigator.of(context).pop();
@@ -81,7 +85,7 @@ class DialogUi extends StatelessWidget {
           },
           child: const Text("Aceptar"),
         ),
-        textField
+        textField && cancel
             ? ElevatedButton(
                 onPressed: () {
                   Navigator.of(context).pop();

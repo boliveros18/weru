@@ -16,6 +16,32 @@ class FTPService {
     securityType: SecurityType.FTPES,
     timeout: 10,
   );
+  Future<bool> downloadFile(String value) async {
+    try {
+      ftpConnect.supportIPV6 = false;
+      bool connect = await ftpConnect.connect();
+      ftpConnect.transferMode = TransferMode.passive;
+      if (!connect) {
+        return false;
+      }
+      final masterPath = await getLocalMasterPath(value);
+      final file = File(masterPath);
+      void onProgress(double progress, int total, int transferred) {
+        print(
+            'Progreso: ${(progress * 100).toStringAsFixed(2)}% ($transferred / $total bytes)');
+      }
+
+      bool obtained = await ftpConnect.downloadFileWithRetry(
+          '${pathFTPS + value}.zip', file,
+          onProgress: onProgress);
+      await ftpConnect.disconnect();
+      return obtained;
+    } catch (e, stackTrace) {
+      print('Error al descargar el archivo: $e, $stackTrace');
+      await ftpConnect.disconnect();
+      return false;
+    }
+  }
 
   static Future<String> getDeviceId() async {
     DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
@@ -28,20 +54,6 @@ class FTPService {
       id = iOsInfo.identifierForVendor ?? '';
     }
     return id;
-  }
-
-  Future<bool> downloadFile(String remoteFileName, String localFileName) async {
-    try {
-      await ftpConnect.connect();
-      await ftpConnect.downloadFileWithRetry(
-          remoteFileName, File(localFileName));
-      print('Archivo descargado: $localFileName');
-      await ftpConnect.disconnect();
-      return true;
-    } catch (e, stackTrace) {
-      print('Error al descargar el archivo: $e, $stackTrace');
-      return false;
-    }
   }
 
   static Future<String> getMessages() async {
