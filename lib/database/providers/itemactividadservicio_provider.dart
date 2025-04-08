@@ -34,6 +34,7 @@ class ItemActividadServicioProvider {
       return ItemActividadServicio(
         id: map['id'] as int,
         idItem: map['idItem'] as int,
+        idTipo: map['idTipo'] as int,
         idActividadServicio: map['idActividadServicio'] as int,
         cantidadReq: map['cantidadReq'] as double,
       );
@@ -67,8 +68,9 @@ class ItemActividadServicioProvider {
       ItemActividadServicio itemactividadservicio = ItemActividadServicio(
         id: int.parse(parts[0].trim()),
         idItem: int.parse(parts[1].trim()),
-        idActividadServicio: int.parse(parts[2].trim()),
-        cantidadReq: double.parse(parts[3].trim()),
+        idTipo: int.parse(parts[2].trim()),
+        idActividadServicio: int.parse(parts[3].trim()),
+        cantidadReq: double.parse(parts[4].trim()),
       );
       await db.transaction((database) async {
         await database.insert(

@@ -27,8 +27,17 @@ class ServicioProvider {
     return Servicio.fromMap(items.first);
   }
 
-  Future<List<Servicio>> getAll() async {
-    final List<Map<String, Object?>> maps = await db.query('Servicio');
+  Future<List<Servicio>> getFiltered() async {
+
+   List<int> filters = [2, 10, 3, 4];
+
+    String placeholders = filters.map((_) => '?').join(', ');
+
+    final List<Map<String, Object?>> maps = await db.query(
+      'Servicio',
+      where: 'idEstadoServicio IN ($placeholders)',
+      whereArgs: filters,
+    );
     return maps.map((map) {
       return Servicio(
         id: map['id'] as int,

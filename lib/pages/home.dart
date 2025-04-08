@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:weru/components/app_bar_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -12,6 +13,9 @@ import 'package:weru/pages/service.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:weru/provider/session.dart';
 import 'package:provider/provider.dart';
+import 'dart:isolate';
+import 'dart:async';
+import 'package:flutter_app_badge_control/flutter_app_badge_control.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -24,33 +28,64 @@ class _HomePageState extends State<HomePage> {
   late DatabaseMain databaseMain;
   late Session session;
   bool isLoading = true;
+  final ReceivePort _receivePort = ReceivePort();
 
   @override
   void initState() {
     super.initState();
-    initializeDatabase();
     session = Provider.of<Session>(context, listen: false);
+    session.loadSession();
+    initializeDatabase();
+    _removeBadge();
+    IsolateNameServer.removePortNameMapping('service_port');
+    IsolateNameServer.registerPortWithName(
+      _receivePort.sendPort,
+      'service_port',
+    );
+    _receivePort.listen((message) async {
+      await databaseMain.getServices();
+      _setBadge(1);
+      setState(() {});
+    });
+
+    SendPort? onStartPort = IsolateNameServer.lookupPortByName(
+      'onstart_service_port',
+    );
+    if (onStartPort != null) {
+      onStartPort.send("ready");
+    }
+  }
+
+  @override
+  void dispose() {
+    IsolateNameServer.removePortNameMapping('service_port');
+    super.dispose();
   }
 
   Future<void> initializeDatabase() async {
     databaseMain = DatabaseMain(path: await getLocalDatabasePath());
     await databaseMain.getServices();
+
     setState(() {
       isLoading = false;
     });
   }
 
+  Future<void> _setBadge(int count) async {
+    FlutterAppBadgeControl.updateBadgeCount(count);
+  }
+
+  Future<void> _removeBadge() async {
+    FlutterAppBadgeControl.removeBadge();
+  }
+
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
-      return const Scaffold(
-        body: Center(
-          child: ProgressIndicatorUi(),
-        ),
-      );
+      return const Scaffold(body: Center(child: ProgressIndicatorUi()));
     }
     return Scaffold(
-      appBar: AppBarUi(
+      appBar: const AppBarUi(
         header: "Servicios",
         prefixIcon: true,
         prefixIconHeight: 34,
@@ -68,10 +103,7 @@ class _HomePageState extends State<HomePage> {
                 padding: const EdgeInsets.only(bottom: 20.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    AppStatus(),
-                    servicesSection(),
-                  ],
+                  children: [const AppStatus(), servicesSection()],
                 ),
               ),
             ),
@@ -118,8 +150,10 @@ class _HomePageState extends State<HomePage> {
                     InkWell(
                       onTap: () async {
                         if (await canLaunchUrl(Uri.parse(googleMapsUrl))) {
-                          await launchUrl(Uri.parse(googleMapsUrl),
-                              mode: LaunchMode.externalApplication);
+                          await launchUrl(
+                            Uri.parse(googleMapsUrl),
+                            mode: LaunchMode.externalApplication,
+                          );
                         } else {
                           print("No se pudo abrir Google Maps");
                         }
@@ -138,31 +172,37 @@ class _HomePageState extends State<HomePage> {
                     ),
                     InkWell(
                       onTap: () async {
+                        _removeBadge();
                         await session.setIndexService(index);
                         if (databaseMain.services[index].idEstadoServicio ==
                                 10 ||
                             databaseMain.services[index].idEstadoServicio ==
-                                2) {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => ServicePage()),
-                          ).then((value) async => {
-                                await databaseMain.getServices(),
-                                setState(() {})
-                              });
-                        } else if (databaseMain
-                                    .services[index].idEstadoServicio ==
-                                3 ||
+                                2 ||
                             databaseMain.services[index].idEstadoServicio ==
                                 4) {
                           Navigator.push(
                             context,
+                            MaterialPageRoute(
+                              builder: (context) => ServicePage(),
+                            ),
+                          ).then(
+                            (value) async => {
+                              await databaseMain.getServices(),
+                              setState(() {}),
+                            },
+                          );
+                        } else if (databaseMain
+                                .services[index].idEstadoServicio ==
+                            3) {
+                          Navigator.push(
+                            context,
                             MaterialPageRoute(builder: (context) => MenuPage()),
-                          ).then((value) async => {
-                                await databaseMain.getServices(),
-                                setState(() {})
-                              });
+                          ).then(
+                            (value) async => {
+                              await databaseMain.getServices(),
+                              setState(() {}),
+                            },
+                          );
                         }
                       },
                       child: Column(
@@ -198,9 +238,10 @@ class _HomePageState extends State<HomePage> {
                             child: Padding(
                               padding: const EdgeInsets.fromLTRB(20, 2, 20, 0),
                               child: TextUi(
-                                  text: status.nombre,
-                                  color: Colors.white,
-                                  main: true),
+                                text: status.nombre,
+                                color: Colors.white,
+                                main: true,
+                              ),
                             ),
                           ),
                         ],

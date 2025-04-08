@@ -40,9 +40,9 @@ class _MenuPageState extends State<MenuPage> {
   @override
   void initState() {
     super.initState();
-    initializeDatabase();
     session = Provider.of<Session>(context, listen: false);
     index = session.indexServicio;
+    initializeDatabase();
   }
 
   Future<void> initializeDatabase() async {

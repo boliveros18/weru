@@ -1,15 +1,14 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
+import 'dart:isolate';
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:provider/provider.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
-import 'package:weru/functions/authentication.dart';
 import 'package:weru/functions/current_situation.dart';
 import 'package:weru/pages/home.dart';
 import 'package:weru/pages/login.dart';
-import 'package:weru/pages/signature.dart';
 import 'package:weru/provider/session.dart';
 import 'package:weru/services/ftp_service.dart';
 import 'package:weru/functions/insert_stage_message_list_data_to_sqflite.dart';
@@ -24,41 +23,60 @@ import 'package:weru/database/models/pulso.dart';
 import 'package:weru/database/providers/tecnico_provider.dart';
 import 'package:weru/database/models/tecnico.dart';
 import 'package:intl/intl.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:weru/services/stage_service.dart';
+import 'package:flutter/services.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+final DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+const MethodChannel backgroundChannel = MethodChannel('background_channel');
+bool? lastInternetStatus;
+bool? lastGpsStatus;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await checkAndRequestLocationPermissions();
   await initializeService();
   startBackgroundService();
-  runApp(
-    ChangeNotifierProvider<Session>(
-      create: (context) => Session(),
-      child: const MyApp(),
-    ),
-  );
+
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
+  Future<Session> _initializeSession() async {
+    final session = Session();
+    await session.loadSession();
+    return session;
+  }
+
   @override
   Widget build(BuildContext context) {
-    Session session = Provider.of<Session>(context);
-
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(fontFamily: 'Poppins'),
-      home: FutureBuilder<bool>(
-          future: Authentication(session.user, session.pass),
-          builder: (context, snapshot) {
-            if (snapshot.hasData && snapshot.data == true) {
-              return HomePage();
-            }
-            return LoginPage();
-          }),
+    return FutureBuilder<Session>(
+      future: _initializeSession(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const MaterialApp(
+            debugShowCheckedModeBanner: false,
+            home: Scaffold(body: Center(child: CircularProgressIndicator())),
+          );
+        }
+        return ChangeNotifierProvider<Session>.value(
+          value: snapshot.data!,
+          child: MaterialApp(
+            debugShowCheckedModeBanner: false,
+            theme: ThemeData(fontFamily: 'Poppins'),
+            home: Consumer<Session>(
+              builder: (context, session, _) {
+                return session.isAuthenticated
+                    ? const HomePage()
+                    : const LoginPage();
+              },
+            ),
+          ),
+        );
+      },
     );
   }
 }
@@ -111,16 +129,39 @@ Future<bool> onIosBackground(ServiceInstance service) async {
   return true;
 }
 
+Future<void> pulseStageInsert(Database database, Tecnico updated,
+    double latitud, double longitud, String fechaPulso) async {
+  await PulsoProvider(db: database).insert(Pulso(
+    idTecnico: updated.id,
+    latitud: latitud,
+    longitud: longitud,
+    fechaPulso: fechaPulso,
+  ));
+}
+
 @pragma('vm:entry-point')
 void onStart(ServiceInstance service) async {
+  if (service is AndroidServiceInstance) {
+    service.setForegroundNotificationInfo(
+      title: "Servicio en ejecución",
+      content: "Este servicio se ejecuta en segundo plano",
+    );
+  }
   service.on("stop").listen((event) {
     service.stopSelf();
     print("Background process is now stopped");
   });
 
-  bool internet = false;
   Database database =
       await DatabaseMain(path: await getLocalDatabasePath()).onCreate();
+
+  final ReceivePort waitPort = ReceivePort();
+  IsolateNameServer.removePortNameMapping('onstart_service_port');
+  IsolateNameServer.registerPortWithName(
+      waitPort.sendPort, 'onstart_service_port');
+
+  String deviceName;
+  String platformVersion;
 
   LocationSettings locationSettings;
   if (Platform.isAndroid) {
@@ -128,8 +169,13 @@ void onStart(ServiceInstance service) async {
       accuracy: LocationAccuracy.high,
       distanceFilter: 10,
       forceLocationManager: false,
-      intervalDuration: const Duration(seconds: 5),
+      intervalDuration: const Duration(seconds: 10),
     );
+    AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+    deviceName = androidInfo.model;
+    platformVersion =
+        RegExp(r'(\d+\.\d+\.\d+)').firstMatch(Platform.version)?.group(1) ??
+            "Not Found";
   } else if (Platform.isIOS) {
     locationSettings = AppleSettings(
       accuracy: LocationAccuracy.best,
@@ -137,97 +183,128 @@ void onStart(ServiceInstance service) async {
       distanceFilter: 10,
       pauseLocationUpdatesAutomatically: false,
     );
+    IosDeviceInfo iOsInfo = await deviceInfo.iosInfo;
+    deviceName = iOsInfo.modelName;
+    platformVersion =
+        RegExp(r'(\d+\.\d+\.\d+)').firstMatch(Platform.version)?.group(1) ??
+            "Not Found";
   } else {
     print('Plataforma no soportada para obtener ubicaciones.');
     return;
   }
 
-  Timer.periodic(Duration(seconds: 30), (timer) async {
-    final List<ConnectivityResult> connectivityResult =
-        await (Connectivity().checkConnectivity());
-    if (connectivityResult.contains(ConnectivityResult.mobile) ||
-        connectivityResult.contains(ConnectivityResult.wifi)) {
-      internet = true;
-      await currentSituation("ModoAvion-Desactivado");
-    } else if (connectivityResult.contains(ConnectivityResult.none)) {
-      internet = false;
-      await currentSituation("ModoAvion-Activado");
-    }
+  waitPort.listen((message) {
+    if (message == "ready") {
+      Timer.periodic(const Duration(seconds: 40), (timer) async {
+        final List<ConnectivityResult> connectivityResult =
+            await (Connectivity().checkConnectivity());
 
-    Geolocator.getServiceStatusStream().listen((ServiceStatus status) async {
-      if (status == ServiceStatus.enabled) {
-        await currentSituation("Gps-Activado");
-      } else {
-        await currentSituation("Gps-Desactivado");
-      }
-    });
+        bool currentInternetStatus =
+            connectivityResult.contains(ConnectivityResult.mobile) ||
+                connectivityResult.contains(ConnectivityResult.wifi);
 
-    Position position = await Geolocator.getCurrentPosition(
-      locationSettings: locationSettings,
-    );
-    final double latitud = position.latitude;
-    final double longitud = position.longitude;
-    final String fechaPulso =
-        DateFormat("MMM dd yyyy  h:mma").format(DateTime.now());
-
-    if (!Directory(await getLocalDatabasePathFile()).existsSync()) {
-      List<Tecnico> technicians = await TecnicoProvider(db: database).getAll();
-      if (technicians.isNotEmpty) {
-        Map<String, Object?> technician = technicians[0].toMap();
-        technician['latitud'] = latitud;
-        technician['longitud'] = longitud;
-        technician['fechaPulso'] = fechaPulso;
-        Tecnico updated = Tecnico.fromMap(technician);
-        TecnicoProvider(db: database).insert(updated);
-
-        Future<void> pulseStageInsert(Tecnico updated) async {
-          await PulsoProvider(db: database).insert(Pulso(
-            idTecnico: updated.id,
-            latitud: latitud,
-            longitud: longitud,
-            fechaPulso: fechaPulso,
-          ));
+        if (lastInternetStatus != currentInternetStatus) {
+          lastInternetStatus = currentInternetStatus;
+          if (currentInternetStatus) {
+            await currentSituation("ModoAvion-Desactivado");
+          } else {
+            await currentSituation("ModoAvion-Activado");
+          }
         }
 
-        if (internet) {
-          try {
+        if (connectivityResult.contains(ConnectivityResult.wifi)) {
+          if (lastInternetStatus != true) {
             await currentSituation("Señal-Activada");
-            String message = await FTPService.getMessages();
-            if (message.isNotEmpty) {
-              final data = await responseStageMessageXMLtoJSON(message);
-              await insertStageMessageListDataToSqflite(data, database);
-              List<Pulso> pulses = await PulsoProvider(db: database).getAll();
-              if (pulses.isNotEmpty) {
-                for (final pulse in pulses) {
-                  technician['latitud'] = pulse.latitud;
-                  technician['longitud'] = pulse.longitud;
-                  technician['fechaPulso'] = pulse.fechaPulso;
-                  bool sent = await FTPService.sendMessageEntrada(
-                      jsonEncode(technician), 'Tecnico');
-                  if (sent) {
-                    await PulsoProvider(db: database).delete(pulse.id!);
+          }
+        } else if (connectivityResult.contains(ConnectivityResult.none)) {
+          if (lastInternetStatus != false) {
+            await currentSituation("Señal-Desactivada");
+          }
+        }
+
+        Geolocator.getServiceStatusStream()
+            .listen((ServiceStatus status) async {
+          bool gpsEnabled = (status == ServiceStatus.enabled);
+
+          if (lastGpsStatus != gpsEnabled) {
+            lastGpsStatus = gpsEnabled;
+            await currentSituation(
+                gpsEnabled ? "Gps-Activado" : "Gps-Desactivado");
+          }
+        });
+
+        Position position = await Geolocator.getCurrentPosition(
+          locationSettings: locationSettings,
+        );
+        final double latitud = position.latitude;
+        final double longitud = position.longitude;
+        final String fechaPulso =
+            DateFormat("yyyy-MM-dd HH:mm:ss").format(DateTime.now());
+        final String versionApp =
+            '4.1 ${Platform.isAndroid ? "- SDK:" : "- iOs:"} ${platformVersion} - Equipo: ${deviceName}';
+
+        if (!Directory(await getLocalDatabasePathFile()).existsSync()) {
+          List<Tecnico> technicians =
+              await TecnicoProvider(db: database).getAll();
+          if (technicians.isNotEmpty) {
+            Map<String, Object?> technician = technicians[0].toMap();
+            technician['latitud'] = latitud;
+            technician['longitud'] = longitud;
+            technician['fechaPulso'] = fechaPulso;
+            technician['versionApp'] = versionApp;
+            Tecnico updated = Tecnico.fromMap(technician);
+            TecnicoProvider(db: database).insert(updated);
+
+            if (currentInternetStatus) {
+              try {
+                String message = await FTPService.getMessages();
+                if (message.isNotEmpty) {
+                  final data = await responseStageMessageXMLtoJSON(message);
+                  await insertStageMessageListDataToSqflite(data, database);
+                  if (data['Servicio']!.isNotEmpty) {
+                    SendPort? uiSendPort =
+                        IsolateNameServer.lookupPortByName('service_port');
+                    if (uiSendPort != null) {
+                      uiSendPort.send("servicio");
+                    }
                   }
+                  List<Pulso> pulses =
+                      await PulsoProvider(db: database).getAll();
+                  if (pulses.isNotEmpty) {
+                    for (final pulse in pulses) {
+                      technician['latitud'] = pulse.latitud;
+                      technician['longitud'] = pulse.longitud;
+                      technician['fechaPulso'] = pulse.fechaPulso;
+                      bool sent = await FTPService.sendMessageEntrada(
+                          jsonEncode(technician), 'Tecnico');
+                      if (sent) {
+                        await PulsoProvider(db: database).delete(pulse.id!);
+                      }
+                    }
+                  }
+                  await FTPService.sendMessageEntrada(
+                      jsonEncode(technician), 'Tecnico');
+                  await StageService.sendStageMessages2Server();
+                }
+              } catch (e) {
+                if (e.toString().contains("Connection timed out") ||
+                    e.toString().contains("Failed host lookup")) {
+                  await currentSituation("Señal-Desactivada");
+                  await pulseStageInsert(
+                      database, updated, latitud, longitud, fechaPulso);
                 }
               }
-              await FTPService.sendMessageEntrada(
-                  jsonEncode(technician), 'Tecnico');
-              await StageService.sendStageMessages2Server();
+            } else {
+              try {
+                await pulseStageInsert(
+                    database, updated, latitud, longitud, fechaPulso);
+              } catch (e) {
+                print('Error al insertar pulso: $e');
+              }
             }
-          } catch (e) {
-            if (e.toString().contains("Connection timed out") ||
-                e.toString().contains("Failed host lookup")) {
-              await currentSituation("Señal-Desactivada");
-              await pulseStageInsert(updated);
-            }
-          }
-        } else {
-          try {
-            await pulseStageInsert(updated);
-          } catch (e) {
-            print('Error al insertar pulso: $e');
           }
         }
-      }
+      });
     }
   });
 }

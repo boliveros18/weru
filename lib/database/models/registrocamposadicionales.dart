@@ -2,14 +2,14 @@ class RegistroCamposAdicionales {
   final int id;
   final int idCamposAdicionales;
   final int idRegistro;
-  final int valor;
+  final int? valor;
   final String nombre;
 
   RegistroCamposAdicionales({
     required this.id,
     required this.idCamposAdicionales,
     required this.idRegistro,
-    required this.valor,
+    this.valor,
     required this.nombre,
   });
 

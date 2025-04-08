@@ -1,44 +1,50 @@
 import 'package:http/http.dart' as http;
 import '../config/config.dart';
-import 'package:ftpconnect/ftpconnect.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:intl/intl.dart';
 import 'package:xml/xml.dart';
 import 'dart:io';
+import 'dart:convert';
+import 'dart:async';
 
 class FTPService {
-  final FTPConnect ftpConnect = FTPConnect(
-    servidorFTPS,
-    user: userNameFTPS,
-    pass: passwordFTPS,
-    port: puertoFTPS,
-    showLog: true,
-    securityType: SecurityType.FTPES,
-    timeout: 10,
-  );
+  
   Future<bool> downloadFile(String value) async {
     try {
-      ftpConnect.supportIPV6 = false;
-      bool connect = await ftpConnect.connect();
-      ftpConnect.transferMode = TransferMode.passive;
-      if (!connect) {
+      final response = await http.post(
+        Uri.parse(tokenUrl),
+        headers: {
+          'Content-Type': 'text/plain',
+          'Accept': '/',
+        },
+        body: jsonEncode({"NIT": value, "Aplicacion": "PWeruC"}),
+      );
+      if (response.statusCode == 200) {
+        final String data = response.body;
+        String tokenData = jsonDecode(data);
+        final res = await http.post(
+          Uri.parse(masterUrl),
+          headers: {
+            'Content-Type': 'text/plain',
+            'Accept': '/',
+          },
+          body: jsonDecode(jsonEncode(tokenData)),
+        );
+        if (res.headers['content-disposition'] ==
+            "attachment; filename=MasterData.zip") {
+          final file = File(await getLocalMasterPath(value));
+          await file.writeAsBytes(res.bodyBytes);
+          return true;
+        } else {
+          print("Error in master post: ${res.statusCode} - ${res.body}");
+          return false;
+        }
+      } else {
+        print("Error in token post: ${response.statusCode} - ${response.body}");
         return false;
       }
-      final masterPath = await getLocalMasterPath(value);
-      final file = File(masterPath);
-      void onProgress(double progress, int total, int transferred) {
-        print(
-            'Progreso: ${(progress * 100).toStringAsFixed(2)}% ($transferred / $total bytes)');
-      }
-
-      bool obtained = await ftpConnect.downloadFileWithRetry(
-          '${pathFTPS + value}.zip', file,
-          onProgress: onProgress);
-      await ftpConnect.disconnect();
-      return obtained;
-    } catch (e, stackTrace) {
-      print('Error al descargar el archivo: $e, $stackTrace');
-      await ftpConnect.disconnect();
+    } catch (e) {
+      print('Error al descargar el archivo: $e');
       return false;
     }
   }
@@ -155,17 +161,43 @@ class FTPService {
     }
   }
 
-  static Future<void> sendImage(String imagePath) async {
-    final request = http.MultipartRequest(
-        "POST", Uri.http(appRibGetMessagesUrlHost, appRibSendImagesUrlMethod));
-    var file = File(imagePath);
-    request.files.add(await http.MultipartFile.fromPath('file', file.path));
-    final response = await http.Response.fromStream(await request.send());
+static Future<void> sendImage(String imagePath) async {
+    final file = File(imagePath);
+    if (!file.existsSync() || file.lengthSync() == 0) {
+      print('El archivo no existe: $imagePath');
+      return;
+    }
 
-    if (response.statusCode == 200) {
-      await file.delete();
-    } else {
-      print('Error al enviar imagen: ${response.statusCode}');
+    final fileName = file.path.split('/').last;
+    final boundary =
+        '----DartFormBoundary${DateTime.now().millisecondsSinceEpoch}';
+    final contentType = 'multipart/form-data; boundary=$boundary';
+    final body = <int>[];
+    void write(String s) => body.addAll(s.codeUnits);
+
+    write('--$boundary\r\n');
+    write(
+        'Content-Disposition: form-data; name="file"; filename="$fileName"\r\n');
+    write('Content-Type: image/png\r\n\r\n');
+    body.addAll(await file.readAsBytes());
+    write('\r\n--$boundary--\r\n');
+
+    final uri = Uri.parse(sendImagesUrlMethod);
+    final request = await HttpClient().postUrl(uri)
+      ..headers.set(HttpHeaders.contentTypeHeader, contentType)
+      ..headers.set(HttpHeaders.contentLengthHeader, body.length)
+      ..add(body);
+
+    try {
+      final response = await request.close();
+      if (response.statusCode == 200) {
+        await file.delete();
+      } else {
+        print('Error al enviar la imagen: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Excepción durante el envío: $e');
     }
   }
+  
 }

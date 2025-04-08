@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:weru/pages/briefcase.dart';
 import 'package:weru/provider/session.dart';
 import 'package:provider/provider.dart';
 
@@ -156,6 +157,12 @@ class _AppBarUiState extends State<AppBarUi> {
     if (selectedValue != null) {
       switch (selectedValue) {
         case 1:
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const BriefcasePage(),
+            ),
+          );
           break;
         case 2:
           break;

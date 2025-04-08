@@ -72,8 +72,7 @@ class RegistroCamposAdicionalesProvider {
         id: int.parse(parts[0].trim()),
         idCamposAdicionales: int.parse(parts[1].trim()),
         idRegistro: int.parse(parts[2].trim()),
-        valor: int.parse(parts[3].trim()),
-        nombre: parts[4].trim(),
+        nombre: parts[3].trim(),
       );
       await db.transaction((database) async {
         await database.insert(

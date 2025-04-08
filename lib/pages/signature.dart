@@ -22,7 +22,6 @@ import 'package:sqflite/sqflite.dart';
 import 'package:intl/intl.dart';
 import 'package:signature/signature.dart';
 import 'package:weru/services/ftp_service.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
 
 class SignaturePage extends StatefulWidget {
   const SignaturePage({super.key});
@@ -41,10 +40,10 @@ class _SignaturePageState extends State<SignaturePage> {
   String TextFieldComment = "";
   String TextFieldId = "";
   int index = 0;
-  bool saved = false;
   bool isLoading = true;
   late SignatureController signatureController;
   late ServicioProvider servicioProvider;
+  int diagnosesLength = 0;
   late Servicio service;
   late Database database;
   late Map<String, Object?> message;
@@ -52,9 +51,9 @@ class _SignaturePageState extends State<SignaturePage> {
   @override
   void initState() {
     super.initState();
-    initializeDatabase();
     session = Provider.of<Session>(context, listen: false);
     index = session.indexServicio;
+    initializeDatabase();
   }
 
   Future<void> initializeDatabase() async {
@@ -63,9 +62,10 @@ class _SignaturePageState extends State<SignaturePage> {
         await DatabaseMain(path: await getLocalDatabasePath()).onCreate();
     await databaseMain.getServices();
     service = databaseMain.services[index];
-    final file = File(service.archivoFirma);
-    if (file.existsSync()) {
-      saved = true;
+    final String fileFolder = '${await getLocalDatabasePath()}/backup';
+    final Directory backupDir = Directory(fileFolder);
+    if (!await backupDir.exists()) {
+      await backupDir.create(recursive: true);
     }
     await databaseMain.getNews(service.id);
     await databaseMain.getDiagnoses(service.id);
@@ -80,6 +80,7 @@ class _SignaturePageState extends State<SignaturePage> {
         databaseMain.newsServices.map((item) => item.toMap()).toList();
     final diagnosesServices =
         databaseMain.diagnosesServices.map((item) => item.toMap()).toList();
+    diagnosesLength = diagnosesServices.length;
     final activitiesServices =
         databaseMain.activitiesServices.map((item) => item.toMap()).toList();
     final itemServices =
@@ -251,11 +252,7 @@ class _SignaturePageState extends State<SignaturePage> {
               width: 150,
               child: ButtonUi(
                 disabled: service.idEstadoServicio == 5 ? true : false,
-                value: saved
-                    ? "Enviar"
-                    : service.idEstadoServicio == 5
-                        ? "Enviado "
-                        : "Guardar",
+                value: service.idEstadoServicio == 5 ? "Enviado " : "Enviar",
                 onClicked: () async {
                   final Uint8List? signature = await signatureController
                       .toPngBytes(height: 250, width: 500);
@@ -264,20 +261,17 @@ class _SignaturePageState extends State<SignaturePage> {
                       TextFieldId.isNotEmpty &&
                       signature != Null &&
                       signature!.isNotEmpty;
-                  final signatureFile = File(service.archivoFirma);
-                  if (signatureFile.existsSync()) {
-                    saved = true;
-                  }
-                  if (fields || saved) {
-                    if (!saved) {
+
+                  if (fields) {
+                    if (diagnosesLength != 0) {
                       final String date =
                           DateFormat("yyyyMMddHHmmss").format(DateTime.now());
                       final String name =
                           "Servicio_${service.id}_Firma-$date.png";
                       final String filePath =
-                          '${await getLocalDatabasePath()}/backup/${name}';
+                          '${await getLocalDatabasePath()}/backup/$name';
                       final File img = File(filePath);
-                      await img.writeAsBytes(signature!);
+                      await img.writeAsBytes(signature);
                       Map<String, Object?> serviceItem = service.toMap();
                       serviceItem['nombreFirma'] = TextFieldName;
                       serviceItem['comentarios'] = TextFieldComment;
@@ -290,86 +284,64 @@ class _SignaturePageState extends State<SignaturePage> {
                       await databaseMain.getServices();
                       service = databaseMain.services[index];
                       FocusScope.of(context).unfocus();
-                      setState(() {
-                        saved = true;
-                      });
-                    } else {
-                      final List<ConnectivityResult> connectivityResult =
-                          await (Connectivity().checkConnectivity());
-                      if (connectivityResult
-                              .contains(ConnectivityResult.mobile) ||
-                          connectivityResult
-                              .contains(ConnectivityResult.wifi)) {
-                        try {
-                          List<Tecnico> technicians =
-                              await TecnicoProvider(db: database).getAll();
-                          Map<String, Object?> technician =
-                              technicians[0].toMap();
-                          bool send = await FTPService.sendMessageEntrada(
-                              jsonEncode(technician), 'Tecnico');
-                          if (send) {
-                            await databaseMain.getPhotosService(service.id);
-                            final photoServices = databaseMain.photosServices
-                                .map((item) => item.toMap())
-                                .toList();
-                            if (photoServices.isNotEmpty) {
-                              for (final photo in photoServices) {
-                                final String? filePath =
-                                    photo["archivo"] as String?;
-                                final int id = photo["id"] as int;
-                                if (filePath != null && filePath.isNotEmpty) {
-                                  await FTPService.sendImage(filePath);
-                                  await FotoServicioProvider(db: database)
-                                      .delete(id);
-                                } else {
-                                  print("Archivo no válido: $filePath");
-                                }
-                              }
+                      List<Tecnico> technicians =
+                          await TecnicoProvider(db: database).getAll();
+                      Map<String, Object?> technician = technicians[0].toMap();
+                      bool send = await FTPService.sendMessageEntrada(
+                          jsonEncode(technician), 'Tecnico');
+                      if (send) {
+                        await databaseMain.getPhotosService(service.id);
+                        final photoServices = databaseMain.photosServices
+                            .map((item) => item.toMap())
+                            .toList();
+                        if (photoServices.isNotEmpty) {
+                          for (final photo in photoServices) {
+                            final String? filePath =
+                                photo["archivo"] as String?;
+                            final int id = photo["id"] as int;
+                            if (filePath != null && filePath.isNotEmpty) {
+                              await FTPService.sendImage(filePath);
+                              await FotoServicioProvider(db: database)
+                                  .delete(id);
+                            } else {
+                              print("Archivo no válido: $filePath");
                             }
-                            await FTPService.sendImage(service.archivoFirma);
-                            Map<String, Object?> serviceItem = service.toMap();
-                            serviceItem['idEstadoServicio'] = 5;
-                            serviceItem['fechaModificacion'] =
-                                DateTime.now().toString().substring(0, 19);
-                            serviceItem['fechaFin'] =
-                                DateTime.now().toString().substring(0, 19);
-                            serviceItem['archivoFirma'] =
-                                service.archivoFirma.split('/').last;
-                            Servicio updated = Servicio.fromMap(serviceItem);
-                            await servicioProvider.update(updated);
-                            await databaseMain.getServices();
-                            service = databaseMain.services[index];
-                            onConnectionValidationStage(
-                                jsonEncode({...message, ...service.toMap()}),
-                                "Servicio");
-                            nameController.clear();
-                            commentController.clear();
-                            idController.clear();
-                            signatureController.clear();
-                            setState(() {
-                              saved = false;
-                            });
-                          }
-                        } catch (e) {
-                          if (e.toString().contains("Connection timed out") ||
-                              e.toString().contains("Failed host lookup")) {
-                            MessageAlert(
-                                'Revisa tu conexion a internet e intentalo más tarde!');
                           }
                         }
-                      } else {
-                        MessageAlert(
-                            'Revisa tu conexion a internet e intentalo más tarde!');
+                        await FTPService.sendImage(service.archivoFirma);
+                        Map<String, Object?> serviceItem = service.toMap();
+                        serviceItem['idEstadoServicio'] = 5;
+                        serviceItem['fechaModificacion'] =
+                            DateTime.now().toString().substring(0, 19);
+                        serviceItem['fechaFin'] =
+                            DateTime.now().toString().substring(0, 19);
+                        serviceItem['archivoFirma'] =
+                            service.archivoFirma.split('/').last;
+                        Servicio updated = Servicio.fromMap(serviceItem);
+                        await servicioProvider.update(updated);
+                        service = updated;
+                        onConnectionValidationStage(
+                            jsonEncode({...message, ...service.toMap()}),
+                            "ServicioFlutter");
+                        nameController.clear();
+                        commentController.clear();
+                        idController.clear();
+                        signatureController.clear();
+                        setState(() {});
                       }
+                    } else {
+                      MessageAlert(
+                          'Debes agregar algún diagnóstico en el menú de servicios para poder firmar.');
                     }
                   } else {
                     MessageAlert('Rellena los campos y la firma');
                   }
                 },
-                color: saved
-                    ? Color.fromARGB(255, 255, 177, 125)
-                    : Color(0xff4caf50),
-                textColor: saved ? Colors.black : Colors.white,
+                color: service.idEstadoServicio == 5
+                    ? const Color.fromARGB(255, 228, 228, 228)
+                    : const Color(0xff4caf50),
+                textColor:
+                    service.idEstadoServicio == 5 ? Colors.black : Colors.white,
                 borderRadius: 2,
               ),
             ),

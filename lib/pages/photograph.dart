@@ -44,9 +44,9 @@ class _PhotographPageState extends State<PhotographPage> {
   @override
   void initState() {
     super.initState();
-    initializeDatabase();
     session = Provider.of<Session>(context, listen: false);
     index = session.indexServicio;
+    initializeDatabase();
   }
 
   Future<void> initializeDatabase() async {
@@ -181,9 +181,6 @@ class _PhotographPageState extends State<PhotographPage> {
                                 final String filePath =
                                     '${await getLocalDatabasePath()}/backup/${name}';
                                 await pickedFile!.saveTo(filePath);
-                                final cachePath =
-                                    '${await getLocalCachePath()}/${pickedFile!.name}';
-                                await File(cachePath).delete();
                                 FotoServicio fotoservicio = FotoServicio(
                                     idServicio: service.id,
                                     archivo: filePath,

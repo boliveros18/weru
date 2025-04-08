@@ -8,6 +8,7 @@ class ButtonUi extends StatelessWidget {
   final double fontSize;
   final Function() onClicked;
   final bool disabled;
+  final double? height;
 
   const ButtonUi(
       {super.key,
@@ -17,13 +18,14 @@ class ButtonUi extends StatelessWidget {
       this.borderRadius = 10,
       this.fontSize = 15,
       required this.onClicked,
+      this.height,
       this.disabled = false});
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       width: double.infinity,
-      height: 45,
+      height: height ?? 45,
       child: ElevatedButton(
         onPressed: disabled ? null : onClicked,
         style: ElevatedButton.styleFrom(

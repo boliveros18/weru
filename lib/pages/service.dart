@@ -42,9 +42,9 @@ class _ServicePageState extends State<ServicePage> {
   @override
   void initState() {
     super.initState();
-    initializeDatabase();
     session = Provider.of<Session>(context, listen: false);
     index = session.indexServicio;
+    initializeDatabase();
   }
 
   Future<void> initializeDatabase() async {
@@ -256,12 +256,11 @@ class _ServicePageState extends State<ServicePage> {
                         children: [
                           Container(
                             color: const Color.fromARGB(255, 0, 45, 168),
-                            child: Column(
+                            child: const Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Padding(
-                                  padding:
-                                      const EdgeInsets.fromLTRB(20, 2, 20, 2),
+                                  padding: EdgeInsets.fromLTRB(20, 2, 20, 2),
                                   child: TextUi(
                                     text: 'Datos del equipo',
                                     color: Colors.white,
@@ -270,9 +269,10 @@ class _ServicePageState extends State<ServicePage> {
                               ],
                             ),
                           ),
-                          DividerUi(paddingHorizontal: 0),
+                          const DividerUi(paddingHorizontal: 0),
                           const SizedBox(height: 10),
                           Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 TextUi(
@@ -280,8 +280,7 @@ class _ServicePageState extends State<ServicePage> {
                                   long: 50,
                                 ),
                                 TextUi(
-                                  text:
-                                      'Nombre del equipo: ${equipment.nombre}',
+                                  text: 'Nombre: ${equipment.nombre}',
                                   long: 50,
                                 ),
                               ]),
@@ -334,7 +333,19 @@ class _ServicePageState extends State<ServicePage> {
                               ? "Llegada a sitio"
                               : "Inicio",
                           onClicked: () async {
-                            if (statusServiceId == 3) {
+                            if (statusServiceId == 10) {
+                              final Map<String, dynamic> serviceData =
+                                  databaseMain.services[index].toMap();
+                              serviceData['idEstadoServicio'] = 3;
+                              serviceData['fechayhorainicio'] =
+                                  DateTime.now().toString().substring(0, 19);
+                              serviceData['fechaInicio'] =
+                                  DateTime.now().toString().substring(0, 19);
+                              final Servicio servicio =
+                                  Servicio.fromMap(serviceData);
+                              await servicioProvider.insert(servicio);
+                              await onConnectionValidationStage(
+                                  jsonEncode(servicio.toMap()), "Servicio");
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
@@ -344,11 +355,7 @@ class _ServicePageState extends State<ServicePage> {
                             } else {
                               final Map<String, dynamic> serviceData =
                                   databaseMain.services[index].toMap();
-                              serviceData['idEstadoServicio'] = 3;
-                              serviceData['fechayhorainicio'] =
-                                  DateTime.now().toString().substring(0, 19);
-                              serviceData['fechaInicio'] =
-                                  DateTime.now().toString().substring(0, 19);
+                              serviceData['idEstadoServicio'] = 10;
                               serviceData['fechaLlegada'] =
                                   DateTime.now().toString().substring(0, 19);
                               final Servicio servicio =

@@ -60,6 +60,7 @@ class ActividadServicioProvider {
       where: 'idServicio = ?',
       whereArgs: [idServicio],
     );
+
     return maps.map((map) {
       return ActividadServicio(
         id: map['id'] as int,

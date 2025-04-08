@@ -1,12 +1,14 @@
 class ItemActividadServicio {
   final int id;
   final int idItem;
+  final int? idTipo;
   final int idActividadServicio;
   final double cantidadReq;
 
   ItemActividadServicio({
     required this.id,
     required this.idItem,
+    this.idTipo,
     required this.idActividadServicio,
     required this.cantidadReq,
   });
@@ -15,6 +17,7 @@ class ItemActividadServicio {
     return {
       'id': id,
       'idItem': idItem,
+      'idTipo': idTipo,
       'idActividadServicio': idActividadServicio,
       'cantidadReq': cantidadReq,
     };
@@ -24,6 +27,7 @@ class ItemActividadServicio {
     return   ItemActividadServicio(
            id: int.tryParse(map['id']?.toString() ?? '') ?? 0,
       idItem: int.tryParse(map['idItem']?.toString() ?? '') ?? 0,
+      idTipo: int.tryParse(map['idTipo']?.toString() ?? '') ?? 0,
       idActividadServicio: int.tryParse(map['idActividadServicio']?.toString() ?? '') ?? 0,
       cantidadReq: double.tryParse(map['cantidadReq']?.toString() ?? '') ?? 0.0,
     );
@@ -31,6 +35,6 @@ class ItemActividadServicio {
 
   @override
   String toString() {
-    return 'ItemActividadServicio{id: $id, idItem: $idItem, idActividadServicio: $idActividadServicio, cantidadReq: $cantidadReq}';
+    return 'ItemActividadServicio{id: $id, idItem: $idItem, idTipo: $idTipo, idActividadServicio: $idActividadServicio, cantidadReq: $cantidadReq}';
   }
 }

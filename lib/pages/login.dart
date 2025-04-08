@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:archive/archive.dart';
+import 'package:archive/archive_io.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'dart:io';
 import 'package:sqflite/sqflite.dart';
@@ -10,7 +10,7 @@ import 'package:weru/database/main.dart';
 import 'package:weru/functions/response_stage_message_xml_to_json.dart';
 import 'package:weru/functions/insert_master_file_in_sqflite.dart';
 import 'package:weru/functions/insert_stage_message_list_data_to_sqflite.dart';
-import 'package:weru/functions/authentication.dart';
+import 'package:weru/functions/auth.dart';
 import 'package:weru/provider/session.dart';
 import 'package:weru/permission_request.dart';
 import 'package:weru/components/text_field_ui.dart';
@@ -44,56 +44,28 @@ class _LoginPageState extends State<LoginPage> {
   DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
   late AndroidDeviceInfo androidInfo;
   late IosDeviceInfo iOsInfo;
+  bool success = false;
 
   @override
   void initState() {
     super.initState();
     session = Provider.of<Session>(context, listen: false);
+    session.loadSession();
     _initializeApp();
   }
 
   @override
   void dispose() {
+    userController.dispose();
+    passController.dispose();
     if (isTimerInitialized) {
       timer.cancel();
     }
-    userController.dispose();
-    passController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    Future.delayed(Duration.zero, () {
-      if (!Directory(localDirectoryPath).existsSync()) {
-        DialogUi.show(
-          context: context,
-          title: "Ingrese el nit de la organización",
-          hintText: "nit",
-          cancel: false,
-          onConfirm: (value) async {
-            if (Platform.isAndroid) {
-              androidInfo = await deviceInfo.androidInfo;
-            } else {
-              iOsInfo = await deviceInfo.iosInfo;
-            }
-            Navigator.of(context).pop();
-            Navigator.of(context).pop();
-            await downloadAndUnzipMaster(value);
-            (Future.delayed(Duration(milliseconds: 500), () {
-              DialogUi.show(
-                context: context,
-                title:
-                    "Este es el id del dispositivo: ${Platform.isAndroid ? androidInfo.id : iOsInfo.identifierForVendor}",
-                textField: false,
-                onConfirm: (value) async {},
-              );
-            }));
-          },
-        );
-      }
-    });
-
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
@@ -128,6 +100,7 @@ class _LoginPageState extends State<LoginPage> {
                   Image.asset('assets/icons/weru.png'),
                   const SizedBox(height: 20),
                   TextFieldUi(
+                    pass: true,
                     hint: "Usuario",
                     prefixIcon: true,
                     prefixIconPath: "assets/icons/user.png",
@@ -148,10 +121,10 @@ class _LoginPageState extends State<LoginPage> {
                   ButtonUi(
                       value: "Ingresar",
                       onClicked: () async {
-                        bool validation = await Authentication(
+                        bool validation = await Auth( session,
                             userController.text, passController.text);
                         if (validation) {
-                          await session.login();
+                          await session.login( userController.text, passController.text);
                         } else {
                           (Future.delayed(Duration.zero, () {
                             DialogUi.show(
@@ -175,27 +148,28 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void updatePermissionStatus(bool granted) {
-    setState(() {
-      permissionsGranted = granted;
-    });
+    if(mounted){
+      setState(() {
+        permissionsGranted = granted;
+      });
+    }
   }
 
   Future<void> downloadAndUnzipMaster(String value) async {
     isLoading = true;
     master = await ftpService.downloadFile(value);
     isLoading = false;
-    /*
     if (master) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Archivo master descargado!")),
       );
-      final input = InputFileStream(await getLocalMasterPath(value));
-      final archive = ZipDecoder().decodeStream(input);
+     final input = InputFileStream(await getLocalMasterPath(value));
+     final archive = await ZipDecoder().decodeStream(input);
       for (final file in archive) {
         if (file.isFile) {
           try {
             final output =
-                OutputFileStream('${localDirectoryPath}/${file.name}');
+                OutputFileStream('${await localDirectoryPath()}/${file.name}');
             output.writeStream(file.getContent()!);
             insertMasterFileInSqflite(file, database);
             await file.close();
@@ -204,7 +178,7 @@ class _LoginPageState extends State<LoginPage> {
           }
         } else {
           try {
-            await Directory('${localDirectoryPath}/${file.name}')
+            await Directory('${await localDirectoryPath()}/${file.name}')
                 .create(recursive: true);
           } catch (e, stackTrace) {
             print('Error in directory:${e}, $stackTrace');
@@ -216,21 +190,20 @@ class _LoginPageState extends State<LoginPage> {
         const SnackBar(content: Text("Nit errado")),
       );
     }
-    */
   }
 
   Future<void> _initializeApp() async {
     await currentPosition();
     database =
         await DatabaseMain(path: await getLocalDatabasePath()).onCreate();
-    timer = Timer.periodic(Duration(seconds: 2), (timer) async {
+    timer = Timer.periodic(Duration(seconds: 20), (timer) async {
       try {
         String response = await FTPService.getMessages();
         if (response.isEmpty) {
           return;
         }
         final data = await responseStageMessageXMLtoJSON(response);
-        if (session.user.isEmpty &&
+        if (
             data['Tecnico'] != null &&
             data['Tecnico'] is List &&
             data['Tecnico']!.isNotEmpty &&
@@ -258,6 +231,37 @@ class _LoginPageState extends State<LoginPage> {
       }
     });
     isTimerInitialized = true;
+    Future.delayed(Duration.zero, () async {
+      if (mounted) {
+        if (!Directory(await localDirectoryPath()).existsSync()) {
+          DialogUi.show(
+            context: context,
+            title: "Ingrese el nit de la organización",
+            hintText: "nit",
+            cancel: false,
+            onConfirm: (value) async {
+              if (Platform.isAndroid) {
+                androidInfo = await deviceInfo.androidInfo;
+              } else {
+                iOsInfo = await deviceInfo.iosInfo;
+              }
+              await downloadAndUnzipMaster(value);
+              Future.delayed(Duration(milliseconds: 1000), () {
+                if (mounted) {
+                  DialogUi.show(
+                    context: context,
+                    title:
+                        "Este es el id del dispositivo: ${Platform.isAndroid ? androidInfo.id : iOsInfo.identifierForVendor}",
+                    textField: false,
+                    onConfirm: (value) async {},
+                  );
+                }
+              });
+            },
+          );
+        }
+      }
+    });
   }
 }
 

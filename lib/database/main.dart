@@ -75,7 +75,7 @@ class DatabaseMain {
   Future<void> getServices() async {
     final database = await db;
     try {
-      final _services = await ServicioProvider(db: database).getAll();
+      final _services = await ServicioProvider(db: database).getFiltered();
 
       equipments = await Future.wait(_services.map((service) async {
         return await EquipoProvider(db: database).getItemById(service.idEquipo);
@@ -255,7 +255,7 @@ class DatabaseMain {
     );
   }
 
-  Future<void> onCreateTables(Database db) async {
+Future<void> onCreateTables(Database db) async {
     await db.execute(
       'CREATE TABLE Actividad (id INTEGER PRIMARY KEY, codigoExt TEXT, descripcion TEXT, costo INTEGER, valor INTEGER, idEstadoActividad INTEGER)',
     );
@@ -263,10 +263,10 @@ class DatabaseMain {
       'CREATE TABLE ActividadModelo (id INTEGER PRIMARY KEY, idActividad INTEGER, idModelo INTEGER)',
     );
     await db.execute(
-      'CREATE TABLE ActividadServicio (id INTEGER PRIMARY KEY AUTOINCREMENT, idActividad INTEGER NOT NULL, idServicio TEXT NOT NULL, cantidad INTEGER, costo INTEGER, valor INTEGER, ejecutada INTEGER DEFAULT 0)',
+      'CREATE TABLE ActividadServicio (id INTEGER PRIMARY KEY AUTOINCREMENT, idActividad INTEGER NOT NULL, idServicio INTEGER NOT NULL, cantidad INTEGER, costo INTEGER, valor INTEGER, ejecutada INTEGER DEFAULT 0)',
     );
     await db.execute(
-      'CREATE TABLE AdjuntoServicio (id INTEGER PRIMARY KEY, idServicio TEXT NOT NULL, idTecnico INTEGER, titulo TEXT, descripcion TEXT, tipo TEXT)',
+      'CREATE TABLE AdjuntoServicio (id INTEGER PRIMARY KEY, idServicio INTEGER NOT NULL, idTecnico INTEGER, titulo TEXT, descripcion TEXT, tipo TEXT)',
     );
     await db.execute(
       'CREATE TABLE CategoriaIndicador (id INTEGER PRIMARY KEY, nombre TEXT, descripcion TEXT)',
@@ -275,7 +275,7 @@ class DatabaseMain {
       'CREATE TABLE Ciudad (id INTEGER PRIMARY KEY, nombre TEXT NOT NULL, estado INTEGER NOT NULL)',
     );
     await db.execute(
-      'CREATE TABLE Cliente (id INTEGER PRIMARY KEY, nombre TEXT NOT NULL, direccion TEXT NOT NULL, idCiudad INTEGER, telefono TEXT, celular TEXT, idTipoCliente INTEGER, idTipoDocumento TEXT, numDocumento TEXT, establecimiento TEXT, contacto TEXT, idEstado INTEGER, correo TEXT)',
+      'CREATE TABLE Cliente (id INTEGER PRIMARY KEY, nombre TEXT NOT NULL, direccion TEXT NOT NULL, idCiudad INTEGER, telefono TEXT, celular TEXT, idTipoCliente INTEGER, idTipoDocumento INTEGER, numDocumento TEXT, establecimiento TEXT, contacto TEXT, idEstado INTEGER, correo TEXT)',
     );
     await db.execute(
       'CREATE TABLE Diagnostico (id INTEGER PRIMARY KEY, descripcion TEXT, estado INTEGER)',
@@ -301,7 +301,7 @@ class DatabaseMain {
       'CREATE TABLE IndicadorModelo (id INTEGER PRIMARY KEY, idIndicador INTEGER, idModelo INTEGER)',
     );
     await db.execute(
-      'CREATE TABLE IndicadorServicio (id INTEGER PRIMARY KEY AUTOINCREMENT, idIndicador INTEGER NOT NULL,idServicio TEXT NOT NULL,idTecnico INTEGER,valor TEXT)',
+      'CREATE TABLE IndicadorServicio (id INTEGER PRIMARY KEY AUTOINCREMENT, idIndicador INTEGER NOT NULL, idServicio INTEGER NOT NULL, idTecnico INTEGER,valor TEXT)',
     );
     await db.execute(
       'CREATE TABLE Indirecto (id INTEGER PRIMARY KEY, idEstado INTEGER NOT NULL, descripcion TEXT NOT NULL, costo INTEGER, valor INTEGER)',
@@ -310,13 +310,13 @@ class DatabaseMain {
       'CREATE TABLE IndirectoModelo (id INTEGER PRIMARY KEY, idIndirecto INTEGER, idModelo INTEGER)',
     );
     await db.execute(
-      'CREATE TABLE IndirectoServicio (id INTEGER PRIMARY KEY AUTOINCREMENT, idIndirecto INTEGER NOT NULL, idServicio TEXT NOT NULL, cantidad INTEGER, costo INTEGER, valor INTEGER)',
+      'CREATE TABLE IndirectoServicio (id INTEGER PRIMARY KEY AUTOINCREMENT, idIndirecto INTEGER NOT NULL, idServicio INTEGER NOT NULL, cantidad INTEGER, costo INTEGER, valor INTEGER)',
     );
     await db.execute(
       'CREATE TABLE Item (id INTEGER PRIMARY KEY, SKU TEXT NOT NULL, descripcion TEXT, tipo INTEGER, costo INTEGER, precio INTEGER, idEstadoItem INTEGER, foto TEXT)',
     );
     await db.execute(
-      'CREATE TABLE ItemActividadServicio (id INTEGER PRIMARY KEY, idItem INTEGER NOT NULL, idActividadServicio INTEGER NOT NULL, cantidadReq REAL DEFAULT 0)',
+      'CREATE TABLE ItemActividadServicio (id INTEGER PRIMARY KEY, idItem INTEGER NOT NULL, idTipo INTEGER NOT NULL, idActividadServicio INTEGER NOT NULL, cantidadReq REAL DEFAULT 0)',
     );
     await db.execute(
       'CREATE TABLE ItemModelo (id INTEGER PRIMARY KEY, idItem INTEGER, idModelo INTEGER)',
@@ -340,13 +340,13 @@ class DatabaseMain {
       'CREATE TABLE RegistroCamposAdicionales (id INTEGER PRIMARY KEY, idCamposAdicionales INTEGER NOT NULL, idRegistro INTEGER NOT NULL, valor INTEGER, nombre INTEGER)',
     );
     await db.execute(
-      'CREATE TABLE Servicio (id INTEGER PRIMARY KEY, idTecnico INTEGER NOT NULL, idCliente INTEGER NOT NULL, idEstadoServicio int NOT NULL, nombre TEXT NULL, descripcion TEXT NULL, direccion TEXT NULL, idCiudad INTEGER NOT NULL, latitud decimal(11, 8) NOT NULL, longitud decimal(11, 8) NOT NULL, fechaInicio TEXT NULL, fechayhorainicio TEXT NULL, fechaModificacion TEXT NULL, fechaFin TEXT NULL, idEquipo INTEGER NULL, idFalla INTEGER NOT NULL, observacionReporte TEXT NULL, radicado TEXT NULL, idTipoServicio INTEGER NULL, cedulaFirma TEXT NULL, nombreFirma TEXT NULL, archivoFirma TEXT NULL, orden INTEGER DEFAULT 0, fechaLlegada TEXT NULL, comentarios TEXT NULL, consecutivo int NOT NULL)',
+      'CREATE TABLE Servicio (id INTEGER PRIMARY KEY, idTecnico INTEGER NOT NULL, idCliente INTEGER NOT NULL, idEstadoServicio INTEGER NOT NULL, nombre TEXT NULL, descripcion TEXT NULL, direccion TEXT NULL, idCiudad INTEGER NOT NULL, latitud decimal(11, 8) NOT NULL, longitud decimal(11, 8) NOT NULL, fechaInicio TEXT NULL, fechayhorainicio TEXT NULL, fechaModificacion TEXT NULL, fechaFin TEXT NULL, idEquipo INTEGER NULL, idFalla INTEGER NOT NULL, observacionReporte TEXT NULL, radicado TEXT NULL, idTipoServicio INTEGER NULL, cedulaFirma TEXT NULL, nombreFirma TEXT NULL, archivoFirma TEXT NULL, orden INTEGER DEFAULT 0, fechaLlegada TEXT NULL, comentarios TEXT NULL, consecutivo int NOT NULL)',
     );
     await db.execute(
       'CREATE TABLE StageMessage (id INTEGER PRIMARY KEY AUTOINCREMENT, Message TEXT NOT NULL, MessageFamily TEXT NOT NULL, Action TEXT NOT NULL, Sent INTEGER NOT NULL, CreatedAt TEXT NOT NULL)',
     );
     await db.execute(
-      'CREATE TABLE Tecnico (id INTEGER PRIMARY KEY, cedula TEXT NOT NULL, nombre TEXT NULL, idProveedor int NULL, idEstadoTecnico int NULL, usuario TEXT NOT NULL, clave TEXT NULL, telefono TEXT NULL, celular TEXT NULL, latitud REAL NULL, longitud REAL NULL, androidID TEXT NULL, fechaPulso TEXT NULL, versionApp TEXT NULL, situacionActual TEXT NULL)',
+      'CREATE TABLE Tecnico (id INTEGER PRIMARY KEY, cedula TEXT NOT NULL, nombre TEXT NULL, idProveedor INTEGER NULL, idEstadoTecnico INTEGER NULL, usuario TEXT NOT NULL, clave TEXT NULL, telefono TEXT NULL, celular TEXT NULL, latitud REAL NULL, longitud REAL NULL, androidID TEXT NULL, fechaPulso TEXT NULL, versionApp TEXT NULL, situacionActual TEXT NULL)',
     );
     await db.execute(
       'CREATE TABLE TipoCliente (id INTEGER PRIMARY KEY, nombre TEXT, descripcion TEXT)',

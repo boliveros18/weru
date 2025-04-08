@@ -14,6 +14,7 @@ Future<Map<String, List<Map<String, dynamic>>>> responseStageMessageXMLtoJSON(
   final tables = await TableList();
   final tableRegex = RegExp(r'(\w+)\s*\(([^)]+)\)');
   final matches = tableRegex.allMatches(tables);
+
   final Map<String, List<Map<String, dynamic>>> result = {};
 
   for (var match in matches) {
@@ -45,7 +46,30 @@ Future<Map<String, List<Map<String, dynamic>>>> responseStageMessageXMLtoJSON(
         final service = transformJson(map);
         service.forEach((key, value) {
           value.forEach((map) {
-            AddMessage(key, map);
+            switch (key) {
+              case "cliente":
+                AddMessage("Cliente", map);
+              case "equipo":
+                AddMessage("Equipo", map);
+              case "novedades":
+                AddMessage("NovedadServicio", map);
+              case "diagnosticos":
+                AddMessage("DiagnosticoServicio", map);
+              case "actividades":
+                AddMessage("ActividadServicio", map);
+              case "herramientas":
+                AddMessage("ItemActividadServicio", map);
+              case "repuestos":
+                AddMessage("ItemServicio", map);
+              case "indirectos":
+                AddMessage("IndirectoServicio", map);
+              case "fotos":
+                AddMessage("FotoServicio", map);
+              case "indicadores":
+                AddMessage("IndicadorServicio", map);
+              case "registroCamposAdicionales":
+                AddMessage("RegistroCamposAdicionales", map);
+            }
           });
         });
         FTPService.setMessageReceived(id);

@@ -20,17 +20,10 @@ class _PermissionRequestState extends State<PermissionRequest> {
   Future<void> _requestPermissions() async {
     Map<Permission, PermissionStatus> statuses = await [
       Permission.camera,
-      Permission.storage,
-      Permission.notification,
       Permission.location,
       Permission.locationAlways,
       Permission.locationWhenInUse,
-      Permission.accessMediaLocation,
-      Permission.manageExternalStorage,
-      Permission.sensors,
-      Permission.scheduleExactAlarm,
-      Permission.ignoreBatteryOptimizations,
-      Permission.phone,
+      Permission.photos
     ].request();
 
     bool allGranted = statuses.values.every((status) => status.isGranted);

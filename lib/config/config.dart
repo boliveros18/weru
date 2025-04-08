@@ -11,12 +11,10 @@ const String appImageFilesFolder = 'Images';
 const String appImageBakFilesFolder = 'Images_bak';
 const String appMaintenancePassword = '509569';
 const String appRibHostName = 'nansoft.co';
-
-const String servidorFTPS = 'nansoft.co';
-const int puertoFTPS = 21;
-const String userNameFTPS = 'Soporte';
-const String passwordFTPS = 'S0porte*123.';
-const String pathFTPS = '/WerU_Prueba/MasterData';
+const String tokenUrl =
+    "http://nansoft.co:89/IntegradorWerU/IntegradorWERU.svc/REST/MaestroToken";
+const String masterUrl =
+    "http://nansoft.co:89/IntegradorWerU/IntegradorWERU.svc/REST/DescargarArchivoMaestros";
 
 const String appRibGetMessagesUrlHost = 'nansoft.co:87';
 const String appRibGetMessagesUrlPath =
@@ -29,8 +27,8 @@ const String appRibSendMessageSalida =
     '/PruebaWeruC/RibWeb.svc/REST/RecibirMensajeStreamSalida';
 const String appRibDeleteMessagesNewInstall =
     '/PruebaWeruC/RibWeb.svc/REST/BorrarMensajesTableta';
-const String appRibSendImagesUrlMethod =
-    '/PruebaWeruC/RibWeb.svc/REST/RecibirImagen';
+const String sendImagesUrlMethod =
+    'http://nansoft.co:87/PruebaWeruC/RibWeb.svc/REST/RecibirImagen';
 
 const String appRibSleepTime = '2000';
 const String appRibSleepTimeGPS = '1000';
@@ -41,7 +39,7 @@ Future<String> getLocalDatabasePath() async {
 
   return Platform.isAndroid
       ? "/data/data/com.example.weru/files"
-      : "${directory.path}/database";
+      : "${directory.path}";
 }
 
 Future<String> getLocalCachePath() async {
@@ -67,5 +65,9 @@ Future<String> getLocalMasterPath(String value) async {
       : "${directory.path}/MasterData$value.zip";
 }
 
-const String localDirectoryPath =
-    "/data/data/com.example.weru/files/MasterData";
+Future<String> localDirectoryPath() async {
+  final directory = await getApplicationDocumentsDirectory();
+  return Platform.isAndroid
+      ? "/data/data/com.example.weru/files/MasterData"
+      : "${directory.path}/MasterData";
+}

@@ -43,9 +43,9 @@ class _NewsPageState extends State<NewsPage> {
   @override
   void initState() {
     super.initState();
-    initializeDatabase();
     session = Provider.of<Session>(context, listen: false);
     index = session.indexServicio;
+    initializeDatabase();
   }
 
   Future<void> initializeDatabase() async {
@@ -130,6 +130,13 @@ class _NewsPageState extends State<NewsPage> {
                     "NovedadServicio",
                   );
                   await databaseMain.getNews(servicio.id);
+                  final Map<String, dynamic> serviceData =
+                      databaseMain.services[index].toMap();
+                  serviceData['idEstadoServicio'] = 4;
+                  final Servicio service = Servicio.fromMap(serviceData);
+                  await servicioProvider.insert(service);
+                  await onConnectionValidationStage(
+                      jsonEncode(service.toMap()), "Servicio");
                   setState(() {});
                 }
               },
