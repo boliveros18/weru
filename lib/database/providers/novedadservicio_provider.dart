@@ -72,19 +72,12 @@ class NovedadServicioProvider {
     );
   }
 
-  Future<void> deleteByIdNovedad(int id) async {
+  Future<void> deleteByIdNovedadAndIdServicio(
+      int idNovedad, int idServicio) async {
     await db.delete(
       'NovedadServicio',
-      where: 'idNovedad = ?',
-      whereArgs: [id],
-    );
-  }
-
-  Future<void> deleteByIdServicio(int id) async {
-    await db.delete(
-      'NovedadServicio',
-      where: 'idServicio = ?',
-      whereArgs: [id],
+      where: 'idNovedad = ? AND idServicio = ?',
+      whereArgs: [idNovedad, idServicio],
     );
   }
 

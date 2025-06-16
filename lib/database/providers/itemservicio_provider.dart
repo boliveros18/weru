@@ -82,11 +82,11 @@ class ItemServicioProvider {
     );
   }
 
-  Future<void> deleteByIdItem(int id) async {
+  Future<void> deleteByIdItemAndIdServicio(int idItem, int idServicio) async {
     await db.delete(
       'ItemServicio',
-      where: 'idItem = ?',
-      whereArgs: [id],
+      where: 'idItem = ? AND idServicio = ?',
+      whereArgs: [idItem, idServicio],
     );
   }
 

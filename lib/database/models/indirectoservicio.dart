@@ -26,6 +26,17 @@ class IndirectoServicio {
     };
   }
 
+  factory IndirectoServicio.unknown() {
+    return IndirectoServicio(
+      id: 0,
+      idIndirecto: 0,
+      idServicio: 0,
+      cantidad: 0,
+      costo: 0,
+      valor: 0,
+    );
+  }
+
   factory IndirectoServicio.fromMap(Map<String, dynamic> map) {
     return IndirectoServicio(
       id: int.tryParse(map['id']?.toString() ?? '') ?? 0,

@@ -7,6 +7,11 @@ import 'package:weru/components/progress_indicator_ui.dart';
 import 'package:weru/components/text_ui.dart';
 import 'package:weru/config/config.dart';
 import 'package:weru/database/main.dart';
+import 'package:weru/database/models/ciudad.dart';
+import 'package:weru/database/models/cliente.dart';
+import 'package:weru/database/models/equipo.dart';
+import 'package:weru/database/models/estadoservicio.dart';
+import 'package:weru/database/models/modelo.dart';
 import 'package:weru/functions/get_status_color.dart';
 import 'package:weru/pages/menu.dart';
 import 'package:weru/pages/service.dart';
@@ -15,7 +20,6 @@ import 'package:weru/provider/session.dart';
 import 'package:provider/provider.dart';
 import 'dart:isolate';
 import 'dart:async';
-import 'package:flutter_app_badge_control/flutter_app_badge_control.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -36,16 +40,28 @@ class _HomePageState extends State<HomePage> {
     session = Provider.of<Session>(context, listen: false);
     session.loadSession();
     initializeDatabase();
-    _removeBadge();
     IsolateNameServer.removePortNameMapping('service_port');
     IsolateNameServer.registerPortWithName(
       _receivePort.sendPort,
       'service_port',
     );
     _receivePort.listen((message) async {
-      await databaseMain.getServices();
-      _setBadge(1);
-      setState(() {});
+      if (message is String && message == "Servicio") {
+        await databaseMain.setUser(session.user);
+        await databaseMain.getServices();
+        setState(() {});
+      }
+      if (message is Map<String, dynamic>) {
+        final latitude = message["latitude"];
+        final longitude = message["longitude:"];
+        final fecha = message["date"];
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Lat: $latitude, Lon: $longitude, Fecha: $fecha"),
+            duration: const Duration(seconds: 10),
+          ),
+        );
+      }
     });
 
     SendPort? onStartPort = IsolateNameServer.lookupPortByName(
@@ -64,19 +80,11 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> initializeDatabase() async {
     databaseMain = DatabaseMain(path: await getLocalDatabasePath());
+    await databaseMain.setUser(session.user);
     await databaseMain.getServices();
-
     setState(() {
       isLoading = false;
     });
-  }
-
-  Future<void> _setBadge(int count) async {
-    FlutterAppBadgeControl.updateBadgeCount(count);
-  }
-
-  Future<void> _removeBadge() async {
-    FlutterAppBadgeControl.removeBadge();
   }
 
   @override
@@ -122,12 +130,32 @@ class _HomePageState extends State<HomePage> {
           child: ListView.separated(
             itemBuilder: (context, index) {
               final service = databaseMain.services[index];
-              final client = databaseMain.clients[index];
-              final city = databaseMain.cities[index];
-              final equipment = databaseMain.equipments[index];
-              final model = databaseMain.models[index];
-              final status = databaseMain.servicesStatus[index];
-              final dateAndTime = service.fechayhorainicio.split(' ');
+              final client = (index < databaseMain.clients.length &&
+                      databaseMain.clients[index] != null)
+                  ? databaseMain.clients[index]!
+                  : Cliente.unknown();
+
+              final city = (index < databaseMain.cities.length &&
+                      databaseMain.cities[index] != null)
+                  ? databaseMain.cities[index]!
+                  : Ciudad.unknown();
+
+              final equipment = (index < databaseMain.equipments.length &&
+                      databaseMain.equipments[index] != null)
+                  ? databaseMain.equipments[index]!
+                  : Equipo.unknown();
+
+              final model = (index < databaseMain.models.length &&
+                      databaseMain.models[index] != null)
+                  ? databaseMain.models[index]!
+                  : Modelo.unknown();
+
+              final status = (index < databaseMain.servicesStatus.length &&
+                      databaseMain.servicesStatus[index] != null)
+                  ? databaseMain.servicesStatus[index]!
+                  : EstadoServicio.unknown();
+
+              final dateAndTime = service.fechaInicio.split(' ');
               final address = "${service.direccion}${city.nombre}";
               final encodedAddress = Uri.encodeComponent(address);
               final googleMapsUrl =
@@ -149,9 +177,10 @@ class _HomePageState extends State<HomePage> {
                   children: [
                     InkWell(
                       onTap: () async {
-                        if (await canLaunchUrl(Uri.parse(googleMapsUrl))) {
+                        final uri = Uri.parse(googleMapsUrl);
+                        if (await canLaunchUrl(uri)) {
                           await launchUrl(
-                            Uri.parse(googleMapsUrl),
+                            uri,
                             mode: LaunchMode.externalApplication,
                           );
                         } else {
@@ -172,7 +201,6 @@ class _HomePageState extends State<HomePage> {
                     ),
                     InkWell(
                       onTap: () async {
-                        _removeBadge();
                         await session.setIndexService(index);
                         if (databaseMain.services[index].idEstadoServicio ==
                                 10 ||
@@ -214,9 +242,13 @@ class _HomePageState extends State<HomePage> {
                             mainAxisAlignment: MainAxisAlignment.start,
                             mainAxisSize: MainAxisSize.max,
                             children: [
-                              TextUi(text: 'N° Servicio: ${service.orden}'),
+                              TextUi(
+                                  text: 'N° Servicio: ${service.consecutivo}'),
                               const SizedBox(width: 15),
-                              TextUi(text: 'Radicado: ${service.radicado}'),
+                              TextUi(
+                                text: 'Radicado: ${service.radicado}',
+                                long: 20,
+                              ),
                             ],
                           ),
                           TextUi(text: 'Cliente: ${client.nombre}'),

@@ -47,6 +47,7 @@ class _MenuPageState extends State<MenuPage> {
 
   Future<void> initializeDatabase() async {
     databaseMain = DatabaseMain(path: await getLocalDatabasePath());
+    await databaseMain.setUser(session.user);
     await databaseMain.getServices();
     setState(() {
       isLoading = false;
@@ -77,7 +78,7 @@ class _MenuPageState extends State<MenuPage> {
                     padding: const EdgeInsets.only(left: 20, right: 20),
                     child: Column(
                       children: [
-                        AppStatus(),
+                        const AppStatus(),
                         serviceHeaderSection(),
                         serviceBodySection()
                       ],
@@ -95,14 +96,14 @@ class _MenuPageState extends State<MenuPage> {
     return Column(
       children: [
         const SizedBox(height: 10),
-        TextUi(text: 'N° Servicio: ${service.orden}'),
+        TextUi(text: 'N° Servicio: ${service.consecutivo}'),
         const SizedBox(height: 20),
         Container(
           color: const Color.fromARGB(255, 0, 45, 168),
-          child: Column(
+          child: const Column(
             children: [
               Padding(
-                padding: const EdgeInsets.fromLTRB(20, 2, 20, 2),
+                padding: EdgeInsets.fromLTRB(20, 2, 20, 2),
                 child: TextUi(
                   text: 'PANEL DE CONTROL',
                   color: Colors.white,
@@ -118,7 +119,7 @@ class _MenuPageState extends State<MenuPage> {
   }
 
   Column serviceBodySection() {
-    return Column(
+    return const Column(
       children: [
         Row(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -128,19 +129,19 @@ class _MenuPageState extends State<MenuPage> {
                 IconPath: "assets/icons/servicio.png",
                 title: "Servicio",
                 page: ServicePage()),
-            const SizedBox(width: 10),
+            SizedBox(width: 10),
             MenuItemUi(
                 IconPath: "assets/icons/diagnosticos.png",
                 title: "Diagnosticos",
                 page: DiagnosisPage()),
-            const SizedBox(width: 10),
+            SizedBox(width: 10),
             MenuItemUi(
                 IconPath: "assets/icons/actividades.png",
                 title: "Actividades",
                 page: ActivityPage()),
           ],
         ),
-        const SizedBox(height: 30),
+        SizedBox(height: 30),
         Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.center,
@@ -149,19 +150,19 @@ class _MenuPageState extends State<MenuPage> {
                 IconPath: "assets/icons/repuestos.png",
                 title: "Repuestos",
                 page: RefillsPage()),
-            const SizedBox(width: 10),
+            SizedBox(width: 10),
             MenuItemUi(
                 IconPath: "assets/icons/herramientas.png",
                 title: "Herramientas",
                 page: ToolsPage()),
-            const SizedBox(width: 10),
+            SizedBox(width: 10),
             MenuItemUi(
                 IconPath: "assets/icons/indirectos.png",
                 title: "Indirectos",
                 page: OverheadPage()),
           ],
         ),
-        const SizedBox(height: 30),
+        SizedBox(height: 30),
         Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.center,
@@ -170,12 +171,12 @@ class _MenuPageState extends State<MenuPage> {
                 IconPath: "assets/icons/fotografia.png",
                 title: "Fotografia",
                 page: PhotographPage()),
-            const SizedBox(width: 10),
+            SizedBox(width: 10),
             MenuItemUi(
                 IconPath: "assets/icons/indicador.png",
                 title: "Indicadores",
                 page: IndicatorsPage()),
-            const SizedBox(width: 10),
+            SizedBox(width: 10),
             MenuItemUi(
                 IconPath: "assets/icons/pencil.png",
                 title: "Firmar-cerrar",

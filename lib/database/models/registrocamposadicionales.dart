@@ -23,10 +23,11 @@ class RegistroCamposAdicionales {
     };
   }
 
-   factory   RegistroCamposAdicionales.fromMap(Map<String, dynamic> map) {
-    return   RegistroCamposAdicionales(
-           id: int.tryParse(map['id']?.toString() ?? '') ?? 0,
-      idCamposAdicionales: int.tryParse(map['idCamposAdicionales']?.toString() ?? '') ?? 0,
+  factory RegistroCamposAdicionales.fromMap(Map<String, dynamic> map) {
+    return RegistroCamposAdicionales(
+      id: int.tryParse(map['id']?.toString() ?? '') ?? 0,
+      idCamposAdicionales:
+          int.tryParse(map['idCamposAdicionales']?.toString() ?? '') ?? 0,
       idRegistro: int.tryParse(map['idRegistro']?.toString() ?? '') ?? 0,
       valor: int.tryParse(map['valor']?.toString() ?? '') ?? 0,
       nombre: map['nombre']?.toString() ?? '',

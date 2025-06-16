@@ -4,6 +4,7 @@ import 'package:weru/services/ftp_service.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:weru/database/main.dart';
 import 'package:weru/config/config.dart';
+import 'package:intl/intl.dart';
 
 Future<void> stageMessageProviderInsert(String message, String table) async {
   Database database =
@@ -18,7 +19,9 @@ Future<void> onConnectionValidationStage(String message, String table) async {
   if (connectivityResult.contains(ConnectivityResult.mobile) ||
       connectivityResult.contains(ConnectivityResult.wifi)) {
     try {
-      await FTPService.sendMessageEntrada(message, table);
+      final String date =
+          DateFormat("yyyy-MM-dd HH:mm:ss").format(DateTime.now());
+      await FTPService.sendMessageEntrada(message, table, date);
     } catch (e) {
       if (e.toString().contains("Connection timed out") ||
           e.toString().contains("Failed host lookup")) {

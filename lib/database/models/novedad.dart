@@ -17,9 +17,13 @@ class Novedad {
     };
   }
 
-   factory   Novedad.fromMap(Map<String, dynamic> map) {
-    return   Novedad(
-           id: int.tryParse(map['id']?.toString() ?? '') ?? 0,
+  factory Novedad.unknown() {
+    return Novedad(id: 0, descripcion: "Desconocido", estado: 0);
+  }
+
+  factory Novedad.fromMap(Map<String, dynamic> map) {
+    return Novedad(
+      id: int.tryParse(map['id']?.toString() ?? '') ?? 0,
       descripcion: map['descripcion']?.toString() ?? '',
       estado: int.tryParse(map['estado']?.toString() ?? '') ?? 0,
     );

@@ -9,10 +9,14 @@ import 'package:weru/components/dropdown_menu_ui.dart';
 import 'package:weru/components/text_ui.dart';
 import 'package:weru/config/config.dart';
 import 'package:weru/database/main.dart';
+import 'package:weru/database/models/equipo.dart';
 import 'package:weru/database/models/indicador.dart';
+import 'package:weru/database/models/indicadormodelo.dart';
 import 'package:weru/database/models/indicadorservicio.dart';
 import 'package:weru/database/models/servicio.dart';
+import 'package:weru/database/providers/equipo_provider.dart';
 import 'package:weru/database/providers/indicador_provider.dart';
+import 'package:weru/database/providers/indicadormodelo_provider.dart';
 import 'package:weru/database/providers/indicadorservicio_provider.dart';
 import 'package:weru/database/providers/servicio_provider.dart';
 import 'package:weru/provider/session.dart';
@@ -36,7 +40,6 @@ class _IndicatorPageState extends State<IndicatorsPage> {
   late Servicio service;
   late Database database;
   late List<Indicador> indicators;
-  late List<IndicadorServicio> indicatorsServices;
 
   @override
   void initState() {
@@ -50,15 +53,39 @@ class _IndicatorPageState extends State<IndicatorsPage> {
     databaseMain = DatabaseMain(path: await getLocalDatabasePath());
     database =
         await DatabaseMain(path: await getLocalDatabasePath()).onCreate();
+    await databaseMain.setUser(session.user);
     await databaseMain.getServices();
     service = databaseMain.services[index];
-    await databaseMain.getIndicators(service.id);
-    indicators = await IndicadorProvider(db: database).getAll();
-    indicatorsServices = await databaseMain.indicatorsServices;
+    await databaseMain.getIndicators(service.id, service.idTecnico);
+    indicators = await filteredIndicators(service.idEquipo);
+
     setState(() {
       isLoading = false;
       servicioProvider = ServicioProvider(db: database);
     });
+  }
+
+  Future<List<Indicador>> filteredIndicators(int idEquipo) async {
+    final Equipo equipo =
+        await EquipoProvider(db: database).getItemById(idEquipo);
+
+    final idModelo = equipo.idModelo;
+
+    final List<IndicadorModelo> _indicadorModelo =
+        await IndicadorModeloProvider(db: database).getAllByIdModelo(idModelo);
+
+    final fetchedIndicators = await Future.wait(
+      _indicadorModelo.map((indicator) async {
+        try {
+          return await IndicadorProvider(db: database)
+              .getItemById(indicator.idIndicador);
+        } catch (_) {
+          return null;
+        }
+      }),
+    );
+
+    return fetchedIndicators.whereType<Indicador>().toList();
   }
 
   @override
@@ -102,7 +129,13 @@ class _IndicatorPageState extends State<IndicatorsPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            const SizedBox(height: 20),
+            const SizedBox(height: 10),
+            Center(
+              child: TextUi(
+                text: 'N° Servicio: ${service.consecutivo}',
+              ),
+            ),
+            const SizedBox(height: 10),
             DropdownMenuUi(
               hint: "Valor",
               textfield: true,
@@ -124,7 +157,8 @@ class _IndicatorPageState extends State<IndicatorsPage> {
                       valor: value);
                   await IndicadorServicioProvider(db: database)
                       .insert(indicatorServices);
-                  await databaseMain.getIndicators(service.id);
+                  await databaseMain.getIndicators(
+                      service.id, service.idTecnico);
                   setState(() {});
                 }
               },
@@ -137,14 +171,19 @@ class _IndicatorPageState extends State<IndicatorsPage> {
               children: [
                 Container(
                   child: SizedBox(
-                      height: MediaQuery.of(context).size.width - 120,
+                      height: MediaQuery.of(context).size.width - 40,
                       child: ListView.separated(
                         itemBuilder: (context, index) {
                           if (index < databaseMain.indicatorsServices.length) {
-                            final _new = databaseMain.indicatorsServices[index];
-                            final _indicator = databaseMain.indicators
-                                .where((item) => item.id == _new.idIndicador)
-                                .first;
+                            final _new =
+                                (index < databaseMain.indicatorsServices.length)
+                                    ? databaseMain.indicatorsServices[index]
+                                    : IndicadorServicio.unknown();
+                            final _indicator =
+                                databaseMain.indicators.firstWhere(
+                              (item) => item.id == _new.idIndicador,
+                              orElse: () => Indicador.unknown(),
+                            );
                             return GestureDetector(
                                 onTap: () {
                                   (Future.delayed(Duration.zero, () {
@@ -164,8 +203,8 @@ class _IndicatorPageState extends State<IndicatorsPage> {
                                         await IndicadorServicioProvider(
                                                 db: database)
                                             .update(updated);
-                                        await databaseMain
-                                            .getIndicators(service.id);
+                                        await databaseMain.getIndicators(
+                                            service.id, service.idTecnico);
                                         setState(() {});
                                       },
                                     );
@@ -217,10 +256,13 @@ class _IndicatorPageState extends State<IndicatorsPage> {
                                                     await IndicadorServicioProvider(
                                                             db: database)
                                                         .deleteByIdIndicador(
-                                                            _new.idIndicador);
+                                                            _new.idIndicador,
+                                                            service.id,
+                                                            service.idTecnico);
                                                     await databaseMain
                                                         .getIndicators(
-                                                            service.id);
+                                                            service.id,
+                                                            service.idTecnico);
                                                     setState(() {});
                                                   } catch (e) {
                                                     print(
@@ -231,8 +273,9 @@ class _IndicatorPageState extends State<IndicatorsPage> {
                                                   "assets/icons/trash-can-regular.svg",
                                                   width: 27,
                                                   height: 27,
-                                                  colorFilter: ColorFilter.mode(
-                                                    const Color.fromARGB(
+                                                  colorFilter:
+                                                      const ColorFilter.mode(
+                                                    Color.fromARGB(
                                                         255, 255, 118, 108),
                                                     BlendMode.srcIn,
                                                   ),

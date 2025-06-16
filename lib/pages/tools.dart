@@ -8,7 +8,6 @@ import 'package:weru/config/config.dart';
 import 'package:weru/database/main.dart';
 import 'package:weru/database/models/item.dart';
 import 'package:weru/database/models/servicio.dart';
-import 'package:weru/database/providers/item_provider.dart';
 import 'package:weru/database/providers/servicio_provider.dart';
 import 'package:weru/provider/session.dart';
 import 'package:provider/provider.dart';
@@ -43,11 +42,12 @@ class _ToolsPageState extends State<ToolsPage> {
     databaseMain = DatabaseMain(path: await getLocalDatabasePath());
     database =
         await DatabaseMain(path: await getLocalDatabasePath()).onCreate();
+    await databaseMain.setUser(session.user);
     await databaseMain.getServices();
     if (databaseMain.services.isNotEmpty) {
       service = databaseMain.services[index];
-      await databaseMain.getTools(service.idTecnico);
-      tools = await ItemProvider(db: database).getAllByType(2);
+      await databaseMain.getTools(service.id);
+      tools = databaseMain.tools;
     }
     setState(() {
       isLoading = false;
@@ -95,7 +95,13 @@ class _ToolsPageState extends State<ToolsPage> {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 20),
+            const SizedBox(height: 10),
+            Center(
+              child: TextUi(
+                text: 'N° Servicio: ${service.consecutivo}',
+              ),
+            ),
+            const SizedBox(height: 10),
             Text("Lista de herramientas (${tools.length}): ",
                 style: TextStyle(fontWeight: FontWeight.w400, fontSize: 16)),
             const SizedBox(height: 10),
@@ -103,12 +109,11 @@ class _ToolsPageState extends State<ToolsPage> {
               children: [
                 Container(
                   child: SizedBox(
-                      height: MediaQuery.of(context).size.width - 120,
+                      height: MediaQuery.of(context).size.width - 40,
                       child: ListView.separated(
                         itemBuilder: (context, index) {
                           if (index < tools.toList().length) {
                             final _new = tools[index];
-
                             return GestureDetector(
                                 onTap: () {},
                                 child: Column(

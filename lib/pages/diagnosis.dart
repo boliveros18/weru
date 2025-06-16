@@ -49,11 +49,12 @@ class _DiagnosisPageState extends State<DiagnosisPage> {
     databaseMain = DatabaseMain(path: await getLocalDatabasePath());
     database =
         await DatabaseMain(path: await getLocalDatabasePath()).onCreate();
+    await databaseMain.setUser(session.user);
     await databaseMain.getServices();
     service = databaseMain.services[index];
     await databaseMain.getDiagnoses(service.id);
     diagnoses = await DiagnosticoProvider(db: database).getAll();
-    diagnosesService = await databaseMain.diagnosesServices;
+    diagnosesService = databaseMain.diagnosesServices;
     setState(() {
       isLoading = false;
       servicioProvider = ServicioProvider(db: database);
@@ -101,7 +102,13 @@ class _DiagnosisPageState extends State<DiagnosisPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            const SizedBox(height: 20),
+            const SizedBox(height: 10),
+            Center(
+              child: TextUi(
+                text: 'N° Servicio: ${service.consecutivo}',
+              ),
+            ),
+            const SizedBox(height: 10),
             DropdownMenuUi(
               list: diagnoses.map((item) {
                 return DropDownValueModel(
@@ -132,11 +139,13 @@ class _DiagnosisPageState extends State<DiagnosisPage> {
               children: [
                 Container(
                   child: SizedBox(
-                      height: MediaQuery.of(context).size.width - 120,
+                      height: MediaQuery.of(context).size.width - 40,
                       child: ListView.separated(
                         itemBuilder: (context, index) {
                           if (index < databaseMain.diagnoses.length) {
-                            final _new = databaseMain.diagnoses[index];
+                            final _new = (index < databaseMain.diagnoses.length)
+                                ? databaseMain.diagnoses[index]
+                                : Diagnostico.unknown();
                             return Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -177,8 +186,8 @@ class _DiagnosisPageState extends State<DiagnosisPage> {
                                               try {
                                                 await DiagnosticoServicioProvider(
                                                         db: database)
-                                                    .deleteByIdDiagnostico(
-                                                        _new.id);
+                                                    .deleteByIdDiagnosticoAndIdServicio(
+                                                        _new.id, service.id);
                                                 await databaseMain
                                                     .getDiagnoses(service.id);
                                                 setState(() {});
@@ -190,8 +199,9 @@ class _DiagnosisPageState extends State<DiagnosisPage> {
                                               "assets/icons/trash-can-regular.svg",
                                               width: 27,
                                               height: 27,
-                                              colorFilter: ColorFilter.mode(
-                                                const Color.fromARGB(
+                                              colorFilter:
+                                                  const ColorFilter.mode(
+                                                Color.fromARGB(
                                                     255, 255, 118, 108),
                                                 BlendMode.srcIn,
                                               ),
@@ -200,7 +210,7 @@ class _DiagnosisPageState extends State<DiagnosisPage> {
                                         )),
                                   ],
                                 ),
-                                DividerUi(
+                                const DividerUi(
                                   paddingHorizontal: 0,
                                 ),
                               ],

@@ -26,6 +26,17 @@ class Maletin {
     };
   }
 
+  factory Maletin.unknown() {
+    return Maletin(
+      id: 0,
+      idItem: 0,
+      idTecnico: 0,
+      cantidad: 0,
+      costo: 0,
+      valor: 0,
+    );
+  }
+
   factory Maletin.fromMap(Map<String, dynamic> map) {
     return Maletin(
       id: int.tryParse(map['id']?.toString() ?? '') ?? 0,

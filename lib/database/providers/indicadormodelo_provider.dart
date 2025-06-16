@@ -27,8 +27,12 @@ class IndicadorModeloProvider {
     return IndicadorModelo.fromMap(items.first);
   }
 
-  Future<List<IndicadorModelo>> getAll() async {
-    final List<Map<String, Object?>> maps = await db.query('IndicadorModelo');
+  Future<List<IndicadorModelo>> getAllByIdModelo(int idModelo) async {
+    final List<Map<String, Object?>> maps = await db.query(
+      'IndicadorModelo',
+      where: 'idModelo = ?',
+      whereArgs: [idModelo],
+    );
     return maps.map((map) {
       return IndicadorModelo(
         id: map['id'] as int,

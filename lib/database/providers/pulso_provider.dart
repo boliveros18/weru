@@ -5,12 +5,15 @@ class PulsoProvider {
   final Database db;
   PulsoProvider({required this.db});
 
-  Future<void> insert(Pulso pulso) async {
-    await db.insert(
+  Future<Pulso> insert(Pulso pulso) async {
+    final int id = await db.insert(
       'Pulso',
       pulso.toMap(),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
+
+    pulso.id = id;
+    return pulso;
   }
 
   Future<Pulso> getItemById(int id) async {

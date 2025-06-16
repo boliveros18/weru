@@ -15,7 +15,6 @@ import 'package:weru/provider/session.dart';
 import 'package:weru/permission_request.dart';
 import 'package:weru/components/text_field_ui.dart';
 import 'package:weru/components/dialog_ui.dart';
-import 'package:weru/components/progress_indicator_ui.dart';
 import 'package:weru/services/ftp_service.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -32,7 +31,6 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   bool permissionsGranted = false;
-  bool isLoading = false;
   late bool master;
   bool isTimerInitialized = false;
   late Session session;
@@ -97,10 +95,25 @@ class _LoginPageState extends State<LoginPage> {
                     PermissionRequest(
                       onPermissionStatusChanged: updatePermissionStatus,
                     ),
-                  Image.asset('assets/icons/weru.png'),
+                  GestureDetector(
+                    onTap: () async {
+                      if (Platform.isAndroid) {
+                        androidInfo = await deviceInfo.androidInfo;
+                      } else {
+                        iOsInfo = await deviceInfo.iosInfo;
+                      }
+                      DialogUi.show(
+                        context: context,
+                        title:
+                            "Este es el id del dispositivo: ${Platform.isAndroid ? androidInfo.id : iOsInfo.identifierForVendor}",
+                        textField: false,
+                        onConfirm: (value) async {},
+                      );
+                    },
+                    child: Image.asset('assets/icons/weru.png'),
+                  ),
                   const SizedBox(height: 20),
                   TextFieldUi(
-                    pass: true,
                     hint: "Usuario",
                     prefixIcon: true,
                     prefixIconPath: "assets/icons/user.png",
@@ -110,6 +123,7 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   const SizedBox(height: 20),
                   TextFieldUi(
+                    pass: true,
                     hint: "Contraseña",
                     prefixIcon: true,
                     prefixIconPath: "assets/icons/padlock.png",
@@ -121,10 +135,11 @@ class _LoginPageState extends State<LoginPage> {
                   ButtonUi(
                       value: "Ingresar",
                       onClicked: () async {
-                        bool validation = await Auth( session,
-                            userController.text, passController.text);
+                        bool validation = await Auth(
+                            session, userController.text, passController.text);
                         if (validation) {
-                          await session.login( userController.text, passController.text);
+                          await session.login(
+                              userController.text, passController.text);
                         } else {
                           (Future.delayed(Duration.zero, () {
                             DialogUi.show(
@@ -136,8 +151,6 @@ class _LoginPageState extends State<LoginPage> {
                           }));
                         }
                       }),
-                  const SizedBox(height: 10),
-                  if (isLoading) const ProgressIndicatorUi()
                 ],
               ),
             ),
@@ -148,7 +161,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void updatePermissionStatus(bool granted) {
-    if(mounted){
+    if (mounted) {
       setState(() {
         permissionsGranted = granted;
       });
@@ -156,20 +169,34 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> downloadAndUnzipMaster(String value) async {
-    isLoading = true;
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return const AlertDialog(
+          content: Row(
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(width: 20),
+              Text("Descargando archivo..."),
+            ],
+          ),
+        );
+      },
+    );
     master = await ftpService.downloadFile(value);
-    isLoading = false;
     if (master) {
+      Navigator.of(context, rootNavigator: true).pop();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Archivo master descargado!")),
       );
-     final input = InputFileStream(await getLocalMasterPath(value));
-     final archive = await ZipDecoder().decodeStream(input);
+      final input = InputFileStream(await getLocalMasterPath(value));
+      final archive = await ZipDecoder().decodeStream(input);
       for (final file in archive) {
         if (file.isFile) {
           try {
             final output =
-                OutputFileStream('${await localDirectoryPath()}/${file.name}');
+                OutputFileStream('${localDirectoryPath}/${file.name}');
             output.writeStream(file.getContent()!);
             insertMasterFileInSqflite(file, database);
             await file.close();
@@ -178,13 +205,14 @@ class _LoginPageState extends State<LoginPage> {
           }
         } else {
           try {
-            await Directory('${await localDirectoryPath()}/${file.name}')
+            await Directory('${localDirectoryPath}/${file.name}')
                 .create(recursive: true);
           } catch (e, stackTrace) {
             print('Error in directory:${e}, $stackTrace');
           }
         }
       }
+      await ftpService.deleteMessagesNewInstall();
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Nit errado")),
@@ -196,41 +224,6 @@ class _LoginPageState extends State<LoginPage> {
     await currentPosition();
     database =
         await DatabaseMain(path: await getLocalDatabasePath()).onCreate();
-    timer = Timer.periodic(Duration(seconds: 20), (timer) async {
-      try {
-        String response = await FTPService.getMessages();
-        if (response.isEmpty) {
-          return;
-        }
-        final data = await responseStageMessageXMLtoJSON(response);
-        if (
-            data['Tecnico'] != null &&
-            data['Tecnico'] is List &&
-            data['Tecnico']!.isNotEmpty &&
-            data['Tecnico']![0]['usuario']?.toString().isNotEmpty == true) {
-          bool insert =
-              await insertStageMessageListDataToSqflite(data, database);
-          if (insert) {
-            session.user = data['Tecnico']?[0]['usuario'];
-            session.pass = data['Tecnico']?[0]['clave'];
-            userController.text = session.user;
-            passController.text = session.pass;
-            Future.delayed(Duration.zero, () {
-              DialogUi.show(
-                context: context,
-                title:
-                    "Se descargaron tus servicios y credenciales. Accede a tu cuenta!",
-                textField: false,
-                onConfirm: (value) async {},
-              );
-            });
-          }
-        }
-      } catch (e, stackTrace) {
-        print('Error in _initializeApp: $e, $stackTrace');
-      }
-    });
-    isTimerInitialized = true;
     Future.delayed(Duration.zero, () async {
       if (mounted) {
         if (!Directory(await localDirectoryPath()).existsSync()) {
@@ -246,7 +239,37 @@ class _LoginPageState extends State<LoginPage> {
                 iOsInfo = await deviceInfo.iosInfo;
               }
               await downloadAndUnzipMaster(value);
-              Future.delayed(Duration(milliseconds: 1000), () {
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (BuildContext context) {
+                  return const AlertDialog(
+                    content: Row(
+                      children: [
+                        CircularProgressIndicator(),
+                        SizedBox(width: 20),
+                        Text("Por favor espere..."),
+                      ],
+                    ),
+                  );
+                },
+              );
+              try {
+                String response = await FTPService.getMessages();
+                if (response.isEmpty) {
+                  return;
+                }
+                final data = await responseStageMessageXMLtoJSON(response);
+                if (data.isNotEmpty) {
+                  await insertStageMessageListDataToSqflite(data, database);
+                }
+              } catch (e, stackTrace) {
+                print(
+                    'Error in getting initials new data master: $e, $stackTrace');
+              } finally {
+                Navigator.of(context, rootNavigator: true).pop();
+              }
+              Future.delayed(const Duration(milliseconds: 1000), () {
                 if (mounted) {
                   DialogUi.show(
                     context: context,
@@ -262,6 +285,40 @@ class _LoginPageState extends State<LoginPage> {
         }
       }
     });
+    bool isDialogVisible = false;
+    timer = Timer.periodic(const Duration(seconds: 20), (timer) async {
+      try {
+        String response = await FTPService.getMessages();
+        if (response.isEmpty) {
+          return;
+        }
+        final data = await responseStageMessageXMLtoJSON(response);
+        if (data['Tecnico'] != null &&
+            data['Tecnico'] is List &&
+            data['Tecnico']!.isNotEmpty &&
+            data['Tecnico']![0]['usuario']?.toString().isNotEmpty == true) {
+          bool insert =
+              await insertStageMessageListDataToSqflite(data, database);
+          if (insert && !isDialogVisible) {
+            isDialogVisible = true;
+            Future.delayed(Duration.zero, () {
+              DialogUi.show(
+                context: context,
+                title:
+                    "Se descargaron tus servicios y credenciales. Accede a tu cuenta!",
+                textField: false,
+                onConfirm: (value) async {
+                  isDialogVisible = false;
+                },
+              );
+            });
+          }
+        }
+      } catch (e, stackTrace) {
+        print('Error in _initializeApp: $e, $stackTrace');
+      }
+    });
+    isTimerInitialized = true;
   }
 }
 

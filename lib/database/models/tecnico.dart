@@ -13,7 +13,7 @@ class Tecnico {
   final String androidID;
   final String fechaPulso;
   final String versionApp;
-  final String? situacionActual;
+  final String situacionActual;
 
   Tecnico(
       {required this.id,
@@ -30,7 +30,7 @@ class Tecnico {
       required this.androidID,
       required this.fechaPulso,
       required this.versionApp,
-      this.situacionActual});
+      required this.situacionActual});
 
   Map<String, Object?> toMap() {
     return {

@@ -35,6 +35,19 @@ class ItemServicio {
     };
   }
 
+  factory ItemServicio.unknown() {
+    return ItemServicio(
+        id: 0,
+        idItem: 0,
+        idServicio: 0,
+        cantidad: 0,
+        costo: 0,
+        valor: 0,
+        cantidadReq: 0,
+        fechaUltimaVez: "desconocido",
+        vidaUtil: "desconocido");
+  }
+
   factory ItemServicio.fromMap(Map<String, dynamic> map) {
     return ItemServicio(
       id: int.tryParse(map['id']?.toString() ?? '') ?? 0,

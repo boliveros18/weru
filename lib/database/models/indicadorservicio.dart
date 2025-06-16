@@ -23,6 +23,16 @@ class IndicadorServicio {
     };
   }
 
+  factory IndicadorServicio.unknown() {
+    return IndicadorServicio(
+      id: 0,
+      idIndicador: 0,
+      idServicio: 0,
+      idTecnico: 0,
+      valor: "Desconocido",
+    );
+  }
+
   factory IndicadorServicio.fromMap(Map<String, dynamic> map) {
     return IndicadorServicio(
       id: int.tryParse(map['id']?.toString() ?? '') ?? 0,

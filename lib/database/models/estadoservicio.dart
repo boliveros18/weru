@@ -17,9 +17,17 @@ class EstadoServicio {
     };
   }
 
-   factory   EstadoServicio.fromMap(Map<String, dynamic> map) {
-    return   EstadoServicio(
-           id: int.tryParse(map['id']?.toString() ?? '') ?? 0,
+  factory EstadoServicio.unknown() {
+    return EstadoServicio(
+      id: 0,
+      nombre: 'Desconocido',
+      descripcion: 'Desconocido',
+    );
+  }
+
+  factory EstadoServicio.fromMap(Map<String, dynamic> map) {
+    return EstadoServicio(
+      id: int.tryParse(map['id']?.toString() ?? '') ?? 0,
       nombre: map['nombre']?.toString() ?? '',
       descripcion: map['descripcion']?.toString() ?? '',
     );

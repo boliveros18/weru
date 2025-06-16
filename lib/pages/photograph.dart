@@ -17,6 +17,7 @@ import 'package:weru/provider/session.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:flutter_exif_rotation/flutter_exif_rotation.dart';
 import 'package:intl/intl.dart';
 import 'dart:io';
 
@@ -53,6 +54,7 @@ class _PhotographPageState extends State<PhotographPage> {
     databaseMain = DatabaseMain(path: await getLocalDatabasePath());
     database =
         await DatabaseMain(path: await getLocalDatabasePath()).onCreate();
+    await databaseMain.setUser(session.user);
     await databaseMain.getServices();
     service = databaseMain.services[index];
     await databaseMain.getPhotosService(service.id);
@@ -105,6 +107,11 @@ class _PhotographPageState extends State<PhotographPage> {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Center(
+              child: TextUi(
+                text: 'N° Servicio: ${service.consecutivo}',
+              ),
+            ),
             SizedBox(
               height: 240,
               width: double.infinity,
@@ -125,8 +132,8 @@ class _PhotographPageState extends State<PhotographPage> {
                                 "assets/icons/gallery.svg",
                                 width: 80,
                                 height: 80,
-                                colorFilter: ColorFilter.mode(
-                                  const Color.fromARGB(255, 202, 202, 202),
+                                colorFilter: const ColorFilter.mode(
+                                  Color.fromARGB(255, 202, 202, 202),
                                   BlendMode.srcIn,
                                 ),
                               ),
@@ -134,9 +141,20 @@ class _PhotographPageState extends State<PhotographPage> {
                         ButtonUi(
                           value: "Foto",
                           onClicked: () async {
-                            pickedFile = await picker.pickImage(
-                                source: ImageSource.camera, imageQuality: 25);
-                            setState(() {});
+                            final pickedFile = await picker.pickImage(
+                              source: ImageSource.camera,
+                              imageQuality: 25,
+                            );
+
+                            if (pickedFile != null) {
+                              final File rotatedImage =
+                                  await FlutterExifRotation.rotateImage(
+                                      path: pickedFile.path);
+
+                              setState(() {
+                                this.pickedFile = XFile(rotatedImage.path);
+                              });
+                            }
                           },
                           color: const Color(0xff4caf50),
                           borderRadius: 2,
@@ -181,6 +199,9 @@ class _PhotographPageState extends State<PhotographPage> {
                                 final String filePath =
                                     '${await getLocalDatabasePath()}/backup/${name}';
                                 await pickedFile!.saveTo(filePath);
+                                final cachePath =
+                                    '${await getLocalCachePath()}/${pickedFile!.name}';
+                                await File(cachePath).delete();
                                 FotoServicio fotoservicio = FotoServicio(
                                     idServicio: service.id,
                                     archivo: filePath,
@@ -215,7 +236,7 @@ class _PhotographPageState extends State<PhotographPage> {
               children: [
                 Container(
                   child: SizedBox(
-                      height: MediaQuery.of(context).size.height - 120,
+                      height: MediaQuery.of(context).size.height - 40,
                       child: ListView.separated(
                         itemBuilder: (context, index) {
                           if (index < databaseMain.photosServices.length) {

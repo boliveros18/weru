@@ -8,10 +8,14 @@ import 'package:weru/components/dropdown_menu_ui.dart';
 import 'package:weru/components/text_ui.dart';
 import 'package:weru/config/config.dart';
 import 'package:weru/database/main.dart';
+import 'package:weru/database/models/equipo.dart';
 import 'package:weru/database/models/item.dart';
+import 'package:weru/database/models/itemmodelo.dart';
 import 'package:weru/database/models/itemservicio.dart';
 import 'package:weru/database/models/servicio.dart';
+import 'package:weru/database/providers/equipo_provider.dart';
 import 'package:weru/database/providers/item_provider.dart';
+import 'package:weru/database/providers/itemmodelo_provider.dart';
 import 'package:weru/database/providers/itemservicio_provider.dart';
 import 'package:weru/database/providers/servicio_provider.dart';
 import 'package:weru/provider/session.dart';
@@ -36,7 +40,6 @@ class _RefillsPageState extends State<RefillsPage> {
   late Servicio service;
   late Database database;
   late List<Item> refills;
-  late List<ItemServicio> refillsServices;
 
   @override
   void initState() {
@@ -50,15 +53,40 @@ class _RefillsPageState extends State<RefillsPage> {
     databaseMain = DatabaseMain(path: await getLocalDatabasePath());
     database =
         await DatabaseMain(path: await getLocalDatabasePath()).onCreate();
+    await databaseMain.setUser(session.user);
     await databaseMain.getServices();
     service = databaseMain.services[index];
     await databaseMain.getRefills(service.id);
-    refills = await ItemProvider(db: database).getAllByType(1);
-    refillsServices = await databaseMain.refillsServices;
+    refills = await filteredRefills(service.idEquipo);
+
     setState(() {
       isLoading = false;
       servicioProvider = ServicioProvider(db: database);
     });
+  }
+
+  Future<List<Item>> filteredRefills(int idEquipo) async {
+    final Equipo equipo =
+        await EquipoProvider(db: database).getItemById(idEquipo);
+
+    final idModelo = equipo.idModelo;
+
+    final List<ItemModelo> _itemModelo =
+        await ItemModeloProvider(db: database).getAllByIdModelo(idModelo);
+
+    print(_itemModelo);
+
+    final fetchedRefills = await Future.wait(
+      _itemModelo.map((item) async {
+        try {
+          return await ItemProvider(db: database).getItemById(item.idItem);
+        } catch (_) {
+          return null;
+        }
+      }),
+    );
+
+    return fetchedRefills.whereType<Item>().toList();
   }
 
   @override
@@ -102,7 +130,13 @@ class _RefillsPageState extends State<RefillsPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            const SizedBox(height: 20),
+            const SizedBox(height: 10),
+            Center(
+              child: TextUi(
+                text: 'N° Servicio: ${service.consecutivo}',
+              ),
+            ),
+            const SizedBox(height: 10),
             DropdownMenuUi(
               hint: "Cantidad",
               textfield: true,
@@ -154,14 +188,18 @@ class _RefillsPageState extends State<RefillsPage> {
               children: [
                 Container(
                   child: SizedBox(
-                      height: MediaQuery.of(context).size.width - 120,
+                      height: MediaQuery.of(context).size.width - 40,
                       child: ListView.separated(
                         itemBuilder: (context, index) {
                           if (index < databaseMain.refillsServices.length) {
-                            final _new = databaseMain.refillsServices[index];
-                            final _refill = databaseMain.refills
-                                .where((item) => item.id == _new.idItem)
-                                .first;
+                            final _new =
+                                (index < databaseMain.refillsServices.length)
+                                    ? databaseMain.refillsServices[index]
+                                    : ItemServicio.unknown();
+                            final _refill = databaseMain.refills.firstWhere(
+                              (item) => item.id == _new.idItem,
+                              orElse: () => Item.unknown(),
+                            );
                             return GestureDetector(
                                 onTap: () {
                                   (Future.delayed(Duration.zero, () {

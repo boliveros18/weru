@@ -5,6 +5,7 @@ import 'package:weru/database/models/stagemessage.dart';
 import 'package:weru/database/providers/stagemessage_provider.dart';
 import 'package:weru/database/main.dart';
 import 'package:weru/services/ftp_service.dart';
+import 'package:intl/intl.dart';
 
 class StageService {
   StageService();
@@ -28,8 +29,10 @@ class StageService {
           StageMessageProvider(db: await database()).delete(item.id!);
         }
       } else {
-        bool sent =
-            await FTPService.sendMessageEntrada(jsonEncode(message), table);
+        final String date =
+            DateFormat("yyyy-MM-dd HH:mm:ss").format(DateTime.now());
+        bool sent = await FTPService.sendMessageEntrada(
+            jsonEncode(message), table, date);
         Map<String, Object?> stageMessage = item.toMap();
         stageMessage['Sent'] = sent ? 1 : 0;
         StageMessage updated = StageMessage.fromMap(stageMessage);

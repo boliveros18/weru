@@ -27,24 +27,12 @@ class IndicadorServicioProvider {
     return IndicadorServicio.fromMap(items.first);
   }
 
-  Future<List<IndicadorServicio>> getAll() async {
-    final List<Map<String, Object?>> maps = await db.query('IndicadorServicio');
-    return maps.map((map) {
-      return IndicadorServicio(
-        id: map['id'] as int,
-        idIndicador: map['idIndicador'] as int,
-        idServicio: map['idServicio'] as int,
-        idTecnico: map['idTecnico'] as int,
-        valor: map['valor'] as String,
-      );
-    }).toList();
-  }
-
-  Future<List<IndicadorServicio>> getAllByIdServicio(int idServicio) async {
+  Future<List<IndicadorServicio>> getAllByIdServicio(
+      int idServicio, int idTecnico) async {
     final List<Map<String, Object?>> maps = await db.query(
       'IndicadorServicio',
-      where: 'idServicio = ?',
-      whereArgs: [idServicio],
+      where: 'idServicio = ? AND idTecnico = ?',
+      whereArgs: [idServicio, idTecnico],
     );
     return maps.map((map) {
       return IndicadorServicio(
@@ -74,11 +62,12 @@ class IndicadorServicioProvider {
     );
   }
 
-  Future<void> deleteByIdIndicador(int id) async {
+  Future<void> deleteByIdIndicador(
+      int idIndicador, int idServicio, int idTecnico) async {
     await db.delete(
       'IndicadorServicio',
-      where: 'idIndicador = ?',
-      whereArgs: [id],
+      where: 'idIndicador = ?  AND idServicio = ? AND idTecnico = ?',
+      whereArgs: [idIndicador, idServicio, idTecnico],
     );
   }
 

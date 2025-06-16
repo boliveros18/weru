@@ -7,12 +7,16 @@ import 'package:weru/components/progress_indicator_ui.dart';
 import 'package:weru/components/text_ui.dart';
 import 'package:weru/config/config.dart';
 import 'package:weru/database/main.dart';
+import 'package:weru/database/models/cliente.dart';
+import 'package:weru/database/models/equipo.dart';
+import 'package:weru/database/models/estadoservicio.dart';
+import 'package:weru/database/models/falla.dart';
 import 'package:weru/database/models/servicio.dart';
+import 'package:weru/database/models/tiposervicio.dart';
 import 'package:weru/database/providers/servicio_provider.dart';
 import 'package:weru/functions/get_status_color.dart';
 import 'package:weru/functions/on_connection_validation_stage.dart';
 import 'dart:convert';
-import 'package:weru/pages/home.dart';
 import 'package:weru/pages/menu.dart';
 import 'package:weru/pages/more_info.dart';
 import 'package:weru/pages/news.dart';
@@ -51,6 +55,7 @@ class _ServicePageState extends State<ServicePage> {
     databaseMain = DatabaseMain(path: await getLocalDatabasePath());
     database =
         await DatabaseMain(path: await getLocalDatabasePath()).onCreate();
+    await databaseMain.setUser(session.user);
     await databaseMain.getServices();
     setState(() {
       isLoading = false;
@@ -84,7 +89,7 @@ class _ServicePageState extends State<ServicePage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    AppStatus(),
+                    const AppStatus(),
                     serviceMainSection(),
                     serviceMiddleSection(),
                     serviceEndedSection()
@@ -100,8 +105,14 @@ class _ServicePageState extends State<ServicePage> {
 
   Column serviceMainSection() {
     final service = databaseMain.services[index];
-    final client = databaseMain.clients[index];
-    final servicesStatus = databaseMain.servicesStatus[index];
+    final client = (index < databaseMain.clients.length &&
+            databaseMain.clients[index] != null)
+        ? databaseMain.clients[index]!
+        : Cliente.unknown();
+    final servicesStatus = (index < databaseMain.servicesStatus.length &&
+            databaseMain.servicesStatus[index] != null)
+        ? databaseMain.servicesStatus[index]!
+        : EstadoServicio.unknown();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -114,7 +125,7 @@ class _ServicePageState extends State<ServicePage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Center(
-                    child: TextUi(text: 'N° Servicio: ${service.orden}'),
+                    child: TextUi(text: 'N° Servicio: ${service.consecutivo}'),
                   ),
                   const SizedBox(height: 10),
                   statusServiceIdMenu == 3
@@ -140,11 +151,11 @@ class _ServicePageState extends State<ServicePage> {
                   const SizedBox(height: 10),
                   Container(
                     color: const Color.fromARGB(255, 0, 45, 168),
-                    child: Column(
+                    child: const Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Padding(
-                          padding: const EdgeInsets.fromLTRB(20, 2, 20, 2),
+                          padding: EdgeInsets.fromLTRB(20, 2, 20, 2),
                           child: TextUi(
                             text: 'Datos del cliente',
                             color: Colors.white,
@@ -153,7 +164,7 @@ class _ServicePageState extends State<ServicePage> {
                       ],
                     ),
                   ),
-                  DividerUi(paddingHorizontal: 0),
+                  const DividerUi(paddingHorizontal: 0),
                   const SizedBox(height: 10),
                   Row(children: [
                     Row(
@@ -189,9 +200,19 @@ class _ServicePageState extends State<ServicePage> {
 
   Column serviceMiddleSection() {
     final service = databaseMain.services[index];
-    final type = databaseMain.servicesTypes[index];
-    final fail = databaseMain.fails[index];
-    final equipment = databaseMain.equipments[index];
+    final type = (index < databaseMain.servicesTypes.length &&
+            databaseMain.servicesTypes[index] != null)
+        ? databaseMain.servicesTypes[index]!
+        : TipoServicio.unknown();
+
+    final fail =
+        (index < databaseMain.fails.length && databaseMain.fails[index] != null)
+            ? databaseMain.fails[index]!
+            : Falla.unknown();
+    final equipment = (index < databaseMain.equipments.length &&
+            databaseMain.equipments[index] != null)
+        ? databaseMain.equipments[index]!
+        : Equipo.unknown();
     final dateTime = service.fechayhorainicio.split(' ');
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -207,11 +228,11 @@ class _ServicePageState extends State<ServicePage> {
                 const SizedBox(height: 10),
                 Container(
                   color: const Color.fromARGB(255, 0, 45, 168),
-                  child: Column(
+                  child: const Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 2, 20, 2),
+                        padding: EdgeInsets.fromLTRB(20, 2, 20, 2),
                         child: TextUi(
                           text: 'Datos del servicio',
                           color: Colors.white,
@@ -220,7 +241,7 @@ class _ServicePageState extends State<ServicePage> {
                     ],
                   ),
                 ),
-                DividerUi(paddingHorizontal: 0),
+                const DividerUi(paddingHorizontal: 0),
                 const SizedBox(height: 10),
                 Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Row(
@@ -232,9 +253,12 @@ class _ServicePageState extends State<ServicePage> {
                   ),
                   Row(
                     children: [
-                      TextUi(text: 'N° Servicio: ${service.orden}'),
+                      TextUi(text: 'N° Servicio: ${service.consecutivo}'),
                       const SizedBox(width: 59),
-                      TextUi(text: 'Radicado: ${service.radicado}')
+                      TextUi(
+                        text: 'Radicado: ${service.radicado}',
+                        long: 20,
+                      )
                     ],
                   ),
                   TextUi(
@@ -312,7 +336,7 @@ class _ServicePageState extends State<ServicePage> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => MoreInfoPage(),
+                            builder: (context) => const MoreInfoPage(),
                           ),
                         );
                       },
@@ -329,7 +353,7 @@ class _ServicePageState extends State<ServicePage> {
                     children: [
                       Expanded(
                         child: ButtonUi(
-                          value: statusServiceId == 2
+                          value: statusServiceId == 2 || statusServiceId == 4
                               ? "Llegada a sitio"
                               : "Inicio",
                           onClicked: () async {
@@ -349,7 +373,7 @@ class _ServicePageState extends State<ServicePage> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => MenuPage(),
+                                  builder: (context) => const MenuPage(),
                                 ),
                               );
                             } else {
@@ -369,28 +393,17 @@ class _ServicePageState extends State<ServicePage> {
                             }
                           },
                           borderRadius: 2,
-                          color: statusServiceId == 2
+                          color: statusServiceId == 2 || statusServiceId == 4
                               ? const Color(0xFF4CAF50)
                               : const Color(0xFF00BCD4),
                         ),
                       ),
-                      SizedBox(width: 30),
+                      const SizedBox(width: 30),
                       Expanded(
                         child: ButtonUi(
                           value: "Cancelar",
                           onClicked: () async {
-                            final Map<String, dynamic> serviceData =
-                                databaseMain.services[index].toMap();
-                            serviceData['idEstadoServicio'] = 7;
-                            final Servicio servicio =
-                                Servicio.fromMap(serviceData);
-                            await servicioProvider.insert(servicio);
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => HomePage(),
-                              ),
-                            );
+                            Navigator.pop(context);
                           },
                           color: Colors.red,
                           borderRadius: 2,
@@ -398,11 +411,11 @@ class _ServicePageState extends State<ServicePage> {
                       ),
                     ],
                   ),
-                  SizedBox(height: 50),
+                  const SizedBox(height: 50),
                   Row(
                     children: [
                       SizedBox(width: MediaQuery.of(context).size.width / 1.99),
-                      TextUi(
+                      const TextUi(
                         text: 'Novedades: ',
                         fontSize: 15,
                       ),
@@ -413,7 +426,7 @@ class _ServicePageState extends State<ServicePage> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => NewsPage(),
+                                builder: (context) => const NewsPage(),
                               ),
                             )
                           },

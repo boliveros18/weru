@@ -45,11 +45,12 @@ class _BriefcasePageState extends State<BriefcasePage> {
     databaseMain = DatabaseMain(path: await getLocalDatabasePath());
     database =
         await DatabaseMain(path: await getLocalDatabasePath()).onCreate();
+    await databaseMain.setUser(session.user);
     await databaseMain.getServices();
     if (databaseMain.services.isNotEmpty &&
         index < databaseMain.services.length) {
       service = databaseMain.services[index];
-      await databaseMain.getTools(service.idTecnico);
+      await databaseMain.getItems(service.idTecnico);
       tools = await ItemProvider(db: database).getAllByType(2);
       briefcase = await databaseMain.briefcase;
     }
@@ -104,15 +105,20 @@ class _BriefcasePageState extends State<BriefcasePage> {
               children: [
                 Container(
                     child: SizedBox(
-                        height: MediaQuery.of(context).size.width - 120,
+                        height: MediaQuery.of(context).size.width - 40,
                         child: databaseMain.briefcase.isNotEmpty
                             ? ListView.separated(
                                 itemBuilder: (context, index) {
                                   if (index < databaseMain.briefcase.length) {
                                     final _new = databaseMain.tools[index];
-                                    final _tool = databaseMain.briefcase
-                                        .where((item) => item.idItem == _new.id)
-                                        .first;
+                                    (index < databaseMain.tools.length)
+                                        ? databaseMain.tools[index]
+                                        : Item.unknown();
+                                    final _tool =
+                                        databaseMain.briefcase.firstWhere(
+                                      (item) => item.idItem == _new.id,
+                                      orElse: () => Maletin.unknown(),
+                                    );
                                     return GestureDetector(
                                         onTap: () {},
                                         child: Column(

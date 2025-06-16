@@ -29,6 +29,18 @@ class ActividadServicio {
     };
   }
 
+  factory ActividadServicio.unknown() {
+    return ActividadServicio(
+      id: 0,
+      idActividad: 0,
+      idServicio: 0,
+      cantidad: 0,
+      costo: 0,
+      valor: 0,
+      ejecutada: 0,
+    );
+  }
+
   factory ActividadServicio.fromMap(Map<String, dynamic> map) {
     return ActividadServicio(
       id: int.tryParse(map['id']?.toString() ?? '') ?? 0,

@@ -52,11 +52,12 @@ class _NewsPageState extends State<NewsPage> {
     databaseMain = DatabaseMain(path: await getLocalDatabasePath());
     database =
         await DatabaseMain(path: await getLocalDatabasePath()).onCreate();
+    await databaseMain.setUser(session.user);
     await databaseMain.getServices();
     servicio = databaseMain.services[index];
     await databaseMain.getNews(servicio.id);
     novedades = await NovedadProvider(db: database).getAll();
-    novedadesServicio = await databaseMain.newsServices;
+    novedadesServicio = databaseMain.newsServices;
 
     setState(() {
       isLoading = false;
@@ -148,11 +149,13 @@ class _NewsPageState extends State<NewsPage> {
               children: [
                 Container(
                   child: SizedBox(
-                      height: MediaQuery.of(context).size.width - 120,
+                      height: MediaQuery.of(context).size.width - 40,
                       child: ListView.separated(
                         itemBuilder: (context, index) {
                           if (index < databaseMain.news.length) {
-                            final _new = databaseMain.news[index];
+                            final _new = (index < databaseMain.news.length)
+                                ? databaseMain.news[index]
+                                : Novedad.unknown();
                             return Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -193,7 +196,8 @@ class _NewsPageState extends State<NewsPage> {
                                               try {
                                                 await NovedadServicioProvider(
                                                         db: database)
-                                                    .deleteByIdNovedad(_new.id);
+                                                    .deleteByIdNovedadAndIdServicio(
+                                                        _new.id, servicio.id);
                                                 await databaseMain
                                                     .getNews(servicio.id);
                                                 setState(() {});

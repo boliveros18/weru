@@ -14,9 +14,16 @@ class TipoServicio {
     };
   }
 
-   factory   TipoServicio.fromMap(Map<String, dynamic> map) {
-    return   TipoServicio(
-           id: int.tryParse(map['id']?.toString() ?? '') ?? 0,
+  factory TipoServicio.unknown() {
+    return TipoServicio(
+      id: 0,
+      descripcion: 'Desconocido',
+    );
+  }
+
+  factory TipoServicio.fromMap(Map<String, dynamic> map) {
+    return TipoServicio(
+      id: int.tryParse(map['id']?.toString() ?? '') ?? 0,
       descripcion: map['descripcion']?.toString() ?? '',
     );
   }

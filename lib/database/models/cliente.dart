@@ -47,16 +47,35 @@ class Cliente {
     };
   }
 
-   factory   Cliente.fromMap(Map<String, dynamic> map) {
-    return   Cliente(
-           id: int.tryParse(map['id']?.toString() ?? '') ?? 0,
+  factory Cliente.unknown() {
+    return Cliente(
+      id: 0,
+      nombre: 'Desconocido',
+      direccion: 'N/A',
+      idCiudad: 0,
+      telefono: 'N/A',
+      celular: 'N/A',
+      idTipoCliente: 0,
+      idTipoDocumento: 0,
+      numDocumento: 'N/A',
+      establecimiento: 'N/A',
+      contacto: 'N/A',
+      idEstado: 0,
+      correo: 'N/A',
+    );
+  }
+
+  factory Cliente.fromMap(Map<String, dynamic> map) {
+    return Cliente(
+      id: int.tryParse(map['id']?.toString() ?? '') ?? 0,
       nombre: map['nombre']?.toString() ?? '',
       direccion: map['direccion']?.toString() ?? '',
       idCiudad: int.tryParse(map['idCiudad']?.toString() ?? '') ?? 0,
       telefono: map['telefono']?.toString() ?? '',
       celular: map['celular']?.toString() ?? '',
       idTipoCliente: int.tryParse(map['idTipoCliente']?.toString() ?? '') ?? 0,
-      idTipoDocumento: int.tryParse(map['idTipoDocumento']?.toString() ?? '') ?? 0,
+      idTipoDocumento:
+          int.tryParse(map['idTipoDocumento']?.toString() ?? '') ?? 0,
       numDocumento: map['numDocumento']?.toString() ?? '',
       establecimiento: map['establecimiento']?.toString() ?? '',
       contacto: map['contacto']?.toString() ?? '',

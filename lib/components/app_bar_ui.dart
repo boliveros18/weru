@@ -157,7 +157,7 @@ class _AppBarUiState extends State<AppBarUi> {
     if (selectedValue != null) {
       switch (selectedValue) {
         case 1:
-        Navigator.push(
+          Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => const BriefcasePage(),

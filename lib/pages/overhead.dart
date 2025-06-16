@@ -9,10 +9,14 @@ import 'package:weru/components/dropdown_menu_ui.dart';
 import 'package:weru/components/text_ui.dart';
 import 'package:weru/config/config.dart';
 import 'package:weru/database/main.dart';
+import 'package:weru/database/models/equipo.dart';
 import 'package:weru/database/models/indirecto.dart';
+import 'package:weru/database/models/indirectomodelo.dart';
 import 'package:weru/database/models/indirectoservicio.dart';
 import 'package:weru/database/models/servicio.dart';
+import 'package:weru/database/providers/equipo_provider.dart';
 import 'package:weru/database/providers/indirecto_provider.dart';
+import 'package:weru/database/providers/indirectomodelo_provider.dart';
 import 'package:weru/database/providers/indirectoservicio_provider.dart';
 import 'package:weru/database/providers/servicio_provider.dart';
 import 'package:weru/provider/session.dart';
@@ -36,7 +40,6 @@ class _OverheadPageState extends State<OverheadPage> {
   late Servicio service;
   late Database database;
   late List<Indirecto> overheads;
-  late List<IndirectoServicio> overheadsServices;
 
   @override
   void initState() {
@@ -50,15 +53,39 @@ class _OverheadPageState extends State<OverheadPage> {
     databaseMain = DatabaseMain(path: await getLocalDatabasePath());
     database =
         await DatabaseMain(path: await getLocalDatabasePath()).onCreate();
+    await databaseMain.setUser(session.user);
     await databaseMain.getServices();
     service = databaseMain.services[index];
     await databaseMain.getOverheads(service.id);
-    overheads = await IndirectoProvider(db: database).getAll();
-    overheadsServices = await databaseMain.overheadsServices;
+    overheads = await filteredOverheads(service.idEquipo);
+
     setState(() {
       isLoading = false;
       servicioProvider = ServicioProvider(db: database);
     });
+  }
+
+  Future<List<Indirecto>> filteredOverheads(int idEquipo) async {
+    final Equipo equipo =
+        await EquipoProvider(db: database).getItemById(idEquipo);
+
+    final idModelo = equipo.idModelo;
+
+    final List<IndirectoModelo> _indirectoModelo =
+        await IndirectoModeloProvider(db: database).getAllByIdModelo(idModelo);
+
+    final fetchedOverheads = await Future.wait(
+      _indirectoModelo.map((overhead) async {
+        try {
+          return await IndirectoProvider(db: database)
+              .getItemById(overhead.idIndirecto);
+        } catch (_) {
+          return null;
+        }
+      }),
+    );
+
+    return fetchedOverheads.whereType<Indirecto>().toList();
   }
 
   @override
@@ -102,7 +129,13 @@ class _OverheadPageState extends State<OverheadPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            const SizedBox(height: 20),
+            const SizedBox(height: 10),
+            Center(
+              child: TextUi(
+                text: 'N° Servicio: ${service.consecutivo}',
+              ),
+            ),
+            const SizedBox(height: 10),
             DropdownMenuUi(
               hint: "Cantidad",
               textfield: true,
@@ -150,14 +183,18 @@ class _OverheadPageState extends State<OverheadPage> {
               children: [
                 Container(
                   child: SizedBox(
-                      height: MediaQuery.of(context).size.width - 120,
+                      height: MediaQuery.of(context).size.width - 40,
                       child: ListView.separated(
                         itemBuilder: (context, index) {
                           if (index < databaseMain.overheads.length) {
-                            final _new = databaseMain.overheads[index];
-                            final _overhead = databaseMain.overheadsServices
-                                .where((item) => item.idIndirecto == _new.id)
-                                .first;
+                            final _new = (index < databaseMain.overheads.length)
+                                ? databaseMain.overheads[index]
+                                : Indirecto.unknown();
+                            final _overhead =
+                                databaseMain.overheadsServices.firstWhere(
+                              (item) => item.idIndirecto == _new.id,
+                              orElse: () => IndirectoServicio.unknown(),
+                            );
                             return GestureDetector(
                                 onTap: () {
                                   (Future.delayed(Duration.zero, () {
@@ -207,7 +244,7 @@ class _OverheadPageState extends State<OverheadPage> {
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.start,
                                             children: [
-                                              SizedBox(height: 5),
+                                              const SizedBox(height: 5),
                                               TextUi(
                                                   text: 'Código: ${_new.id}',
                                                   fontSize: 15),
@@ -219,7 +256,7 @@ class _OverheadPageState extends State<OverheadPage> {
                                                   text:
                                                       'Cantidad: ${_overhead.cantidad}',
                                                   fontSize: 15),
-                                              SizedBox(height: 10),
+                                              const SizedBox(height: 10),
                                             ],
                                           ),
                                         ),
@@ -241,8 +278,9 @@ class _OverheadPageState extends State<OverheadPage> {
                                                   try {
                                                     await IndirectoServicioProvider(
                                                             db: database)
-                                                        .deleteByIdIndirecto(
-                                                            _new.id);
+                                                        .deleteByIdIndirectoAndIdServicio(
+                                                            _new.id,
+                                                            service.id);
                                                     await databaseMain
                                                         .getOverheads(
                                                             service.id);
@@ -256,8 +294,9 @@ class _OverheadPageState extends State<OverheadPage> {
                                                   "assets/icons/trash-can-regular.svg",
                                                   width: 27,
                                                   height: 27,
-                                                  colorFilter: ColorFilter.mode(
-                                                    const Color.fromARGB(
+                                                  colorFilter:
+                                                      const ColorFilter.mode(
+                                                    Color.fromARGB(
                                                         255, 255, 118, 108),
                                                     BlendMode.srcIn,
                                                   ),
@@ -266,7 +305,7 @@ class _OverheadPageState extends State<OverheadPage> {
                                             )),
                                       ],
                                     ),
-                                    DividerUi(
+                                    const DividerUi(
                                       paddingHorizontal: 0,
                                     ),
                                   ],

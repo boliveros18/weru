@@ -20,8 +20,10 @@ import 'package:weru/provider/session.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:intl/intl.dart';
+import 'package:weru/pages/home.dart';
 import 'package:signature/signature.dart';
 import 'package:weru/services/ftp_service.dart';
+import 'package:weru/components/text_ui.dart';
 
 class SignaturePage extends StatefulWidget {
   const SignaturePage({super.key});
@@ -60,6 +62,7 @@ class _SignaturePageState extends State<SignaturePage> {
     databaseMain = DatabaseMain(path: await getLocalDatabasePath());
     database =
         await DatabaseMain(path: await getLocalDatabasePath()).onCreate();
+    await databaseMain.setUser(session.user);
     await databaseMain.getServices();
     service = databaseMain.services[index];
     final String fileFolder = '${await getLocalDatabasePath()}/backup';
@@ -73,9 +76,9 @@ class _SignaturePageState extends State<SignaturePage> {
     await databaseMain.getRefills(service.id);
     await databaseMain.getOverheads(service.id);
     await databaseMain.getPhotosService(service.id);
-    await databaseMain.getIndicators(service.id);
-    final client = databaseMain.clients[index].toMap();
-    final equipment = databaseMain.equipments[index].toMap();
+    await databaseMain.getIndicators(service.id, service.idTecnico);
+    final client = databaseMain.clients[index]!.toMap();
+    final equipment = databaseMain.equipments[index]!.toMap();
     final newServices =
         databaseMain.newsServices.map((item) => item.toMap()).toList();
     final diagnosesServices =
@@ -108,6 +111,7 @@ class _SignaturePageState extends State<SignaturePage> {
       "FotoServicio": parserphotoServices,
       "IndicadorServicio": indicatorServices,
     };
+
     signatureController = SignatureController(
       penStrokeWidth: 2,
       penColor: const Color.fromARGB(255, 0, 0, 0),
@@ -164,13 +168,18 @@ class _SignaturePageState extends State<SignaturePage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(
-            height: 272,
+            height: 292,
             child: Container(
               height: 150,
               width: MediaQuery.of(context).size.width,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Center(
+                    child: TextUi(
+                      text: 'N° Servicio: ${service.consecutivo}',
+                    ),
+                  ),
                   const SizedBox(height: 20),
                   TextFieldUi(
                       hint: "Nombre ",
@@ -189,6 +198,7 @@ class _SignaturePageState extends State<SignaturePage> {
                   ),
                   const SizedBox(height: 20),
                   TextFieldUi(
+                      isNumeric: true,
                       hint: "Cedula ",
                       regular: false,
                       onChanged: (value) => TextFieldId = value,
@@ -272,7 +282,18 @@ class _SignaturePageState extends State<SignaturePage> {
                           '${await getLocalDatabasePath()}/backup/$name';
                       final File img = File(filePath);
                       await img.writeAsBytes(signature);
+                      int id = await TecnicoProvider(db: database)
+                          .getItemIdByUser(session.user);
+                      Tecnico technicians =
+                          await TecnicoProvider(db: database).getItemById(id);
+                      Map<String, Object?> technician = technicians.toMap();
+                      final String datef = DateFormat("yyyy-MM-dd HH:mm:ss")
+                          .format(DateTime.now());
+                      bool send = await FTPService.sendMessageEntrada(
+                          jsonEncode(technician), 'Tecnico', datef);
                       Map<String, Object?> serviceItem = service.toMap();
+                      serviceItem['latitud'] = technicians.latitud;
+                      serviceItem['longitud'] = technicians.longitud;
                       serviceItem['nombreFirma'] = TextFieldName;
                       serviceItem['comentarios'] = TextFieldComment;
                       serviceItem['cedulaFirma'] = TextFieldId;
@@ -284,11 +305,6 @@ class _SignaturePageState extends State<SignaturePage> {
                       await databaseMain.getServices();
                       service = databaseMain.services[index];
                       FocusScope.of(context).unfocus();
-                      List<Tecnico> technicians =
-                          await TecnicoProvider(db: database).getAll();
-                      Map<String, Object?> technician = technicians[0].toMap();
-                      bool send = await FTPService.sendMessageEntrada(
-                          jsonEncode(technician), 'Tecnico');
                       if (send) {
                         await databaseMain.getPhotosService(service.id);
                         final photoServices = databaseMain.photosServices
@@ -328,6 +344,12 @@ class _SignaturePageState extends State<SignaturePage> {
                         idController.clear();
                         signatureController.clear();
                         setState(() {});
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const HomePage()),
+                          (Route<dynamic> route) => false,
+                        );
                       }
                     } else {
                       MessageAlert(

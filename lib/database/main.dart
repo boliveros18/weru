@@ -13,6 +13,7 @@ import 'package:weru/database/models/indicadorservicio.dart';
 import 'package:weru/database/models/indirecto.dart';
 import 'package:weru/database/models/indirectoservicio.dart';
 import 'package:weru/database/models/item.dart';
+import 'package:weru/database/models/itemactividadservicio.dart';
 import 'package:weru/database/models/itemservicio.dart';
 import 'package:weru/database/models/maletin.dart';
 import 'package:weru/database/models/modelo.dart';
@@ -35,6 +36,7 @@ import 'package:weru/database/providers/indicadorservicio_provider.dart';
 import 'package:weru/database/providers/indirecto_provider.dart';
 import 'package:weru/database/providers/indirectoservicio_provider.dart';
 import 'package:weru/database/providers/item_provider.dart';
+import 'package:weru/database/providers/itemactividadservicio_provider.dart';
 import 'package:weru/database/providers/itemservicio_provider.dart';
 import 'package:weru/database/providers/maletin_provider.dart';
 import 'package:weru/database/providers/modelo_provider.dart';
@@ -43,18 +45,20 @@ import 'package:weru/database/providers/novedadservicio_provider.dart';
 import 'package:weru/database/providers/servicio_provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+import 'package:weru/database/providers/tecnico_provider.dart';
 import 'package:weru/database/providers/tiposervicio_provider.dart';
 
 class DatabaseMain {
   final String path;
+  String user = "";
   List<Servicio> services = [];
-  List<Cliente> clients = [];
-  List<Equipo> equipments = [];
-  List<Ciudad> cities = [];
-  List<Modelo> models = [];
-  List<EstadoServicio> servicesStatus = [];
-  List<TipoServicio> servicesTypes = [];
-  List<Falla> fails = [];
+  List<Cliente?> clients = [];
+  List<Equipo?> equipments = [];
+  List<Ciudad?> cities = [];
+  List<Modelo?> models = [];
+  List<EstadoServicio?> servicesStatus = [];
+  List<TipoServicio?> servicesTypes = [];
+  List<Falla?> fails = [];
   List<Novedad> news = [];
   List<NovedadServicio> newsServices = [];
   List<Diagnostico> diagnoses = [];
@@ -63,7 +67,6 @@ class DatabaseMain {
   List<ActividadServicio> activitiesServices = [];
   List<Item> refills = [];
   List<ItemServicio> refillsServices = [];
-  List<Item> tools = [];
   List<Maletin> briefcase = [];
   List<Indirecto> overheads = [];
   List<IndirectoServicio> overheadsServices = [];
@@ -71,42 +74,97 @@ class DatabaseMain {
   List<IndicadorServicio> indicatorsServices = [];
   List<FotoServicio> photosServices = [];
 
+  List<Item> tools = [];
+
   DatabaseMain({required this.path}) {}
+
+  Future<void> setUser(String username) async {
+    user = username;
+  }
+
   Future<void> getServices() async {
     final database = await db;
     try {
-      final _services = await ServicioProvider(db: database).getFiltered();
+      int idTecnico = await TecnicoProvider(db: database).getItemIdByUser(user);
+      final _services =
+          await ServicioProvider(db: database).getFiltered(idTecnico);
 
-      equipments = await Future.wait(_services.map((service) async {
-        return await EquipoProvider(db: database).getItemById(service.idEquipo);
-      }).toList());
+      equipments = (await Future.wait(
+        _services.map((service) async {
+          try {
+            return await EquipoProvider(db: database)
+                .getItemById(service.idEquipo);
+          } catch (_) {
+            return null;
+          }
+        }),
+      ));
 
-      clients = await Future.wait(_services.map((service) async {
-        return await ClienteProvider(db: database)
-            .getItemById(service.idCliente);
-      }).toList());
+      clients = (await Future.wait(
+        _services.map((service) async {
+          try {
+            return await ClienteProvider(db: database)
+                .getItemById(service.idCliente);
+          } catch (_) {
+            return null;
+          }
+        }),
+      ));
 
-      cities = await Future.wait(_services.map((service) async {
-        return await CiudadProvider(db: database).getItemById(service.idCiudad);
-      }).toList());
+      cities = (await Future.wait(
+        _services.map((service) async {
+          try {
+            return await CiudadProvider(db: database)
+                .getItemById(service.idCiudad);
+          } catch (_) {
+            return null;
+          }
+        }),
+      ));
 
-      models = await Future.wait(equipments.map((equipo) async {
-        return await ModeloProvider(db: database).getItemById(equipo.idModelo);
-      }).toList());
+      models = (await Future.wait(
+        equipments.map((equipo) async {
+          try {
+            return await ModeloProvider(db: database)
+                .getItemById(equipo!.idModelo);
+          } catch (_) {
+            return null;
+          }
+        }),
+      ));
 
-      servicesStatus = await Future.wait(_services.map((service) async {
-        return await EstadoServicioProvider(db: database)
-            .getItemById(service.idEstadoServicio);
-      }).toList());
+      servicesStatus = (await Future.wait(
+        _services.map((service) async {
+          try {
+            return await EstadoServicioProvider(db: database)
+                .getItemById(service.idEstadoServicio);
+          } catch (_) {
+            return null;
+          }
+        }),
+      ));
 
-      servicesTypes = await Future.wait(_services.map((service) async {
-        return await TipoServicioProvider(db: database)
-            .getItemById(service.idTipoServicio);
-      }).toList());
+      servicesTypes = (await Future.wait(
+        _services.map((service) async {
+          try {
+            return await TipoServicioProvider(db: database)
+                .getItemById(service.idTipoServicio);
+          } catch (_) {
+            return null;
+          }
+        }),
+      ));
 
-      fails = await Future.wait(_services.map((service) async {
-        return await FallaProvider(db: database).getItemById(service.idFalla);
-      }).toList());
+      fails = (await Future.wait(
+        _services.map((service) async {
+          try {
+            return await FallaProvider(db: database)
+                .getItemById(service.idFalla);
+          } catch (_) {
+            return null;
+          }
+        }),
+      ));
 
       services = _services;
     } catch (e, stackTrace) {
@@ -120,10 +178,18 @@ class DatabaseMain {
       final _newsServices = await NovedadServicioProvider(db: database)
           .getAllByIdServicio(idService);
 
-      news = await Future.wait(_newsServices.map((_new) async {
-        return await NovedadProvider(db: database).getItemById(_new.idNovedad);
-      }).toList());
+      final fetchedNews = await Future.wait(
+        _newsServices.map((_new) async {
+          try {
+            return await NovedadProvider(db: database)
+                .getItemById(_new.idNovedad);
+          } catch (_) {
+            return null;
+          }
+        }),
+      );
 
+      news = fetchedNews.whereType<Novedad>().toList();
       newsServices = _newsServices;
     } catch (e, stackTrace) {
       print("Error getNews() in main database: $e, $stackTrace");
@@ -136,11 +202,18 @@ class DatabaseMain {
       final _diagnosesServices = await DiagnosticoServicioProvider(db: database)
           .getAllByIdServicio(idService);
 
-      diagnoses = await Future.wait(_diagnosesServices.map((diagnosis) async {
-        return await DiagnosticoProvider(db: database)
-            .getItemById(diagnosis.idDiagnostico);
-      }).toList());
+      final fetchedDiagnoses = await Future.wait(
+        _diagnosesServices.map((diagnosis) async {
+          try {
+            return await DiagnosticoProvider(db: database)
+                .getItemById(diagnosis.idDiagnostico);
+          } catch (_) {
+            return null;
+          }
+        }),
+      );
 
+      diagnoses = fetchedDiagnoses.whereType<Diagnostico>().toList();
       diagnosesServices = _diagnosesServices;
     } catch (e, stackTrace) {
       print("Error getDiagnoses() in main database: $e, $stackTrace");
@@ -153,11 +226,18 @@ class DatabaseMain {
       final _activitiesServices = await ActividadServicioProvider(db: database)
           .getAllByIdServicio(idService);
 
-      activities = await Future.wait(_activitiesServices.map((activity) async {
-        return await ActividadProvider(db: database)
-            .getItemById(activity.idActividad);
-      }).toList());
+      final fetchedActivities = await Future.wait(
+        _activitiesServices.map((activity) async {
+          try {
+            return await ActividadProvider(db: database)
+                .getItemById(activity.idActividad);
+          } catch (_) {
+            return null;
+          }
+        }),
+      );
 
+      activities = fetchedActivities.whereType<Actividad>().toList();
       activitiesServices = _activitiesServices;
     } catch (e, stackTrace) {
       print("Error getActivities() in main database: $e, $stackTrace");
@@ -170,29 +250,60 @@ class DatabaseMain {
       final _refillsServices = await ItemServicioProvider(db: database)
           .getAllByIdServicio(idService);
 
-      refills = await Future.wait(_refillsServices.map((item) async {
-        return await ItemProvider(db: database).getItemById(item.idItem);
-      }).toList());
+      final fetchedRefills = await Future.wait(
+        _refillsServices.map((item) async {
+          try {
+            return await ItemProvider(db: database).getItemById(item.idItem);
+          } catch (_) {
+            return null;
+          }
+        }),
+      );
 
+      refills = fetchedRefills.whereType<Item>().toList();
       refillsServices = _refillsServices;
     } catch (e, stackTrace) {
       print("Error getRefills() in main database: $e, $stackTrace");
     }
   }
 
-  Future<void> getTools(int idTecnico) async {
+  Future<void> getItems(int idTecnico) async {
     final database = await db;
     try {
       final _briefcase =
           await MaletinProvider(db: database).getAllByIdTecnico(idTecnico);
 
-      tools = await Future.wait(_briefcase.map((tool) async {
-        return await ItemProvider(db: database).getItemById(tool.idItem);
-      }).toList());
-
       briefcase = _briefcase;
     } catch (e, stackTrace) {
       print("Error getTools() in main database: $e, $stackTrace");
+    }
+  }
+
+  Future<void> getTools(int idService) async {
+    final database = await db;
+    try {
+      final _activitiesServices = await ActividadServicioProvider(db: database)
+          .getAllByIdServicio(idService);
+
+      final fetchedItems = await Future.wait(
+        _activitiesServices.map((activity) async {
+          return await ItemActividadServicioProvider(db: database)
+              .getItemsByIdActividadServicio(activity.id!);
+        }),
+      );
+
+      List<ItemActividadServicio> itemActivityService = fetchedItems
+          .where((list) => list.isNotEmpty)
+          .expand((list) => list)
+          .toList();
+
+      tools = await Future.wait(
+        itemActivityService.map((item) async {
+          return await ItemProvider(db: database).getItemById(item.idItem);
+        }),
+      );
+    } catch (e, stackTrace) {
+      print("Error getActivities() in main database: $e, $stackTrace");
     }
   }
 
@@ -202,28 +313,42 @@ class DatabaseMain {
       final _overheadsServices = await IndirectoServicioProvider(db: database)
           .getAllByIdServicio(idService);
 
-      overheads = await Future.wait(_overheadsServices.map((item) async {
-        return await IndirectoProvider(db: database)
-            .getItemById(item.idIndirecto);
-      }).toList());
+      final fetchedOverheads = await Future.wait(
+        _overheadsServices.map((item) async {
+          try {
+            return await IndirectoProvider(db: database)
+                .getItemById(item.idIndirecto);
+          } catch (_) {
+            return null;
+          }
+        }),
+      );
 
+      overheads = fetchedOverheads.whereType<Indirecto>().toList();
       overheadsServices = _overheadsServices;
     } catch (e, stackTrace) {
       print("Error getOverheads() in main database: $e, $stackTrace");
     }
   }
 
-  Future<void> getIndicators(int idService) async {
+  Future<void> getIndicators(int idService, int idTecnico) async {
     final database = await db;
     try {
       final _indicatorsServices = await IndicadorServicioProvider(db: database)
-          .getAllByIdServicio(idService);
+          .getAllByIdServicio(idService, idTecnico);
 
-      indicators = await Future.wait(_indicatorsServices.map((item) async {
-        return await IndicadorProvider(db: database)
-            .getItemById(item.idIndicador);
-      }).toList());
+      final fetchedIndicators = await Future.wait(
+        _indicatorsServices.map((item) async {
+          try {
+            return await IndicadorProvider(db: database)
+                .getItemById(item.idIndicador);
+          } catch (_) {
+            return null;
+          }
+        }),
+      );
 
+      indicators = fetchedIndicators.whereType<Indicador>().toList();
       indicatorsServices = _indicatorsServices;
     } catch (e, stackTrace) {
       print("Error getIndicators() in main database: $e, $stackTrace");
@@ -255,7 +380,7 @@ class DatabaseMain {
     );
   }
 
-Future<void> onCreateTables(Database db) async {
+  Future<void> onCreateTables(Database db) async {
     await db.execute(
       'CREATE TABLE Actividad (id INTEGER PRIMARY KEY, codigoExt TEXT, descripcion TEXT, costo INTEGER, valor INTEGER, idEstadoActividad INTEGER)',
     );
@@ -364,7 +489,7 @@ Future<void> onCreateTables(Database db) async {
       'CREATE TABLE ValoresIndicador (id INTEGER PRIMARY KEY, idIndicador INTEGER, descripcion TEXT)',
     );
     await db.execute(
-      'CREATE TABLE Pulso ( id INTEGER PRIMARY KEY AUTOINCREMENT, idTecnico INTEGER NOT NULL, latitud REAL NULL, longitud REAL NULL, fechaPulso TEXT NULL)',
+      'CREATE TABLE Pulso ( id INTEGER PRIMARY KEY AUTOINCREMENT, idTecnico INTEGER NOT NULL, latitud REAL NULL, longitud REAL NULL, fechaPulso TEXT NULL, situacionActual TEXT NULL)',
     );
   }
 }

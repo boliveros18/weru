@@ -14,9 +14,16 @@ class Modelo {
     };
   }
 
-   factory   Modelo.fromMap(Map<String, dynamic> map) {
-    return   Modelo(
-           id: int.tryParse(map['id']?.toString() ?? '') ?? 0,
+  factory Modelo.unknown() {
+    return Modelo(
+      id: 0,
+      descripcion: 'Desconocido',
+    );
+  }
+
+  factory Modelo.fromMap(Map<String, dynamic> map) {
+    return Modelo(
+      id: int.tryParse(map['id']?.toString() ?? '') ?? 0,
       descripcion: map['descripcion']?.toString() ?? '',
     );
   }

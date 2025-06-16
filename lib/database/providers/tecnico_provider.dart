@@ -27,6 +27,18 @@ class TecnicoProvider {
     return Tecnico.fromMap(items.first);
   }
 
+  Future<int> getItemIdByUser(String user) async {
+    final List<Map<String, dynamic>> items = await db.query(
+      'Tecnico',
+      where: 'usuario = ?',
+      whereArgs: [user],
+    );
+    if (items.isEmpty) {
+      throw Exception('Item de Tecnico no encontrado!');
+    }
+    return Tecnico.fromMap(items.first).id;
+  }
+
   Future<List<Tecnico>> getAll() async {
     final List<Map<String, Object?>> maps = await db.query('Tecnico');
     return maps.map((map) {

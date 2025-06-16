@@ -8,14 +8,13 @@ import 'dart:convert';
 import 'dart:async';
 
 class FTPService {
-  
   Future<bool> downloadFile(String value) async {
     try {
       final response = await http.post(
         Uri.parse(tokenUrl),
         headers: {
           'Content-Type': 'text/plain',
-          'Accept': '/',
+          'Accept': '*/*',
         },
         body: jsonEncode({"NIT": value, "Aplicacion": "PWeruC"}),
       );
@@ -26,7 +25,7 @@ class FTPService {
           Uri.parse(masterUrl),
           headers: {
             'Content-Type': 'text/plain',
-            'Accept': '/',
+            'Accept': '*/*',
           },
           body: jsonDecode(jsonEncode(tokenData)),
         );
@@ -100,10 +99,9 @@ class FTPService {
   }
 
   static Future<bool> sendMessageEntrada(
-    String body,
-    String table,
-  ) async {
-    final idNegocio = DateFormat("yyyyMMddHHmmss").format(DateTime.now());
+      String body, String table, String date) async {
+    final idNegocio = DateFormat("yyyyMMddHHmmss")
+        .format(DateFormat("yyyy-MM-dd HH:mm:ss").parse(date));
     final idDevice = await getDeviceId();
     final Map<String, dynamic> data = {
       "familiaMensaje": table,
@@ -151,9 +149,13 @@ class FTPService {
     }
   }
 
-  static Future<void> deleteMessagesNewInstall() async {
-    final response = await http.post(
-        Uri.http(appRibGetMessagesUrlHost, appRibDeleteMessagesNewInstall));
+  Future<void> deleteMessagesNewInstall() async {
+    final idDevice = await getDeviceId();
+    final uri = Uri.http(
+      appRibGetMessagesUrlHost,
+      appRibDeleteMessagesNewInstall + idDevice,
+    );
+    final response = await http.get(uri);
     if (response.statusCode == 200) {
       print('Mensajes borrados');
     } else {
@@ -161,7 +163,7 @@ class FTPService {
     }
   }
 
-static Future<void> sendImage(String imagePath) async {
+  static Future<void> sendImage(String imagePath) async {
     final file = File(imagePath);
     if (!file.existsSync() || file.lengthSync() == 0) {
       print('El archivo no existe: $imagePath');
@@ -199,5 +201,4 @@ static Future<void> sendImage(String imagePath) async {
       print('Excepción durante el envío: $e');
     }
   }
-  
 }

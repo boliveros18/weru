@@ -76,11 +76,12 @@ class IndirectoServicioProvider {
     );
   }
 
-  Future<void> deleteByIdIndirecto(int id) async {
+  Future<void> deleteByIdIndirectoAndIdServicio(
+      int idIndirecto, int idServicio) async {
     await db.delete(
       'IndirectoServicio',
-      where: 'idIndirecto = ?',
-      whereArgs: [id],
+      where: 'idIndirecto = ? AND idServicio = ?',
+      whereArgs: [idIndirecto, idServicio],
     );
   }
 

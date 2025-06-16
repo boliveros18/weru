@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:geolocator/geolocator.dart';
 
 class PermissionRequest extends StatefulWidget {
   final Function(bool) onPermissionStatusChanged;
@@ -33,6 +34,19 @@ class _PermissionRequestState extends State<PermissionRequest> {
     }
 
     widget.onPermissionStatusChanged(allGranted);
+  }
+
+    Future<void> checkAndRequestPermissions() async {
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      print('Permissions are permanently denied. Cannot request permissions.');
+    } else if (permission == LocationPermission.denied) {
+      print('Permissions are denied.');
+    }
   }
 
   @override

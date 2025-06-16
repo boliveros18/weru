@@ -27,8 +27,13 @@ class ActividadModeloProvider {
     return ActividadModelo.fromMap(items.first);
   }
 
-  Future<List<ActividadModelo>> getAll() async {
-    final List<Map<String, Object?>> maps = await db.query('ActividadModelo');
+  Future<List<ActividadModelo>> getAllByIdModelo(int idModelo) async {
+    final List<Map<String, Object?>> maps = await db.query(
+      'ActividadModelo',
+      where: 'idModelo = ?',
+      whereArgs: [idModelo],
+    );
+
     return maps.map((map) {
       return ActividadModelo(
         id: map['id'] as int,

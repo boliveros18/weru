@@ -9,6 +9,7 @@ class TextFieldUi extends StatefulWidget {
   final Function(String)? onChanged;
   final bool regular;
   final bool pass;
+  final bool isNumeric;
 
   const TextFieldUi({
     super.key,
@@ -20,6 +21,7 @@ class TextFieldUi extends StatefulWidget {
     this.onChanged,
     this.regular = true,
     this.pass = false,
+    this.isNumeric = false,
   });
 
   @override
@@ -53,6 +55,8 @@ class _TextFieldUiState extends State<TextFieldUi> {
         maxLines: widget.pass ? 1 : null,
         minLines: widget.pass ? 1 : widget.minLines,
         obscureText: widget.pass ? _obscureText : false,
+        keyboardType:
+            widget.isNumeric ? TextInputType.number : TextInputType.text,
         decoration: InputDecoration(
           filled: true,
           fillColor: Colors.white,

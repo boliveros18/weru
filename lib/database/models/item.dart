@@ -32,9 +32,21 @@ class Item {
     };
   }
 
-   factory   Item.fromMap(Map<String, dynamic> map) {
-    return   Item(
-           id: int.tryParse(map['id']?.toString() ?? '') ?? 0,
+  factory Item.unknown() {
+    return Item(
+        id: 0,
+        SKU: "Desconocido",
+        descripcion: 'Desconocido',
+        tipo: 0,
+        costo: 0,
+        precio: 0,
+        idEstadoItem: 0,
+        foto: "Desconocido");
+  }
+
+  factory Item.fromMap(Map<String, dynamic> map) {
+    return Item(
+      id: int.tryParse(map['id']?.toString() ?? '') ?? 0,
       SKU: map['SKU']?.toString() ?? '',
       descripcion: map['descripcion']?.toString() ?? '',
       tipo: int.tryParse(map['tipo']?.toString() ?? '') ?? 0,

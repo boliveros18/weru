@@ -9,10 +9,14 @@ import 'package:weru/components/text_ui.dart';
 import 'package:weru/config/config.dart';
 import 'package:weru/database/main.dart';
 import 'package:weru/database/models/actividad.dart';
+import 'package:weru/database/models/actividadmodelo.dart';
 import 'package:weru/database/models/actividadservicio.dart';
+import 'package:weru/database/models/equipo.dart';
 import 'package:weru/database/models/servicio.dart';
 import 'package:weru/database/providers/actividad_provider.dart';
+import 'package:weru/database/providers/actividadmodelo_provider.dart';
 import 'package:weru/database/providers/actividadservicio_provider.dart';
+import 'package:weru/database/providers/equipo_provider.dart';
 import 'package:weru/database/providers/servicio_provider.dart';
 import 'package:weru/provider/session.dart';
 import 'package:provider/provider.dart';
@@ -35,7 +39,6 @@ class _ActivityPageState extends State<ActivityPage> {
   late Servicio service;
   late Database database;
   late List<Actividad> activities;
-  late List<ActividadServicio> activitiesService;
 
   @override
   void initState() {
@@ -49,16 +52,39 @@ class _ActivityPageState extends State<ActivityPage> {
     databaseMain = DatabaseMain(path: await getLocalDatabasePath());
     database =
         await DatabaseMain(path: await getLocalDatabasePath()).onCreate();
+    await databaseMain.setUser(session.user);
     await databaseMain.getServices();
     service = databaseMain.services[index];
     await databaseMain.getActivities(service.id);
-    activities = await ActividadProvider(db: database).getAll();
-    activitiesService = await databaseMain.activitiesServices;
+    activities = await filteredActivities(service.idEquipo);
 
     setState(() {
       isLoading = false;
       servicioProvider = ServicioProvider(db: database);
     });
+  }
+
+  Future<List<Actividad>> filteredActivities(int idEquipo) async {
+    final Equipo equipo =
+        await EquipoProvider(db: database).getItemById(idEquipo);
+
+    final idModelo = equipo.idModelo;
+
+    final List<ActividadModelo> _actividadModelo =
+        await ActividadModeloProvider(db: database).getAllByIdModelo(idModelo);
+
+    final fetchedActivities = await Future.wait(
+      _actividadModelo.map((activity) async {
+        try {
+          return await ActividadProvider(db: database)
+              .getItemById(activity.idActividad);
+        } catch (_) {
+          return null;
+        }
+      }),
+    );
+
+    return fetchedActivities.whereType<Actividad>().toList();
   }
 
   @override
@@ -103,7 +129,13 @@ class _ActivityPageState extends State<ActivityPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            const SizedBox(height: 20),
+            const SizedBox(height: 10),
+            Center(
+              child: TextUi(
+                text: 'N° Servicio: ${service.consecutivo}',
+              ),
+            ),
+            const SizedBox(height: 10),
             DropdownMenuUi(
               list: activities.map((item) {
                 return DropDownValueModel(
@@ -140,14 +172,19 @@ class _ActivityPageState extends State<ActivityPage> {
               children: [
                 Container(
                   child: SizedBox(
-                      height: MediaQuery.of(context).size.width - 120,
+                      height: MediaQuery.of(context).size.width - 40,
                       child: ListView.separated(
                         itemBuilder: (context, index) {
                           if (index < databaseMain.activities.length) {
-                            final _new = databaseMain.activities[index];
-                            final ejecutada = databaseMain.activitiesServices
-                                .where((item) => item.idActividad == _new.id)
-                                .first
+                            final _new =
+                                (index < databaseMain.activities.length)
+                                    ? databaseMain.activities[index]
+                                    : Actividad.unknown();
+                            final executed = databaseMain.activitiesServices
+                                .firstWhere(
+                                  (item) => item.idActividad == _new.id,
+                                  orElse: () => ActividadServicio.unknown(),
+                                )
                                 .ejecutada;
                             return Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -160,7 +197,7 @@ class _ActivityPageState extends State<ActivityPage> {
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: [
-                                          SizedBox(height: 5),
+                                          const SizedBox(height: 5),
                                           TextUi(
                                               text: 'Código: ${_new.id}',
                                               fontSize: 15),
@@ -170,15 +207,28 @@ class _ActivityPageState extends State<ActivityPage> {
                                               fontSize: 15),
                                           Row(
                                             children: [
-                                              TextUi(
-                                                text:
-                                                    'Estado:  ${ejecutada == 1 ? 'Activa' : 'Inactiva'}',
-                                                long: 40,
-                                                fontSize: 15,
+                                              const TextUi(
+                                                  text: 'Estado: ',
+                                                  fontSize: 15),
+                                              const SizedBox(
+                                                width: 5,
+                                              ),
+                                              Text(
+                                                executed == 1
+                                                    ? 'Ejecutada'
+                                                    : 'Por ejecutar',
+                                                style: TextStyle(
+                                                    color: executed == 1
+                                                        ? Colors.green
+                                                        : Colors.redAccent,
+                                                    fontWeight: executed == 1
+                                                        ? FontWeight.w500
+                                                        : FontWeight.normal,
+                                                    fontSize: 15),
                                               ),
                                               SizedBox(
                                                   width:
-                                                      ejecutada == 1 ? 19 : 5),
+                                                      executed == 1 ? 22 : 8),
                                               SizedBox(
                                                 width: 24,
                                                 height: 24,
@@ -189,21 +239,23 @@ class _ActivityPageState extends State<ActivityPage> {
                                                   visualDensity:
                                                       VisualDensity.compact,
                                                   checkColor: Colors.white,
-                                                  value: ejecutada == 1,
+                                                  activeColor: Colors.green,
+                                                  value: executed == 1,
                                                   onChanged:
                                                       (bool? value) async {
                                                     ActividadServicio
                                                         activityService =
                                                         await ActividadServicioProvider(
                                                                 db: database)
-                                                            .getItemByIdActividad(
-                                                                _new.id);
+                                                            .getItemByIdActividadAndIdServicio(
+                                                                _new.id,
+                                                                service.id);
                                                     Map<String, Object?>
                                                         activityService2 =
                                                         activityService.toMap();
                                                     activityService2[
                                                             'ejecutada'] =
-                                                        ejecutada == 1 ? 0 : 1;
+                                                        executed == 1 ? 0 : 1;
                                                     ActividadServicio
                                                         activityService2Update =
                                                         ActividadServicio.fromMap(
@@ -244,8 +296,8 @@ class _ActivityPageState extends State<ActivityPage> {
                                               try {
                                                 await ActividadServicioProvider(
                                                         db: database)
-                                                    .deleteByIdActividad(
-                                                        _new.id);
+                                                    .deleteByIdActividadAndIdServicio(
+                                                        _new.id, service.id);
                                                 await databaseMain
                                                     .getActivities(service.id);
                                                 setState(() {});
@@ -257,8 +309,9 @@ class _ActivityPageState extends State<ActivityPage> {
                                               "assets/icons/trash-can-regular.svg",
                                               width: 27,
                                               height: 27,
-                                              colorFilter: ColorFilter.mode(
-                                                const Color.fromARGB(
+                                              colorFilter:
+                                                  const ColorFilter.mode(
+                                                Color.fromARGB(
                                                     255, 255, 118, 108),
                                                 BlendMode.srcIn,
                                               ),
